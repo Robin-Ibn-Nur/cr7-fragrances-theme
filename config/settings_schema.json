@@ -2117,5 +2117,28 @@
         "default": "equal-width-buttons"
       }
     ]
+  },
+  {
+    "name": "Password page",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "show_demo_password",
+        "label": "Show storefront password for visitors",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "demo_password_label",
+        "label": "Password label",
+        "default": "Storefront Password"
+      },
+      {
+        "type": "text",
+        "id": "demo_password",
+        "label": "Storefront password to display",
+        "info": "Enter the password set in Shopify Admin → Online Store → Preferences so visitors can view and copy it."
+      }
+    ]
   }
 ]

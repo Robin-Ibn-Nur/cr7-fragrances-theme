@@ -2,6 +2,8 @@
 
 A luxury editorial Shopify Online Store 2.0 theme crafted for **CR7 Fragrances**, built on a crisp `#FFFFFF` × `#0A0A0A` × `#008A38` emerald palette with `Playfair Display` display typography, `Inter` UI typography, custom transparent cutout hero visuals, interactive collection filtering, dedicated editorial pages, and site-wide scroll & text reveal animations.
 
+**Live Store:** [https://cristianoronaldo-cr7.myshopify.com](https://cristianoronaldo-cr7.myshopify.com)  
+**Storefront Password:** `cr7`  
 **Repository:** [github.com/Robin-Ibn-Nur/cr7-fragrances-theme](https://github.com/Robin-Ibn-Nur/cr7-fragrances-theme)
 
 ---
@@ -94,3 +96,4 @@ Zero horizontal overflow across all templates and breakpoints (`1440px`, `768px`
    shopify theme dev
    ```
 3. Open `http://127.0.0.1:9292` in your browser.
+

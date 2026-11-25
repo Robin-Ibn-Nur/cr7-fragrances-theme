@@ -1,0 +1,162 @@
+{%- comment -%}
+  CR7 Editorial Preloader
+  Minimal white (#ffffff) curtain with matte black (#0a0a0a) CR7 wordmark
+  and emerald (#008a38) hairline progress bar.
+{%- endcomment -%}
+
+{%- unless request.design_mode -%}
+  <div id="cr7-preloader" class="cr7-preloader" aria-hidden="true">
+    <div class="cr7-preloader__inner">
+      <div class="cr7-preloader__mark">
+        <span class="cr7-preloader__logo">CR7</span><span class="cr7-preloader__dot">.</span>
+      </div>
+      <span class="cr7-preloader__sub">FRAGRANCES</span>
+      <div class="cr7-preloader__track" aria-hidden="true">
+        <span class="cr7-preloader__bar"></span>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .cr7-preloader {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #ffffff;
+      color: #0a0a0a;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+                  visibility 0.65s step-end;
+    }
+
+    .cr7-preloader.is-done {
+      opacity: 0;
+      transform: translateY(-16px);
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .cr7-preloader__inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 10px;
+      animation: cr7PreloaderIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .cr7-preloader__mark {
+      font-family: var(--font-heading--family, 'Playfair Display', Georgia, serif);
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      line-height: 1;
+      color: #0a0a0a;
+    }
+
+    .cr7-preloader__dot {
+      color: #008a38;
+    }
+
+    .cr7-preloader__sub {
+      font-family: var(--font-subheading--family, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+      color: #55595e;
+      padding-left: 0.34em;
+    }
+
+    .cr7-preloader__track {
+      position: relative;
+      width: 140px;
+      height: 1.5px;
+      margin-top: 10px;
+      background-color: rgba(10, 10, 10, 0.1);
+      overflow: hidden;
+    }
+
+    .cr7-preloader__bar {
+      position: absolute;
+      inset: 0;
+      background-color: #008a38;
+      transform-origin: left center;
+      transform: scaleX(0);
+      animation: cr7PreloaderBar 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes cr7PreloaderIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes cr7PreloaderBar {
+      0% { transform: scaleX(0); }
+      70% { transform: scaleX(0.86); }
+      100% { transform: scaleX(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cr7-preloader {
+        display: none !important;
+      }
+    }
+  </style>
+
+  <script>
+    (function () {
+      var el = document.getElementById('cr7-preloader');
+      if (!el) return;
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        el.remove();
+        return;
+      }
+
+      var minTimeElapsed = false;
+      var pageLoaded = document.readyState === 'complete';
+
+      function hidePreloader() {
+        if (!el || el.classList.contains('is-done')) return;
+        el.classList.add('is-done');
+        window.setTimeout(function () {
+          if (el && el.parentNode) el.parentNode.removeChild(el);
+        }, 700);
+      }
+
+      function tryHide() {
+        if (minTimeElapsed && pageLoaded) {
+          hidePreloader();
+        }
+      }
+
+      window.setTimeout(function () {
+        minTimeElapsed = true;
+        tryHide();
+      }, 650);
+
+      if (!pageLoaded) {
+        window.addEventListener('load', function () {
+          pageLoaded = true;
+          tryHide();
+        }, { once: true });
+      }
+
+      // Safety fallback so preloader never blocks the page
+      window.setTimeout(hidePreloader, 2200);
+    })();
+  </script>
+{%- endunless -%}
+

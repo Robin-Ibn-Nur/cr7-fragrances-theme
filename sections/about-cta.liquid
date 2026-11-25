@@ -1,0 +1,216 @@
+{%- comment -%}
+  About Closing CTA Section
+  Full-container-width panel with serif heading + paragraph + link left, signature right.
+{%- endcomment -%}
+
+{{ 'about.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign link_href = section.settings.link_url | default: routes.collections_url
+  assign sig_img = section.settings.signature_image
+  assign sig_alt = sig_img.alt | default: '' | escape
+-%}
+
+<section
+  id="About-CTA-{{ section.id }}"
+  class="about-section about-cta"
+  data-about-section
+  data-section-id="{{ section.id }}"
+  style="
+    --about-bg: {{ section.settings.background_color }};
+    --about-text: {{ section.settings.text_color }};
+    --about-muted: {{ section.settings.muted_color }};
+    --about-panel: {{ section.settings.panel_color }};
+    --about-sig-width: {{ section.settings.signature_width | default: 270 }}px;
+  "
+>
+  <div class="about-container">
+    <div class="about-cta__panel about-reveal">
+      <div class="about-cta__content">
+        {%- if section.settings.heading != blank -%}
+          <h2 class="about-heading about-cta__heading">
+            {{- section.settings.heading | escape | newline_to_br -}}
+          </h2>
+        {%- endif -%}
+
+        {%- if section.settings.text != blank -%}
+          <p class="about-paragraph about-cta__desc">{{ section.settings.text | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.link_label != blank -%}
+          <a href="{{ link_href }}" class="about-link">
+            <span>{{ section.settings.link_label | escape }}</span>
+            {% render 'about-icon', icon: 'arrow-right', class: 'about-link__arrow' %}
+          </a>
+        {%- endif -%}
+      </div>
+
+      {%- if sig_img != blank -%}
+        <div class="about-cta__signature-wrap">
+          {{ sig_img | image_url: width: 1200 | image_tag:
+            loading: 'lazy',
+            class: 'about-cta__signature',
+            alt: sig_alt,
+            widths: '300, 600, 900, 1200',
+            sizes: '(min-width: 750px) 30vw, 60vw'
+          }}
+        </div>
+      {%- else -%}
+        <div class="about-cta__signature-wrap">
+          <div
+            class="about-sig"
+            data-about-signature
+            role="img"
+            aria-label="{{ section.settings.signature_name | default: 'Cristiano Ronaldo' | escape }} signature"
+          >
+            <svg
+              class="about-sig__svg"
+              viewBox="0 0 360 150"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <!-- Expressive cursive CR7 signature strokes -->
+              <path
+                class="about-sig__path about-sig__path--1"
+                d="M118 46 C94 20, 48 34, 34 72 C22 104, 44 128, 86 116 C122 106, 152 72, 166 42"
+                stroke="currentColor"
+                stroke-width="3.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                class="about-sig__path about-sig__path--2"
+                d="M148 92 C158 58, 184 26, 206 32 C222 36, 214 66, 182 76 C168 80, 182 88, 204 104 C216 112, 228 96, 236 74 C244 52, 260 50, 266 64 C272 78, 260 96, 278 88 C294 80, 304 54, 326 46 C314 68, 298 98, 286 118"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                class="about-sig__path about-sig__path--3"
+                d="M28 126 C98 112, 212 104, 336 96 C268 114, 164 126, 62 134"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            {%- if section.settings.signature_name != blank or section.settings.signature_role != blank -%}
+              <div class="about-sig__meta">
+                {%- if section.settings.signature_name != blank -%}
+                  <span class="about-sig__name">{{ section.settings.signature_name | escape }}</span>
+                {%- endif -%}
+                {%- if section.settings.signature_role != blank -%}
+                  <span class="about-sig__role">{{ section.settings.signature_role | escape }}</span>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "About CTA",
+  "tag": "section",
+  "class": "section-about-cta",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "panel_color",
+      "label": "Panel background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#0a0a0a"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Muted text",
+      "default": "#55595e"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Live Bold.\nSmell Legendary."
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Paragraph",
+      "default": "Experience the power of CR7 Fragrances — because true success never goes unnoticed."
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Link label",
+      "default": "SHOP THE COLLECTION"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "Link URL"
+    },
+    {
+      "type": "header",
+      "content": "Signature"
+    },
+    {
+      "type": "image_picker",
+      "id": "signature_image",
+      "label": "Signature image (black on transparent)"
+    },
+    {
+      "type": "range",
+      "id": "signature_width",
+      "min": 140,
+      "max": 420,
+      "step": 10,
+      "unit": "px",
+      "label": "Signature width",
+      "default": 270
+    },
+    {
+      "type": "text",
+      "id": "signature_name",
+      "label": "Signature name",
+      "default": "Cristiano Ronaldo"
+    },
+    {
+      "type": "text",
+      "id": "signature_role",
+      "label": "Signature role",
+      "default": "Founder, CR7 Fragrances"
+    }
+  ],
+  "presets": [
+    {
+      "name": "About CTA"
+    }
+  ]
+}
+{% endschema %}
+

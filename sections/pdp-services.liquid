@@ -1,0 +1,139 @@
+{%- comment -%}
+  PDP Services Strip Section
+  Row with top and bottom hairline borders, up to 4 blocks with icons, titles, and subtitles.
+{%- endcomment -%}
+
+{%- if section.blocks.size > 0 -%}
+  <section
+    id="PDP-Services-{{ section.id }}"
+    class="pdp-section pdp-services"
+    data-section-id="{{ section.id }}"
+    data-section-type="pdp-services"
+    style="
+      --pdp-bg: {{ section.settings.background_color }};
+      --pdp-text: {{ section.settings.text_color }};
+      --pdp-muted: {{ section.settings.muted_color }};
+      --pdp-border: {{ section.settings.border_color }};
+      --pdp-services-cols: {{ section.blocks.size | at_most: 4 }};
+    "
+  >
+    <div class="pdp-container">
+      <div class="pdp-services__grid" role="region" aria-label="Store services">
+        {%- for block in section.blocks -%}
+          <div class="pdp-service-item" {{ block.shopify_attributes }}>
+            <div class="pdp-service-item__icon-wrap" aria-hidden="true">
+              {% render 'pdp-icon', icon: block.settings.icon %}
+            </div>
+            <div class="pdp-service-item__text">
+              <h3 class="pdp-service-item__title">{{ block.settings.title }}</h3>
+              {%- if block.settings.subtitle != blank -%}
+                <span class="pdp-service-item__subtitle">{{ block.settings.subtitle }}</span>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "PDP Services Strip",
+  "tag": "section",
+  "class": "section-pdp-services",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#111827"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Muted Color",
+      "default": "#6b7280"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#e5e7eb"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "service",
+      "name": "Service Item",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "truck", "label": "Truck / Free Delivery" },
+            { "value": "card", "label": "Payment Card / Flexible" },
+            { "value": "headset", "label": "Headset / Support" },
+            { "value": "shield", "label": "Shield / Security" },
+            { "value": "return", "label": "Return / Exchange" },
+            { "value": "gift", "label": "Gift / Packaging" },
+            { "value": "box", "label": "Box / Packaging" }
+          ],
+          "default": "truck"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Free Shipping"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "default": "Free shipping on orders above £100"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "PDP Services Strip",
+      "blocks": [
+        {
+          "type": "service",
+          "settings": {
+            "icon": "truck",
+            "title": "Free Shipping",
+            "subtitle": "Free shipping on orders above £100"
+          }
+        },
+        {
+          "type": "service",
+          "settings": {
+            "icon": "card",
+            "title": "Flexible Payment",
+            "subtitle": "Multiple secure payment options"
+          }
+        },
+        {
+          "type": "service",
+          "settings": {
+            "icon": "headset",
+            "title": "24x7 Support",
+            "subtitle": "We support online all days"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

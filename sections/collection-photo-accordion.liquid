@@ -1,0 +1,513 @@
+{%- doc -%}
+  Collection Photo Accordion
+  A dark split hero with an interactive photo accordion of stages.
+  Each accordion panel represents a stage (collection or custom image + link).
+{%- enddoc -%}
+
+{{ 'collection-photo-accordion.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'collection-photo-accordion.js' | asset_url }}" type="module" defer></script>
+
+{%- liquid
+  assign default_active = section.settings.default_active_panel | default: 1
+  if default_active > section.blocks.size or default_active < 1
+    assign default_active = 1
+  endif
+
+  assign has_primary = false
+  if section.settings.primary_button_label != blank and section.settings.primary_button_link != blank
+    assign has_primary = true
+  endif
+
+  assign has_secondary = false
+  if section.settings.secondary_button_label != blank and section.settings.secondary_button_link != blank
+    assign has_secondary = true
+  endif
+-%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} {
+    --accordion-bg: {{ section.settings.background_color | default: '#0a0a0a' }};
+    --accordion-text: {{ section.settings.text_color | default: '#ffffff' }};
+    --accordion-muted: {{ section.settings.muted_text_color | default: '#a3a3a3' }};
+    --accordion-btn-bg: {{ section.settings.primary_button_background | default: '#ffffff' }};
+    --accordion-btn-text: {{ section.settings.primary_button_text | default: '#0a0a0a' }};
+    --accordion-border: rgba(255, 255, 255, 0.08);
+    --accordion-frame-radius: {{ section.settings.frame_radius | default: 28 }}px;
+    --accordion-panel-radius: {{ section.settings.panel_radius | default: 36 }}px;
+    --accordion-height-desktop: {{ section.settings.accordion_height_desktop | default: 560 }}px;
+    --accordion-height-mobile: {{ section.settings.accordion_height_mobile | default: 480 }}px;
+    --accordion-gap: {{ section.settings.panel_gap | default: 10 }}px;
+    --accordion-overlay-val: {{ section.settings.overlay_strength | default: 70 | times: 1.0 | divided_by: 100.0 }};
+    padding-top: {{ section.settings.padding_top | default: 48 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | default: 48 }}px;
+  }
+{%- endstyle -%}
+
+<section class="photo-accordion-section" aria-label="{{ section.settings.heading | default: 'Photo accordion' | escape }}">
+  <div class="photo-accordion-container photo-accordion-container--{{ section.settings.section_width | default: 'page-width' }}">
+    <div class="photo-accordion-frame">
+      <div class="photo-accordion-layout">
+        
+        {%- comment -%} Left Column: Content {%- endcomment -%}
+        <div class="photo-accordion-content">
+          <div class="photo-accordion-eyebrow-row">
+            <span class="photo-accordion-eyebrow">SIGNATURE FRAGRANCES</span>
+            <span class="photo-accordion-hairline" aria-hidden="true"></span>
+          </div>
+          {%- if section.settings.heading != blank -%}
+            <h2 class="photo-accordion-heading">
+              {{ section.settings.heading | newline_to_br }}
+            </h2>
+          {%- endif -%}
+
+          {%- if section.settings.subtext != blank -%}
+            <div class="photo-accordion-subtext">
+              {{ section.settings.subtext | newline_to_br }}
+            </div>
+          {%- endif -%}
+
+          {%- if has_primary or has_secondary -%}
+            <div class="photo-accordion-buttons">
+              {%- if has_primary -%}
+                <a href="{{ section.settings.primary_button_link }}" class="photo-accordion-btn-primary">
+                  {{ section.settings.primary_button_label | escape }}
+                </a>
+              {%- endif -%}
+
+              {%- if has_secondary -%}
+                <a href="{{ section.settings.secondary_button_link }}" class="photo-accordion-btn-secondary">
+                  <span>{{ section.settings.secondary_button_label | escape }}</span>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+                    <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </a>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        </div>
+
+        {%- comment -%} Right Column: Accordion Panels {%- endcomment -%}
+        <collection-photo-accordion
+          class="photo-accordion-component"
+          data-open-on="{{ section.settings.open_on | default: 'hover' }}"
+          data-default-active="{{ default_active }}"
+        >
+          <div class="photo-accordion-group" role="region" aria-label="Stages">
+            {%- if section.blocks.size > 0 -%}
+              {%- for block in section.blocks -%}
+                {%- liquid
+                  assign col = block.settings.collection
+                  assign panel_title = block.settings.title
+                  if panel_title == blank and col != blank
+                    assign panel_title = col.title
+                  endif
+                  if panel_title == blank
+                    assign panel_title = 'Stage ' | append: forloop.index
+                  endif
+
+                  assign panel_link = block.settings.link
+                  if panel_link == blank and col != blank
+                    assign panel_link = col.url
+                  endif
+                  if panel_link == blank
+                    assign panel_link = '#'
+                  endif
+
+                  assign panel_desc = block.settings.description
+                  if panel_desc == blank and col != blank and col.description != blank
+                    assign panel_desc = col.description | strip_html | truncate: 80
+                  endif
+                  assign panel_image = block.settings.image
+                  if panel_image == blank and col != blank
+                    if col.image != blank
+                      assign panel_image = col.image
+                    elsif col.products.first.featured_image != blank
+                      assign panel_image = col.products.first.featured_image
+                    endif
+                  endif
+
+                  assign is_active = false
+                  if forloop.index == default_active
+                    assign is_active = true
+                  endif
+
+                  assign is_eager = false
+                  if is_active and section.index == 1
+                    assign is_eager = true
+                  endif
+                -%}
+
+                <div
+                  class="photo-accordion-panel"
+                  data-block-id="{{ block.id }}"
+                  data-index="{{ forloop.index0 }}"
+                  data-active="{% if is_active %}true{% else %}false{% endif %}"
+                  {{ block.shopify_attributes }}
+                >
+                  <a
+                    href="{{ panel_link }}"
+                    class="photo-accordion-panel__link"
+                    aria-current="{% if is_active %}true{% else %}false{% endif %}"
+                    aria-label="{{ panel_title | escape }}"
+                  >
+                    <div class="photo-accordion-panel__media">
+                      {%- if panel_image != blank -%}
+                        {%- if is_eager -%}
+                          {{
+                            panel_image
+                            | image_url: width: 1200
+                            | image_tag:
+                              loading: 'eager',
+                              fetchpriority: 'high',
+                              widths: '300, 400, 600, 800, 1000, 1200',
+                              sizes: '(min-width: 990px) 450px, (min-width: 750px) 50vw, 100vw',
+                              class: 'photo-accordion-panel__img',
+                              alt: panel_title
+                          }}
+                        {%- else -%}
+                          {{
+                            panel_image
+                            | image_url: width: 1200
+                            | image_tag:
+                              loading: 'lazy',
+                              fetchpriority: 'auto',
+                              widths: '300, 400, 600, 800, 1000, 1200',
+                              sizes: '(min-width: 990px) 450px, (min-width: 750px) 50vw, 100vw',
+                              class: 'photo-accordion-panel__img',
+                              alt: panel_title
+                          }}
+                        {%- endif -%}
+                      {%- else -%}
+                        {%- assign placeholder_idx = forloop.index0 | modulo: 6 | plus: 1 -%}
+                        {%- assign placeholder_name = 'collection-' | append: placeholder_idx -%}
+                        <div class="photo-accordion-panel__placeholder">
+                          {{ placeholder_name | placeholder_svg_tag }}
+                        </div>
+                      {%- endif -%}
+                    </div>
+
+                    <div class="photo-accordion-panel__overlay"></div>
+
+                    <div class="photo-accordion-panel__content">
+                      <span class="photo-accordion-panel__num" aria-hidden="true">0{{ forloop.index }}</span>
+                      <h3 class="photo-accordion-panel__title">
+                        {{ panel_title | escape }}
+                      </h3>
+                      {%- if panel_desc != blank -%}
+                        <div class="photo-accordion-panel__desc">
+                          {{ panel_desc | escape }}
+                        </div>
+                      {%- endif -%}
+                      <span class="photo-accordion-panel__cta" aria-hidden="true">Explore &rarr;</span>
+                    </div>
+                  </a>
+                </div>
+              {%- endfor -%}
+            {%- else -%}
+              <div class="photo-accordion-empty">
+                <p>Add stage blocks in the theme editor to populate the photo accordion.</p>
+              </div>
+            {%- endif -%}
+          </div>
+        </collection-photo-accordion>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Photo accordion hero",
+  "tag": "section",
+  "class": "section-collection-photo-accordion",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Plan, write,\ndecide, ship."
+    },
+    {
+      "type": "textarea",
+      "id": "subtext",
+      "label": "Subtext",
+      "default": "Specs, roadmaps and releases live together in Fernhill.\nFree for three editors."
+    },
+    {
+      "type": "text",
+      "id": "primary_button_label",
+      "label": "Primary button label",
+      "default": "Start free"
+    },
+    {
+      "type": "url",
+      "id": "primary_button_link",
+      "label": "Primary button link"
+    },
+    {
+      "type": "text",
+      "id": "secondary_button_label",
+      "label": "Secondary button label",
+      "default": "See how it works"
+    },
+    {
+      "type": "url",
+      "id": "secondary_button_link",
+      "label": "Secondary button link"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#0a0a0a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "muted_text_color",
+      "label": "Muted text color",
+      "default": "#a3a3a3"
+    },
+    {
+      "type": "color",
+      "id": "primary_button_background",
+      "label": "Button background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "primary_button_text",
+      "label": "Button text",
+      "default": "#0a0a0a"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "Page width"
+        },
+        {
+          "value": "full-width",
+          "label": "Full width"
+        }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "range",
+      "id": "frame_radius",
+      "label": "Outer frame radius",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "panel_radius",
+      "label": "Panel radius",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "accordion_height_desktop",
+      "label": "Accordion height (desktop)",
+      "min": 400,
+      "max": 750,
+      "step": 10,
+      "unit": "px",
+      "default": 560
+    },
+    {
+      "type": "range",
+      "id": "accordion_height_mobile",
+      "label": "Accordion height (mobile)",
+      "min": 350,
+      "max": 650,
+      "step": 10,
+      "unit": "px",
+      "default": 480
+    },
+    {
+      "type": "range",
+      "id": "panel_gap",
+      "label": "Panel gap",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "overlay_strength",
+      "label": "Bottom overlay strength",
+      "min": 30,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 70
+    },
+    {
+      "type": "header",
+      "content": "Behavior"
+    },
+    {
+      "type": "select",
+      "id": "open_on",
+      "label": "Open panel on",
+      "options": [
+        {
+          "value": "hover",
+          "label": "Hover / Focus"
+        },
+        {
+          "value": "click",
+          "label": "Click"
+        }
+      ],
+      "default": "hover"
+    },
+    {
+      "type": "range",
+      "id": "default_active_panel",
+      "label": "Default active panel",
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    }
+  ],
+  "blocks": [
+    {
+      "type": "stage",
+      "name": "Stage panel",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "Overrides collection image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "info": "Overrides collection title"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Description",
+          "info": "Short description shown when active (~60 characters)"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "info": "Overrides collection URL"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection photo accordion",
+      "settings": {
+        "heading": "Plan, write,\ndecide, ship.",
+        "subtext": "Specs, roadmaps and releases live together in Fernhill.\nFree for three editors.",
+        "primary_button_label": "Start free",
+        "secondary_button_label": "See how it works"
+      },
+      "blocks": [
+        {
+          "type": "stage",
+          "settings": {
+            "title": "Plan",
+            "description": "Map the quarter on one board that stays in sync."
+          }
+        },
+        {
+          "type": "stage",
+          "settings": {
+            "title": "Write",
+            "description": "Draft specifications with instant feedback."
+          }
+        },
+        {
+          "type": "stage",
+          "settings": {
+            "title": "Decide",
+            "description": "Align teams quickly with consensus voting."
+          }
+        },
+        {
+          "type": "stage",
+          "settings": {
+            "title": "Ship",
+            "description": "Deliver on time with automated tracking."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

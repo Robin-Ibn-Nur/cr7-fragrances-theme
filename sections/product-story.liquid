@@ -1,0 +1,195 @@
+{%- comment -%}
+  Product Story Section (Editorial Block)
+  50/50 split on desktop: Left editorial image, Right story copy + perfumer notes + outlined button.
+{%- endcomment -%}
+
+{{ 'product-story.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign eyebrow = section.settings.eyebrow
+  assign heading = product.metafields.custom.story_heading.value | default: product.metafields.custom.story_heading | default: section.settings.heading
+  assign story_text = product.metafields.custom.story_text.value | default: product.metafields.custom.story_text | default: product.description | default: section.settings.body_text
+  assign story_img = product.metafields.custom.story_image.value | default: product.metafields.custom.story_image | default: section.settings.image
+  assign perfumer = product.metafields.custom.perfumer.value | default: product.metafields.custom.perfumer | default: section.settings.perfumer
+
+  assign btn_label = section.settings.button_label
+  assign btn_link = section.settings.button_link | default: product.collections.first.url | default: routes.all_products_collection_url
+-%}
+
+<section
+  id="pp-story"
+  class="ps-block"
+  data-section-id="{{ section.id }}"
+  data-section-type="product-story"
+  style="
+    --ps-bg: {{ section.settings.background_color }};
+    --ps-accent: {{ section.settings.accent_color }};
+    --ps-text: {{ section.settings.text_color }};
+    --ps-muted: {{ section.settings.muted_color }};
+    --ps-border: {{ section.settings.border_color }};
+    --ps-serif-font: {{ section.settings.serif_font.family }}, var(--font-heading--family), Georgia, serif;
+  "
+>
+  <div class="ps-block__ambient" aria-hidden="true">
+    <div class="ps-block__glow ps-block__glow--right"></div>
+    <div class="ps-block__glow ps-block__glow--left"></div>
+  </div>
+
+  <div class="ps-block__container">
+    {%- comment -%} Left Column: Large Editorial Image {%- endcomment -%}
+    <div class="ps-block__media">
+      <div class="ps-block__image-wrap">
+        {%- if story_img != blank -%}
+          {%- assign story_alt = heading | default: product.title | escape -%}
+          {{ story_img | image_url: width: 1400 | image_tag:
+            loading: 'lazy',
+            class: 'ps-block__img',
+            alt: story_alt
+          }}
+        {%- else -%}
+          {{ 'lifestyle-1' | placeholder_svg_tag: 'ps-block__img' }}
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- comment -%} Right Column: Brand Story & Perfumer's Notes {%- endcomment -%}
+    <div class="ps-block__content">
+      {%- if eyebrow != blank -%}
+        <p class="ps-block__eyebrow">{{ eyebrow }}</p>
+      {%- endif -%}
+
+      {%- if heading != blank -%}
+        <h2 class="ps-block__heading">{{ heading }}</h2>
+      {%- endif -%}
+
+      {%- if story_text != blank -%}
+        <div class="ps-block__body rte">
+          {{ story_text }}
+        </div>
+      {%- endif -%}
+
+      {%- if perfumer != blank -%}
+        <div class="ps-block__perfumer">
+          <span class="ps-block__perfumer-label">Nose:</span>
+          <span class="ps-block__perfumer-name">{{ perfumer }}</span>
+        </div>
+      {%- endif -%}
+
+      {%- if btn_label != blank and btn_link != blank -%}
+        <div class="ps-block__actions">
+          <a href="{{ btn_link }}" class="ps-block__btn">
+            <span>{{ btn_label }}</span>
+            <span class="ps-block__btn-arrow" aria-hidden="true">→</span>
+          </a>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Product Story",
+  "tag": "section",
+  "class": "section-product-story",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colors & Tokens"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#030504"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#19e65a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Muted Text",
+      "default": "#a3ada7"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border",
+      "default": "rgba(255, 255, 255, 0.12)"
+    },
+    {
+      "type": "font_picker",
+      "id": "serif_font",
+      "label": "Heading Font",
+      "default": "playfair_display_n5"
+    },
+    {
+      "type": "header",
+      "content": "Editorial Image (Left)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Story Image (Fallback)"
+    },
+    {
+      "type": "header",
+      "content": "Story Copy (Right)"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow Text",
+      "default": "THE ESSENCE OF ENERGY"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "More Than a Fragrance. A Statement."
+    },
+    {
+      "type": "richtext",
+      "id": "body_text",
+      "label": "Story Body Text",
+      "default": "<p>Designed for the modern man who commands attention. With an invigorating blend of sparkling citrus, rich woods, and magnetic spices, it captures the relentless drive, passion, and mindset of a true champion.</p>"
+    },
+    {
+      "type": "text",
+      "id": "perfumer",
+      "label": "Perfumer Attribution (Optional)",
+      "default": "Pierre-Constantin Guéros"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button Label",
+      "default": "DISCOVER THE COLLECTION"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Story"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,257 @@
+{%- comment -%}
+  CR7 Editorial Hero Slider
+  White editorial layout with left serif headline, emerald CTA, numbered pagination (01 02 03),
+  and right-aligned black-and-white portrait over CR7 watermark.
+{%- endcomment -%}
+
+{{ 'cr7-hero-slider.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'cr7-hero-slider.js' | asset_url }}" defer></script>
+
+<section
+  id="CR7-Hero-Slider-{{ section.id }}"
+  class="cr7-hero-slider"
+  data-cr7-hero-slider
+  data-autoplay-ms="{{ section.settings.autoplay_seconds | default: 5 | times: 1000 }}"
+  aria-roledescription="carousel"
+  aria-label="Featured collections"
+>
+  <div class="cr7-hero-slider__container">
+    <div class="cr7-hero-slider__stage">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign is_first = forloop.first
+          assign slide_img = block.settings.image
+          assign cta_href = block.settings.link | default: routes.all_products_collection_url
+          assign slide_alt = block.settings.heading | strip_html | default: 'CR7 Fragrances' | escape
+        -%}
+        <div
+          class="cr7-hero-slider__slide{% if is_first %} is-active{% endif %}"
+          data-cr7-slide
+          aria-hidden="{% if is_first %}false{% else %}true{% endif %}"
+          style="--slide-img-scale: {{ block.settings.image_scale | default: 106 | divided_by: 100.0 }};"
+          {{ block.shopify_attributes }}
+        >
+          <div class="cr7-hero-slider__content">
+            {%- if block.settings.eyebrow != blank -%}
+              <div class="cr7-hero-slider__eyebrow-row">
+                <span class="cr7-hero-slider__eyebrow">{{ block.settings.eyebrow | escape }}</span>
+                <span class="cr7-hero-slider__hairline" aria-hidden="true"></span>
+              </div>
+            {%- endif -%}
+
+            {%- if block.settings.heading != blank -%}
+              {%- assign heading_html = block.settings.heading | escape | newline_to_br -%}
+              {%- assign heading_len = heading_html | size -%}
+              {%- assign last_char = heading_html | slice: -1, 1 -%}
+              {%- if last_char == '.' -%}
+                {%- assign without_dot_len = heading_len | minus: 1 -%}
+                {%- assign heading_prefix = heading_html | slice: 0, without_dot_len -%}
+                {%- capture final_heading -%}{{ heading_prefix }}<span class="cr7-hero-slider__dot">.</span>{%- endcapture -%}
+              {%- else -%}
+                {%- assign final_heading = heading_html -%}
+              {%- endif -%}
+
+              {%- if is_first -%}
+                <h1 class="cr7-hero-slider__heading">{{ final_heading }}</h1>
+              {%- else -%}
+                <h2 class="cr7-hero-slider__heading">{{ final_heading }}</h2>
+              {%- endif -%}
+            {%- endif -%}
+
+            {%- if block.settings.subtitle != blank -%}
+              <p class="cr7-hero-slider__subtitle">{{ block.settings.subtitle | escape | newline_to_br }}</p>
+            {%- endif -%}
+
+            {%- if block.settings.cta_label != blank -%}
+              <a href="{{ cta_href }}" class="cr7-hero-slider__cta">
+                <span>{{ block.settings.cta_label | escape }}</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="4" y1="12" x2="20" y2="12"/>
+                  <polyline points="14 6 20 12 14 18"/>
+                </svg>
+              </a>
+            {%- endif -%}
+          </div>
+
+          <div class="cr7-hero-slider__media">
+            {%- if block.settings.watermark != blank -%}
+              <span class="cr7-hero-slider__watermark" aria-hidden="true">{{ block.settings.watermark | escape }}</span>
+            {%- endif -%}
+
+            <div class="cr7-hero-slider__img-wrap">
+              {%- if slide_img != blank -%}
+                {%- liquid
+                  assign img_loading = 'lazy'
+                  assign img_priority = 'auto'
+                  if is_first
+                    assign img_loading = 'eager'
+                    assign img_priority = 'high'
+                  endif
+                -%}
+                {{ slide_img | image_url: width: 2200 | image_tag:
+                  loading: img_loading,
+                  fetchpriority: img_priority,
+                  class: 'cr7-hero-slider__img',
+                  alt: slide_alt,
+                  widths: '700, 1100, 1600, 2200',
+                  sizes: '(min-width: 750px) 50vw, 100vw'
+                }}
+              {%- else -%}
+                {%- liquid
+                  assign fallback_asset = 'cr7-hero-slide-1.png'
+                  if forloop.index == 2
+                    assign fallback_asset = 'cr7-hero-slide-2.png'
+                  elsif forloop.index == 3
+                    assign fallback_asset = 'cr7-hero-slide-3.png'
+                  endif
+                -%}
+                <img
+                  src="{{ fallback_asset | asset_url }}"
+                  alt="{{ slide_alt }}"
+                  class="cr7-hero-slider__img"
+                  loading="{% if is_first %}eager{% else %}lazy{% endif %}"
+                  {% if is_first %}fetchpriority="high"{% endif %}
+                  width="900"
+                  height="1200"
+                >
+              {%- endif -%}
+            </div>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    {%- if section.blocks.size > 1 -%}
+      <div class="cr7-hero-slider__nav" role="tablist" aria-label="Slide pagination">
+        {%- for block in section.blocks -%}
+          <button
+            type="button"
+            class="cr7-hero-slider__dot-btn"
+            role="tab"
+            data-cr7-dot
+            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+            aria-label="Slide {{ forloop.index }}"
+          >
+            0{{ forloop.index }}
+          </button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "CR7 Hero Slider",
+  "tag": "section",
+  "class": "section-cr7-hero-slider",
+  "max_blocks": 5,
+  "settings": [
+    {
+      "type": "range",
+      "id": "autoplay_seconds",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "unit": "s",
+      "label": "Auto-advance interval (0 = off)",
+      "default": 5
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "text",
+          "id": "eyebrow",
+          "label": "Eyebrow",
+          "default": "CR7 FRAGRANCES"
+        },
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Beyond\nthe Legend."
+        },
+        {
+          "type": "textarea",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "default": "More than a fragrance.\nA statement of confidence."
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "CTA label",
+          "default": "EXPLORE COLLECTION"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "CTA link"
+        },
+        {
+          "type": "text",
+          "id": "watermark",
+          "label": "Background watermark",
+          "default": "CR7"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Slide Image (Upload or Select)"
+        },
+        {
+          "type": "range",
+          "id": "image_scale",
+          "min": 80,
+          "max": 130,
+          "step": 2,
+          "unit": "%",
+          "label": "Image size scale",
+          "default": 106
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "CR7 Hero Slider",
+      "blocks": [
+        {
+          "type": "slide",
+          "settings": {
+            "eyebrow": "CR7 FRAGRANCES",
+            "heading": "Beyond\nthe Legend.",
+            "subtitle": "More than a fragrance.\nA statement of confidence.",
+            "cta_label": "EXPLORE COLLECTION",
+            "watermark": "CR7"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "eyebrow": "THE SIGNATURE SCENT",
+            "heading": "Own Your\nEnergy.",
+            "subtitle": "Fresh citrus, vibrant woods,\nand unstoppable drive.",
+            "cta_label": "SHOP CR7 ENERGY",
+            "watermark": "CR7"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "eyebrow": "TIMELESS LEGACY",
+            "heading": "Play Bold.\nLeave a Mark.",
+            "subtitle": "Crafted for moments that\ndefine greatness.",
+            "cta_label": "DISCOVER LEGACY",
+            "watermark": "CR7"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

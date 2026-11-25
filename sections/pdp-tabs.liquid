@@ -1,0 +1,330 @@
+{%- comment -%}
+  PDP Tabs Section (Description / Additional Information / Reviews)
+  Real accessible ARIA tabs, centered list, zebra table for specs, and reviews app block container.
+{%- endcomment -%}
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+
+  # Reviews data
+  assign rating_obj = product.metafields.reviews.rating.value | default: product.metafields.reviews.rating
+  assign rating_val = 0
+  if rating_obj.rating != blank
+    assign rating_val = rating_obj.rating | plus: 0
+  elsif rating_obj != blank
+    assign rating_val = rating_obj | plus: 0
+  endif
+  assign rating_count = product.metafields.reviews.rating_count.value | default: product.metafields.reviews.rating_count | default: 0 | plus: 0
+
+  assign app_blocks = section.blocks | where: 'type', '@app'
+
+  # Check which tabs have content
+  assign has_desc = false
+  if product.description != blank
+    assign has_desc = true
+  endif
+
+  # Additional info rows: custom.additional_info or fallback real data
+  assign add_info_raw = product.metafields.custom.additional_info.value | default: product.metafields.custom.additional_info
+  assign has_additional_info = false
+  if add_info_raw != blank
+    assign has_additional_info = true
+  else
+    if product.vendor != blank or product.type != blank or current_variant.sku != blank
+      assign has_additional_info = true
+    endif
+  endif
+
+  assign has_reviews = false
+  if rating_val > 0 or app_blocks.size > 0 or request.design_mode
+    assign has_reviews = true
+  endif
+
+  # Tab labels formatting with count
+  assign reviews_label = section.settings.tab_reviews_label
+  if rating_count > 0
+    assign reviews_label = reviews_label | replace: '{count}', rating_count
+  else
+    assign reviews_label = reviews_label | replace: '({count})', '' | replace: '{count}', '' | strip
+  endif
+-%}
+
+<section
+  id="PDP-Tabs-{{ section.id }}"
+  class="pdp-section pdp-tabs"
+  data-section-id="{{ section.id }}"
+  data-section-type="pdp-tabs"
+  style="
+    --pdp-bg: {{ section.settings.background_color }};
+    --pdp-text: {{ section.settings.text_color }};
+    --pdp-muted: {{ section.settings.muted_color }};
+    --pdp-border: {{ section.settings.border_color }};
+  "
+>
+  <div class="pdp-container">
+    {%- comment -%} Centered Tab Navigation List {%- endcomment -%}
+    <div class="pdp-tabs__nav-wrap" role="region" aria-label="Product specifications tabs">
+      <ul class="pdp-tabs__nav" role="tablist">
+        {%- if has_desc -%}
+          <li role="presentation">
+            <button
+              type="button"
+              id="pdp-tab-btn-desc"
+              class="pdp-tabs__btn"
+              role="tab"
+              aria-selected="true"
+              aria-controls="pdp-panel-desc"
+              data-pdp-tab-trigger="description"
+              tabindex="0"
+            >
+              {{ section.settings.tab_desc_label }}
+            </button>
+          </li>
+        {%- endif -%}
+
+        {%- if has_additional_info -%}
+          <li role="presentation">
+            <button
+              type="button"
+              id="pdp-tab-btn-info"
+              class="pdp-tabs__btn"
+              role="tab"
+              aria-selected="{% if has_desc %}false{% else %}true{% endif %}"
+              aria-controls="pdp-panel-info"
+              data-pdp-tab-trigger="additional"
+              tabindex="{% if has_desc %}-1{% else %}0{% endif %}"
+            >
+              {{ section.settings.tab_info_label }}
+            </button>
+          </li>
+        {%- endif -%}
+
+        {%- if has_reviews -%}
+          <li role="presentation">
+            <button
+              type="button"
+              id="pdp-tab-btn-reviews"
+              class="pdp-tabs__btn"
+              role="tab"
+              aria-selected="{% if has_desc or has_additional_info %}false{% else %}true{% endif %}"
+              aria-controls="pdp-panel-reviews"
+              data-pdp-tab-trigger="reviews"
+              tabindex="{% if has_desc or has_additional_info %}-1{% else %}0{% endif %}"
+            >
+              {{ reviews_label }}
+            </button>
+          </li>
+        {%- endif -%}
+      </ul>
+    </div>
+
+    {%- comment -%} Tab Panels Container (~960px centered) {%- endcomment -%}
+    <div class="pdp-tabs__panels">
+      {%- comment -%} Panel 1: Description {%- endcomment -%}
+      {%- if has_desc -%}
+        <div
+          id="pdp-panel-desc"
+          class="pdp-tab-panel pdp-tab-panel--desc rte"
+          role="tabpanel"
+          aria-labelledby="pdp-tab-btn-desc"
+          data-pdp-tab-panel="description"
+          data-active="true"
+        >
+          {{ product.description }}
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Panel 2: Additional Information (Zebra Table) {%- endcomment -%}
+      {%- if has_additional_info -%}
+        <div
+          id="pdp-panel-info"
+          class="pdp-tab-panel pdp-tab-panel--info"
+          role="tabpanel"
+          aria-labelledby="pdp-tab-btn-info"
+          data-pdp-tab-panel="additional"
+          {% if has_desc %}data-active="false" hidden{% else %}data-active="true"{% endif %}
+        >
+          <div class="pdp-table-wrap">
+            <table class="pdp-table">
+              <thead>
+                <tr>
+                  <th class="pdp-table__col-feature">{{ section.settings.table_header_feature }}</th>
+                  <th class="pdp-table__col-desc">{{ section.settings.table_header_desc }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {%- if add_info_raw != blank -%}
+                  {%- assign lines = add_info_raw | newline_to_br | split: '<br />' -%}
+                  {%- for line in lines -%}
+                    {%- assign parts = line | split: ':' -%}
+                    {%- if parts.size >= 2 -%}
+                      {%- assign feature_title = parts[0] | strip -%}
+                      {%- assign feature_val = line | remove_first: parts[0] | remove_first: ':' | strip -%}
+                      {%- if feature_title != blank and feature_val != blank -%}
+                        <tr>
+                          <td class="pdp-table__col-feature">{{ feature_title }}</td>
+                          <td class="pdp-table__col-desc">{{ feature_val }}</td>
+                        </tr>
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- else -%}
+                  {%- if product.vendor != blank -%}
+                    <tr>
+                      <td class="pdp-table__col-feature">Brand</td>
+                      <td class="pdp-table__col-desc">{{ product.vendor }}</td>
+                    </tr>
+                  {%- endif -%}
+
+                  {%- if product.type != blank -%}
+                    <tr>
+                      <td class="pdp-table__col-feature">Category</td>
+                      <td class="pdp-table__col-desc">{{ product.type }}</td>
+                    </tr>
+                  {%- endif -%}
+
+                  {%- if current_variant.weight > 0 -%}
+                    <tr>
+                      <td class="pdp-table__col-feature">Weight</td>
+                      <td class="pdp-table__col-desc">{{ current_variant.weight | weight_with_unit }}</td>
+                    </tr>
+                  {%- endif -%}
+
+                  {%- if current_variant.sku != blank -%}
+                    <tr>
+                      <td class="pdp-table__col-feature">SKU</td>
+                      <td class="pdp-table__col-desc">{{ current_variant.sku }}</td>
+                    </tr>
+                  {%- endif -%}
+                {%- endif -%}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Panel 3: Reviews Panel {%- endcomment -%}
+      {%- if has_reviews -%}
+        <div
+          id="pdp-panel-reviews"
+          class="pdp-tab-panel pdp-tab-panel--reviews"
+          role="tabpanel"
+          aria-labelledby="pdp-tab-btn-reviews"
+          data-pdp-tab-panel="reviews"
+          {% if has_desc or has_additional_info %}data-active="false" hidden{% else %}data-active="true"{% endif %}
+        >
+          <div class="pdp-reviews-wrap">
+            {%- if rating_val > 0 -%}
+              <div class="pdp-reviews-summary">
+                <span class="pdp-reviews-summary__score">{{ rating_val | round: 1 }}</span>
+                <div class="pdp-reviews-summary__stars">
+                  {% render 'pdp-stars',
+                    rating: rating_val,
+                    rating_count: rating_count,
+                    star_size: '20px',
+                    star_color: '#f5a623',
+                    empty_color: '#e5e7eb',
+                    show_text: true
+                  %}
+                </div>
+              </div>
+            {%- endif -%}
+
+            {%- comment -%} Review Apps Container {%- endcomment -%}
+            <div class="pdp-reviews-apps">
+              {%- for block in section.blocks -%}
+                {%- if block.type == '@app' -%}
+                  <div class="pdp-reviews-app-block" {{ block.shopify_attributes }}>
+                    {% render block %}
+                  </div>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "PDP Tabs",
+  "tag": "section",
+  "class": "section-pdp-tabs",
+  "settings": [
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#111827"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Muted Color",
+      "default": "#6b7280"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#e5e7eb"
+    },
+    {
+      "type": "header",
+      "content": "Tab Labels"
+    },
+    {
+      "type": "text",
+      "id": "tab_desc_label",
+      "label": "Description Tab Label",
+      "default": "Description"
+    },
+    {
+      "type": "text",
+      "id": "tab_info_label",
+      "label": "Additional Info Tab Label",
+      "default": "Additional Information"
+    },
+    {
+      "type": "text",
+      "id": "tab_reviews_label",
+      "label": "Reviews Tab Label (use {count})",
+      "default": "Reviews ({count})"
+    },
+    {
+      "type": "header",
+      "content": "Table Headers"
+    },
+    {
+      "type": "text",
+      "id": "table_header_feature",
+      "label": "Feature Column Label",
+      "default": "Feature"
+    },
+    {
+      "type": "text",
+      "id": "table_header_desc",
+      "label": "Description Column Label",
+      "default": "Description"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [
+    {
+      "name": "PDP Tabs"
+    }
+  ]
+}
+{% endschema %}

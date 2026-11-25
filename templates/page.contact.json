@@ -1,0 +1,43 @@
+{
+  "sections": {
+    "cr7_contact": {
+      "type": "cr7-contact",
+      "blocks": {
+        "faq_1": {
+          "type": "faq",
+          "settings": {
+            "question": "How long does delivery take?",
+            "answer": "Orders are dispatched within 24–48 business hours and typically arrive within 2–5 business days."
+          }
+        },
+        "faq_2": {
+          "type": "faq",
+          "settings": {
+            "question": "What is your return policy?",
+            "answer": "Unopened fragrances in original sealed packaging may be returned within 30 days of delivery for a full refund."
+          }
+        },
+        "faq_3": {
+          "type": "faq",
+          "settings": {
+            "question": "Are all CR7 Fragrances 100% authentic?",
+            "answer": "Yes. Every fragrance ordered here ships directly from our official authorized distribution."
+          }
+        }
+      },
+      "block_order": [
+        "faq_1",
+        "faq_2",
+        "faq_3"
+      ],
+      "settings": {
+        "eyebrow": "CONCIERGE & SUPPORT",
+        "heading": "Get in Touch",
+        "subtitle": "Whether you need assistance with an order, fragrance guidance, or press inquiries, our team is here to help."
+      }
+    }
+  },
+  "order": [
+    "cr7_contact"
+  ]
+}

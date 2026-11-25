@@ -1,0 +1,893 @@
+{%- doc -%}
+  Footer (Animated) Section
+  Recreates the dark luxury footer with:
+  - Top trust bar (gold line icons + 2-line text)
+  - Main area (logo, 2 menu columns, vertical divider, newsletter, social icons)
+  - Bottom bar (copyright + legal menu)
+  - Animated glowing green smoke/light background with viewport pause & reduced-motion support
+{%- enddoc -%}
+
+{{ 'footer-animated.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'footer-animated.js' | asset_url }}" type="module" defer></script>
+
+{%- liquid
+  assign form_id = 'FooterNewsletter-' | append: section.id
+
+  # Animation speed multiplier
+  assign anim_mult = 1.0
+  if section.settings.anim_speed == 'slow'
+    assign anim_mult = 1.6
+  elsif section.settings.anim_speed == 'fast'
+    assign anim_mult = 0.6
+  endif
+
+  # Glow intensity (0 to 1)
+  assign glow_opacity = section.settings.glow_intensity | default: 80 | times: 0.01
+
+  # Heading font handling
+  assign heading_font = section.settings.heading_font
+-%}
+
+{%- if heading_font != blank -%}
+  <style>
+    {{ heading_font | font_face: font_display: 'swap' }}
+  </style>
+{%- endif -%}
+
+<footer
+  id="Footer-{{ section.id }}"
+  class="footer-anim"
+  data-footer-animated
+  data-in-view="true"
+  role="contentinfo"
+  style="
+    --footer-bg: {{ section.settings.color_bg | default: '#030504' }};
+    --footer-text: {{ section.settings.color_text | default: '#ffffff' }};
+    --footer-muted: {{ section.settings.color_muted | default: 'rgba(255, 255, 255, 0.75)' }};
+    --footer-accent: {{ section.settings.color_accent | default: '#19e65a' }};
+    --footer-accent-dark: {{ section.settings.color_accent_dark | default: '#0a9f3a' }};
+    --footer-gold: {{ section.settings.color_gold | default: '#d9a43c' }};
+    --footer-border: {{ section.settings.color_border | default: 'rgba(25, 230, 90, 0.15)' }};
+    --footer-anim-mult: {{ anim_mult }};
+    --footer-glow-opacity: {{ glow_opacity }};
+    --footer-padding-top: {{ section.settings.padding_top | default: 48 }}px;
+    --footer-padding-bottom: {{ section.settings.padding_bottom | default: 32 }}px;
+    {% if heading_font != blank %}
+      --footer-heading-font: {{ heading_font.family }}, {{ heading_font.fallback_families }};
+      --footer-heading-weight: {{ heading_font.weight }};
+    {% else %}
+      --footer-heading-font: var(--font-heading--family, Georgia, serif);
+      --footer-heading-weight: 700;
+    {% endif %}
+  "
+>
+  <!-- =======================================================================
+       ANIMATED GREEN SMOKE & GLOW BACKGROUND (aria-hidden, pure CSS)
+       ======================================================================= -->
+  <div class="footer-anim__bg{% unless section.settings.enable_animation %} footer-anim__bg--static{% endunless %}" aria-hidden="true">
+    <div class="footer-anim__base-gradient"></div>
+
+    {%- if section.settings.background_image != blank -%}
+      <div class="footer-anim__bg-photo-wrap">
+        {{
+          section.settings.background_image
+          | image_url: width: 3840
+          | image_tag:
+            loading: 'lazy',
+            alt: '',
+            aria-hidden: 'true',
+            class: 'footer-anim__bg-photo'
+        }}
+      </div>
+    {%- endif -%}
+
+    <!-- Top edge subtle bloom -->
+    <div class="footer-anim__top-bloom"></div>
+
+    <!-- Bottom Left Smoke Cluster -->
+    <div class="footer-anim__smoke-cluster footer-anim__smoke-cluster--left">
+      <div class="footer-anim__blob footer-anim__blob--1"></div>
+      <div class="footer-anim__blob footer-anim__blob--2"></div>
+      <div class="footer-anim__blob footer-anim__blob--3"></div>
+      <div class="footer-anim__blob footer-anim__blob--4"></div>
+    </div>
+
+    <!-- Bottom Right Smoke Cluster -->
+    <div class="footer-anim__smoke-cluster footer-anim__smoke-cluster--right">
+      <div class="footer-anim__blob footer-anim__blob--5"></div>
+      <div class="footer-anim__blob footer-anim__blob--6"></div>
+      <div class="footer-anim__blob footer-anim__blob--7"></div>
+      <div class="footer-anim__blob footer-anim__blob--8"></div>
+    </div>
+
+    <!-- Optional Smoke Textures -->
+    {%- if section.settings.smoke_image_left != blank or section.settings.smoke_image_right != blank -%}
+      {%- assign left_img = section.settings.smoke_image_left | default: section.settings.smoke_image_right -%}
+      {%- assign right_img = section.settings.smoke_image_right | default: section.settings.smoke_image_left -%}
+      <div class="footer-anim__texture-layer">
+        {%- if left_img != blank -%}
+          <div class="footer-anim__texture footer-anim__texture--left">
+            {{
+              left_img
+              | image_url: width: 1200
+              | image_tag: loading: 'lazy', alt: '', aria-hidden: 'true', class: 'footer-anim__texture-img'
+            }}
+          </div>
+        {%- endif -%}
+        {%- if right_img != blank -%}
+          <div class="footer-anim__texture footer-anim__texture--right{% unless section.settings.smoke_image_right != blank %} footer-anim__texture--mirrored{% endunless %}">
+            {{
+              right_img
+              | image_url: width: 1200
+              | image_tag: loading: 'lazy', alt: '', aria-hidden: 'true', class: 'footer-anim__texture-img'
+            }}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <!-- Horizontal Glowing Line above Bottom Bar -->
+    <div class="footer-anim__glow-line-wrap">
+      <div class="footer-anim__glow-line">
+        <div class="footer-anim__glow-line-sweep"></div>
+      </div>
+      <div class="footer-anim__glow-line-bloom"></div>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       FOREGROUND CONTENT (z-index: 2)
+       ======================================================================= -->
+  <div class="footer-anim__inner">
+    <!-- 1. TRUST BAR (Top) -->
+    {%- if section.settings.show_trust_bar -%}
+      {%- assign trust_blocks = section.blocks | where: 'type', 'trust_item' -%}
+      {%- if trust_blocks.size > 0 -%}
+        <div class="footer-anim__trust-bar" style="--trust-cols: {{ trust_blocks.size | at_most: 6 }};">
+          <div class="footer-anim__container footer-anim__trust-container">
+            {%- for block in trust_blocks limit: 6 -%}
+              <div class="footer-anim__trust-item" {{ block.shopify_attributes }}>
+                <div class="footer-anim__trust-icon" aria-hidden="true">
+                  {%- case block.settings.icon -%}
+                    {%- when 'gem' -%}
+                      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 3h12l4 6-10 12L2 9l4-6z"></path>
+                        <path d="M2 9h20"></path>
+                        <path d="M10 3l2 6-2 12"></path>
+                        <path d="M14 3l-2 6 2 12"></path>
+                      </svg>
+                    {%- when 'truck' -%}
+                      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="4" width="14" height="13" rx="1"></rect>
+                        <polygon points="15 8 20 8 23 12 23 17 15 17 15 8"></polygon>
+                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                      </svg>
+                    {%- when 'shield-check' -%}
+                      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <path d="M9 12l2 2 4-4"></path>
+                      </svg>
+                    {%- when 'headset' -%}
+                      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                        <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                      </svg>
+                    {%- when 'box' -%}
+                      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                      </svg>
+                    {%- when 'return' -%}
+                      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="1 4 1 10 7 10"></polyline>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                      </svg>
+                    {%- when 'lock' -%}
+                      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      </svg>
+                    {%- when 'gift' -%}
+                      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 12 20 22 4 22 4 12"></polyline>
+                        <rect x="2" y="7" width="20" height="5"></rect>
+                        <line x1="12" y1="22" x2="12" y2="7"></line>
+                        <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+                        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+                      </svg>
+                    {%- when 'custom' -%}
+                      {%- if block.settings.custom_icon != blank -%}
+                        <img
+                          src="{{ block.settings.custom_icon | image_url: width: 72 }}"
+                          alt=""
+                          width="34"
+                          height="34"
+                          loading="lazy"
+                          class="footer-anim__trust-custom-img"
+                        >
+                      {%- endif -%}
+                  {%- endcase -%}
+                </div>
+                <div class="footer-anim__trust-text">
+                  <div class="footer-anim__trust-title">{{ block.settings.title | escape }}</div>
+                  {%- if block.settings.subtitle != blank -%}
+                    <div class="footer-anim__trust-subtitle">{{ block.settings.subtitle | escape }}</div>
+                  {%- endif -%}
+                </div>
+              </div>
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    <!-- 2. MAIN AREA (Logo, Menus, Divider, Newsletter, Social) -->
+    <div class="footer-anim__main">
+      <div class="footer-anim__container footer-anim__main-container">
+        <div class="footer-anim__main-grid">
+          <!-- Brand Logo Column -->
+          <div class="footer-anim__logo-col">
+            <a href="{{ section.settings.logo_link | default: routes.root_url }}" class="footer-anim__logo-link" aria-label="{{ shop.name | escape }}">
+              {%- liquid
+                assign footer_logo = section.settings.logo
+                assign header_logo = settings.logo
+                assign active_logo = footer_logo | default: header_logo
+              -%}
+              {%- if active_logo != blank -%}
+                {%- assign logo_width = section.settings.logo_width | default: 110 -%}
+                {%- assign logo_height = logo_width | divided_by: active_logo.aspect_ratio | round -%}
+                {%- capture logo_style -%}width: {{ logo_width }}px; max-width: 100%; height: auto;{%- endcapture -%}
+                {{
+                  active_logo
+                  | image_url: width: 480
+                  | image_tag:
+                    loading: 'lazy',
+                    width: logo_width,
+                    height: logo_height,
+                    alt: shop.name,
+                    class: 'footer-anim__logo-img',
+                    style: logo_style
+                }}
+              {%- else -%}
+                <span class="footer-anim__logo-text">{{ shop.name }}</span>
+              {%- endif -%}
+            </a>
+          </div>
+
+        <!-- Menu Columns -->
+        {%- assign menu_blocks = section.blocks | where: 'type', 'menu' -%}
+        {%- for block in menu_blocks limit: 3 -%}
+          <nav class="footer-anim__menu-col" aria-label="{{ block.settings.heading | default: 'Navigation' | escape }}" {{ block.shopify_attributes }}>
+            {%- if block.settings.heading != blank -%}
+              <h3 class="footer-anim__heading">{{ block.settings.heading | escape }}</h3>
+            {%- endif -%}
+            {%- if block.settings.menu != blank -%}
+              <ul class="footer-anim__link-list" role="list">
+                {%- for link in block.settings.menu.links -%}
+                  <li class="footer-anim__link-item">
+                    <a href="{{ link.url }}" class="footer-anim__link">
+                      {{ link.title | escape }}
+                    </a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+          </nav>
+        {%- endfor -%}
+
+        <!-- Newsletter & Social Column (Column 4) -->
+        {%- if section.settings.show_newsletter or section.settings.show_social -%}
+          <div class="footer-anim__newsletter-col" id="{{ form_id }}">
+            {%- if section.settings.show_newsletter -%}
+              {%- if section.settings.newsletter_heading != blank -%}
+                <h3 class="footer-anim__heading">{{ section.settings.newsletter_heading | escape }}</h3>
+              {%- endif -%}
+              {%- if section.settings.newsletter_text != blank -%}
+                <p class="footer-anim__newsletter-desc">{{ section.settings.newsletter_text | escape }}</p>
+              {%- endif -%}
+
+              {%- form 'customer', id: form_id, class: 'footer-anim__form' -%}
+                <input type="hidden" name="contact[tags]" value="newsletter">
+                <label for="FooterEmail-{{ section.id }}" class="visually-hidden">
+                  {{ section.settings.newsletter_placeholder | default: 'Your email address' | escape }}
+                </label>
+
+                <div class="footer-anim__input-group">
+                  <input
+                    id="FooterEmail-{{ section.id }}"
+                    type="email"
+                    name="contact[email]"
+                    class="footer-anim__input"
+                    value="{{ form.email }}"
+                    placeholder="{{ section.settings.newsletter_placeholder | default: 'Your email address' | escape }}"
+                    autocomplete="email"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    required
+                    {% if form.errors %}
+                      aria-invalid="true"
+                      aria-describedby="FooterForm-error-{{ section.id }}"
+                    {% elsif form.posted_successfully? %}
+                      aria-describedby="FooterForm-success-{{ section.id }}"
+                    {% endif %}
+                  >
+                  <button
+                    type="submit"
+                    class="footer-anim__submit-btn"
+                    name="commit"
+                    aria-label="{{ section.settings.newsletter_button_label | default: 'SUBSCRIBE' | escape }}"
+                  >
+                    <span>{{ section.settings.newsletter_button_label | default: 'SUBSCRIBE' | escape }}</span>
+                  </button>
+                </div>
+
+                {%- if form.posted_successfully? -%}
+                  <div
+                    id="FooterForm-success-{{ section.id }}"
+                    class="footer-anim__form-message footer-anim__form-message--success"
+                    role="status"
+                    aria-live="polite"
+                    tabindex="-1"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>{{ section.settings.newsletter_success | default: 'Thank you for subscribing!' | escape }}</span>
+                  </div>
+                {%- elsif form.errors -%}
+                  <div
+                    id="FooterForm-error-{{ section.id }}"
+                    class="footer-anim__form-message footer-anim__form-message--error"
+                    role="alert"
+                    aria-live="assertive"
+                    tabindex="-1"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <span>{{ form.errors.translated_fields.email | capitalize }} {{ form.errors.messages.email }}</span>
+                  </div>
+                {%- endif -%}
+              {%- endform -%}
+            {%- endif -%}
+
+            <!-- Social Icons inside Column 4 -->
+            {%- if section.settings.show_social -%}
+              {%- liquid
+                assign fb = section.settings.social_facebook | default: settings.social_facebook_link
+                assign ig = section.settings.social_instagram | default: settings.social_instagram_link
+                assign yt = section.settings.social_youtube | default: settings.social_youtube_link
+                assign tw = section.settings.social_x | default: settings.social_twitter_link | default: settings.social_x_link
+                assign tt = section.settings.social_tiktok | default: settings.social_tiktok_link
+
+                assign has_social = false
+                if fb != blank or ig != blank or yt != blank or tw != blank or tt != blank
+                  assign has_social = true
+                endif
+              -%}
+
+              {%- if has_social -%}
+                <div class="footer-anim__social-wrap">
+                  <ul class="footer-anim__social-list" role="list">
+                    {%- if fb != blank -%}
+                      <li class="footer-anim__social-item">
+                        <a href="{{ fb }}" class="footer-anim__social-link" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                          </svg>
+                        </a>
+                      </li>
+                    {%- endif -%}
+                    {%- if ig != blank -%}
+                      <li class="footer-anim__social-item">
+                        <a href="{{ ig }}" class="footer-anim__social-link" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                          </svg>
+                        </a>
+                      </li>
+                    {%- endif -%}
+                    {%- if yt != blank -%}
+                      <li class="footer-anim__social-item">
+                        <a href="{{ yt }}" class="footer-anim__social-link" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+                            <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#030504"></polygon>
+                          </svg>
+                        </a>
+                      </li>
+                    {%- endif -%}
+                    {%- if tw != blank -%}
+                      <li class="footer-anim__social-item">
+                        <a href="{{ tw }}" class="footer-anim__social-link" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+                          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+                          </svg>
+                        </a>
+                      </li>
+                    {%- endif -%}
+                    {%- if tt != blank -%}
+                      <li class="footer-anim__social-item">
+                        <a href="{{ tt }}" class="footer-anim__social-link" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3 15.25 6.34 6.34 0 0 0 9.34 21.6a6.34 6.34 0 0 0 6.35-6.35V9a8.16 8.16 0 0 0 4.9 1.63v-3.5a4.85 4.85 0 0 1-1-.44z"></path>
+                          </svg>
+                        </a>
+                      </li>
+                    {%- endif -%}
+                  </ul>
+                </div>
+              {%- endif -%}
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. BOTTOM BAR (Copyright & Legal Links) -->
+    {%- if section.settings.show_bottom_bar -%}
+      <div class="footer-anim__bottom-bar">
+        <div class="footer-anim__container footer-anim__bottom-container">
+          <!-- Copyright -->
+          <div class="footer-anim__copyright">
+            <span>&copy; {{ 'now' | date: '%Y' }} {{ section.settings.copyright_text | default: shop.name }}. {{ powered_by_link }}</span>
+          </div>
+
+          <!-- Legal Links -->
+          <nav class="footer-anim__legal-nav" aria-label="Legal">
+            <ul class="footer-anim__legal-list" role="list">
+              {%- if section.settings.legal_menu != blank -%}
+                {%- for link in section.settings.legal_menu.links -%}
+                  <li class="footer-anim__legal-item">
+                    <a href="{{ link.url }}" class="footer-anim__legal-link">{{ link.title | escape }}</a>
+                  </li>
+                {%- endfor -%}
+              {%- elsif shop.privacy_policy != blank or shop.terms_of_service != blank or shop.refund_policy != blank -%}
+                {%- if shop.privacy_policy != blank -%}
+                  <li class="footer-anim__legal-item">
+                    <a href="{{ shop.privacy_policy.url }}" class="footer-anim__legal-link">{{ shop.privacy_policy.title | escape }}</a>
+                  </li>
+                {%- endif -%}
+                {%- if shop.terms_of_service != blank -%}
+                  <li class="footer-anim__legal-item">
+                    <a href="{{ shop.terms_of_service.url }}" class="footer-anim__legal-link">{{ shop.terms_of_service.title | escape }}</a>
+                  </li>
+                {%- else -%}
+                  <li class="footer-anim__legal-item">
+                    <a href="#" class="footer-anim__legal-link">Terms &amp; Conditions</a>
+                  </li>
+                {%- endif -%}
+                {%- if shop.refund_policy != blank -%}
+                  <li class="footer-anim__legal-item">
+                    <a href="{{ shop.refund_policy.url }}" class="footer-anim__legal-link">{{ shop.refund_policy.title | escape }}</a>
+                  </li>
+                {%- endif -%}
+                <li class="footer-anim__legal-item">
+                  <a href="#" class="footer-anim__legal-link">Cookies</a>
+                </li>
+              {%- else -%}
+                <li class="footer-anim__legal-item">
+                  <a href="#" class="footer-anim__legal-link">Privacy Policy</a>
+                </li>
+                <li class="footer-anim__legal-item">
+                  <a href="#" class="footer-anim__legal-link">Terms &amp; Conditions</a>
+                </li>
+                <li class="footer-anim__legal-item">
+                  <a href="#" class="footer-anim__legal-link">Cookies</a>
+                </li>
+              {%- endif -%}
+            </ul>
+          </nav>
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer (animated)",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout & Width"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width (matches website frame)" },
+        { "value": "full-width", "label": "Full width (edge to edge)" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "header",
+      "content": "Brand & Logo"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo image"
+    },
+    {
+      "type": "text",
+      "id": "brand_title",
+      "label": "Brand title (if no logo image)",
+      "default": "CR7"
+    },
+    {
+      "type": "text",
+      "id": "brand_subtitle",
+      "label": "Brand subtitle (if no logo image)",
+      "default": "CRISTIANO RONALDO"
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "min": 60,
+      "max": 240,
+      "step": 5,
+      "unit": "px",
+      "label": "Logo width",
+      "default": 110
+    },
+    {
+      "type": "url",
+      "id": "logo_link",
+      "label": "Logo link"
+    },
+    {
+      "type": "header",
+      "content": "Typography & Colors"
+    },
+    {
+      "type": "font_picker",
+      "id": "heading_font",
+      "label": "Heading font (condensed recommended)",
+      "default": "playfair_display_n4"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Background",
+      "default": "#030504"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "color_muted",
+      "label": "Muted text",
+      "default": "rgba(255, 255, 255, 0.75)"
+    },
+    {
+      "type": "color",
+      "id": "color_accent",
+      "label": "Accent green",
+      "default": "#19e65a"
+    },
+    {
+      "type": "color",
+      "id": "color_accent_dark",
+      "label": "Accent green (dark)",
+      "default": "#0a9f3a"
+    },
+    {
+      "type": "color",
+      "id": "color_gold",
+      "label": "Trust icon color",
+      "default": "#d9a43c"
+    },
+    {
+      "type": "color",
+      "id": "color_border",
+      "label": "Border color",
+      "default": "rgba(25, 230, 90, 0.15)"
+    },
+    {
+      "type": "header",
+      "content": "Visibility Toggles"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_trust_bar",
+      "label": "Show trust bar",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_newsletter",
+      "label": "Show newsletter",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_social",
+      "label": "Show social links",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_bottom_bar",
+      "label": "Show bottom bar",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Newsletter Content"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_heading",
+      "label": "Newsletter heading",
+      "default": "JOIN THE CR7 CLUB"
+    },
+    {
+      "type": "textarea",
+      "id": "newsletter_text",
+      "label": "Newsletter text",
+      "default": "Get exclusive access to new fragrances, special offers and latest releases."
+    },
+    {
+      "type": "text",
+      "id": "newsletter_placeholder",
+      "label": "Input placeholder",
+      "default": "Your email address"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_button_label",
+      "label": "Button label",
+      "default": "SUBSCRIBE"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_success",
+      "label": "Success message",
+      "default": "Thank you for subscribing!"
+    },
+    {
+      "type": "header",
+      "content": "Social Media URLs"
+    },
+    {
+      "type": "url",
+      "id": "social_facebook",
+      "label": "Facebook URL"
+    },
+    {
+      "type": "url",
+      "id": "social_instagram",
+      "label": "Instagram URL"
+    },
+    {
+      "type": "url",
+      "id": "social_youtube",
+      "label": "YouTube URL"
+    },
+    {
+      "type": "url",
+      "id": "social_x",
+      "label": "X (Twitter) URL"
+    },
+    {
+      "type": "url",
+      "id": "social_tiktok",
+      "label": "TikTok URL"
+    },
+    {
+      "type": "header",
+      "content": "Legal & Bottom Bar"
+    },
+    {
+      "type": "text",
+      "id": "copyright_text",
+      "label": "Copyright brand text",
+      "default": "CR7 Fragrances"
+    },
+    {
+      "type": "link_list",
+      "id": "legal_menu",
+      "label": "Legal menu"
+    },
+    {
+      "type": "header",
+      "content": "Animated Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image (Gemini smoke panorama)"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animation",
+      "label": "Enable animation",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "anim_speed",
+      "label": "Animation speed",
+      "options": [
+        { "value": "slow", "label": "Slow" },
+        { "value": "normal", "label": "Normal" },
+        { "value": "fast", "label": "Fast" }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "range",
+      "id": "glow_intensity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Glow intensity",
+      "default": 80
+    },
+    {
+      "type": "image_picker",
+      "id": "smoke_image_left",
+      "label": "Smoke texture (left)"
+    },
+    {
+      "type": "image_picker",
+      "id": "smoke_image_right",
+      "label": "Smoke texture (right)"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 20,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 32
+    }
+  ],
+  "blocks": [
+    {
+      "type": "trust_item",
+      "name": "Trust item",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "gem", "label": "Gem / Diamond" },
+            { "value": "truck", "label": "Truck / Delivery" },
+            { "value": "shield-check", "label": "Shield with Check" },
+            { "value": "headset", "label": "Headset / Support" },
+            { "value": "box", "label": "Box / Package" },
+            { "value": "return", "label": "Return / Exchange" },
+            { "value": "lock", "label": "Lock / Secure" },
+            { "value": "gift", "label": "Gift" },
+            { "value": "custom", "label": "Custom image" }
+          ],
+          "default": "gem"
+        },
+        {
+          "type": "image_picker",
+          "id": "custom_icon",
+          "label": "Custom icon image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "100% Authentic"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "default": "Guaranteed"
+        }
+      ]
+    },
+    {
+      "type": "menu",
+      "name": "Navigation menu",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "EXPLORE"
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Menu",
+          "default": "main-menu"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Footer (animated)",
+      "blocks": [
+        {
+          "type": "trust_item",
+          "settings": {
+            "icon": "gem",
+            "title": "100% Authentic",
+            "subtitle": "Guaranteed"
+          }
+        },
+        {
+          "type": "trust_item",
+          "settings": {
+            "icon": "truck",
+            "title": "Free Delivery",
+            "subtitle": "On qualifying orders"
+          }
+        },
+        {
+          "type": "trust_item",
+          "settings": {
+            "icon": "shield-check",
+            "title": "Secure Payments",
+            "subtitle": "Shop with confidence"
+          }
+        },
+        {
+          "type": "trust_item",
+          "settings": {
+            "icon": "headset",
+            "title": "Dedicated Support",
+            "subtitle": "We're here to help"
+          }
+        },
+        {
+          "type": "menu",
+          "settings": {
+            "heading": "EXPLORE",
+            "menu": "main-menu"
+          }
+        },
+        {
+          "type": "menu",
+          "settings": {
+            "heading": "SUPPORT",
+            "menu": "footer"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,231 @@
+{%- comment -%}
+  Product Shipping & Returns Section
+  Target ID: pp-shipping
+{%- endcomment -%}
+
+{%- liquid
+  assign has_content = false
+  if section.settings.shipping_content != blank or section.settings.returns_content != blank
+    assign has_content = true
+  endif
+-%}
+
+{%- if has_content -%}
+  <section
+    id="pp-shipping"
+    class="psh-block"
+    data-section-id="{{ section.id }}"
+    data-section-type="product-shipping"
+    data-pp-target="shipping"
+    style="
+      --psh-bg: {{ section.settings.background_color }};
+      --psh-accent: {{ section.settings.accent_color }};
+      --psh-text: {{ section.settings.text_color }};
+      --psh-muted: {{ section.settings.muted_color }};
+      --psh-border: {{ section.settings.border_color }};
+    "
+  >
+    <div class="psh-block__container">
+      {%- if section.settings.heading != blank -%}
+        <div class="psh-block__header">
+          <h2 class="psh-block__title">{{ section.settings.heading }}</h2>
+        </div>
+      {%- endif -%}
+
+      <div class="psh-grid">
+        {%- if section.settings.shipping_content != blank -%}
+          <div class="psh-col">
+            <div class="psh-col__badge">
+              <svg class="psh-col__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="1" y="3" width="15" height="13"/>
+                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                <circle cx="5.5" cy="18.5" r="2.5"/>
+                <circle cx="18.5" cy="18.5" r="2.5"/>
+              </svg>
+              <h3 class="psh-col__title">{{ section.settings.shipping_title }}</h3>
+            </div>
+            <div class="psh-col__content">
+              {{ section.settings.shipping_content }}
+            </div>
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.returns_content != blank -%}
+          <div class="psh-col">
+            <div class="psh-col__badge">
+              <svg class="psh-col__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polyline points="1 4 1 10 7 10"/>
+                <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+              </svg>
+              <h3 class="psh-col__title">{{ section.settings.returns_title }}</h3>
+            </div>
+            <div class="psh-col__content">
+              {{ section.settings.returns_content }}
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+
+  {% style %}
+    .psh-block {
+      background-color: var(--psh-bg, #030504);
+      color: var(--psh-text, #ffffff);
+      padding-block: clamp(48px, 5vw, 80px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+    }
+    .psh-block__container {
+      width: 100%;
+      max-width: var(--page-width, calc(var(--normal-page-width, 120rem) + (var(--page-margin, 40px) * 2)));
+      margin-inline: auto;
+      padding-inline: var(--page-margin, 40px);
+      box-sizing: border-box;
+    }
+    .psh-block__header {
+      text-align: center;
+      margin-bottom: clamp(32px, 4vw, 48px);
+    }
+    .psh-block__title {
+      font-family: var(--font-body--family, inherit);
+      font-size: clamp(16px, 1.4vw, 18px);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #ffffff;
+      margin: 0;
+    }
+    .psh-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: clamp(24px, 3.5vw, 48px);
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .psh-col {
+      background-color: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--psh-border, rgba(255, 255, 255, 0.12));
+      border-radius: 8px;
+      padding: clamp(24px, 3vw, 36px);
+      box-sizing: border-box;
+    }
+    .psh-col__badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .psh-col__icon {
+      width: 22px;
+      height: 22px;
+      color: var(--psh-accent, #19e65a);
+      flex-shrink: 0;
+    }
+    .psh-col__title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      margin: 0;
+      letter-spacing: 0.02em;
+    }
+    .psh-col__content {
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: var(--psh-muted, #a3ada7);
+    }
+    .psh-col__content p {
+      margin: 0 0 10px 0;
+    }
+    .psh-col__content p:last-child {
+      margin-bottom: 0;
+    }
+    @media screen and (max-width: 749px) {
+      .psh-block__container {
+        padding-inline: var(--page-margin, 16px);
+      }
+      .psh-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .psh-col {
+        padding: 20px;
+      }
+    }
+  {% endstyle %}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Product Shipping",
+  "tag": "section",
+  "class": "section-product-shipping",
+  "settings": [
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#030504"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#19e65a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Muted Text",
+      "default": "#a3ada7"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border",
+      "default": "rgba(255, 255, 255, 0.12)"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section Heading",
+      "default": "SHIPPING & RETURNS"
+    },
+    {
+      "type": "text",
+      "id": "shipping_title",
+      "label": "Shipping Title",
+      "default": "Worldwide Fast Delivery"
+    },
+    {
+      "type": "richtext",
+      "id": "shipping_content",
+      "label": "Shipping Content",
+      "default": "<p>Complimentary tracked standard shipping on all UK orders over £39. Orders dispatched within 24 hours. Express global courier shipping available at checkout with real-time tracking updates.</p>"
+    },
+    {
+      "type": "text",
+      "id": "returns_title",
+      "label": "Returns Title",
+      "default": "Hassle-Free 30-Day Returns"
+    },
+    {
+      "type": "richtext",
+      "id": "returns_content",
+      "label": "Returns Content",
+      "default": "<p>We want you to love your fragrance. If you are not completely satisfied, return unopened bottles within 30 days of receipt for a full refund or exchange. Easy prepaid return labels provided.</p>"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Shipping"
+    }
+  ]
+}
+{% endschema %}

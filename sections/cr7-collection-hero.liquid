@@ -1,0 +1,87 @@
+{%- comment -%}
+  CR7 Editorial Collection Hero
+  Clean white editorial header with breadcrumb, serif title, product count, and quick-switch collection pills.
+{%- endcomment -%}
+
+{{ 'cr7-collection.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'cr7-collection.js' | asset_url }}" defer></script>
+
+<section class="cr7-col-hero" data-section-id="{{ section.id }}">
+  <div class="cr7-col-container">
+    <nav class="cr7-col-breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <a href="{{ routes.all_products_collection_url }}">Collections</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ collection.title }}</span>
+    </nav>
+
+    <div class="cr7-col-hero__top">
+      <div>
+        <div class="cr7-col-hero__eyebrow-row">
+          <span class="cr7-col-hero__eyebrow">{{ section.settings.eyebrow | default: 'THE FRAGRANCE ARCHIVE' | escape }}</span>
+          <span class="cr7-col-hero__hairline" aria-hidden="true"></span>
+        </div>
+        <h1 class="cr7-col-hero__title">{{ collection.title }}</h1>
+        {%- if collection.description != blank -%}
+          <div class="cr7-col-hero__desc rte">{{ collection.description }}</div>
+        {%- endif -%}
+      </div>
+
+      <span class="cr7-col-hero__count">
+        {{ collection.products_count }} {% if collection.products_count == 1 %}Product{% else %}Products{% endif %}
+      </span>
+    </div>
+
+    {%- if section.settings.show_collection_pills -%}
+      <div class="cr7-col-pills" role="navigation" aria-label="Browse collections">
+        <a
+          href="{{ routes.all_products_collection_url }}"
+          class="cr7-col-pill"
+          {% if collection.handle == 'all' %}aria-current="page"{% endif %}
+        >
+          All Fragrances
+        </a>
+        {%- for col in collections -%}
+          {%- if col.products_count > 0 and col.handle != 'all' and col.handle != 'frontpage' -%}
+            <a
+              href="{{ col.url }}"
+              class="cr7-col-pill"
+              {% if col.handle == collection.handle %}aria-current="page"{% endif %}
+            >
+              {{ col.title }}
+            </a>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "CR7 Collection Hero",
+  "tag": "section",
+  "class": "section-cr7-col-hero",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "THE FRAGRANCE ARCHIVE"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_collection_pills",
+      "label": "Show collection quick-switch pills",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "CR7 Collection Hero"
+    }
+  ]
+}
+{% endschema %}
+

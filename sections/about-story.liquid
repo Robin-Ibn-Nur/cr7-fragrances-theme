@@ -1,0 +1,157 @@
+{%- comment -%}
+  About Story Section
+  Two-column editorial block: rectangular image left, serif story right.
+{%- endcomment -%}
+
+{{ 'about.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign story_img = section.settings.image
+  assign story_alt = story_img.alt | default: '' | escape
+-%}
+
+<section
+  id="About-Story-{{ section.id }}"
+  class="about-section about-story"
+  data-about-section
+  data-section-id="{{ section.id }}"
+  style="
+    --about-bg: {{ section.settings.background_color }};
+    --about-text: {{ section.settings.text_color }};
+    --about-muted: {{ section.settings.muted_color }};
+    --about-hairline: {{ section.settings.hairline_color }};
+    --about-panel: {{ section.settings.panel_color }};
+  "
+>
+  <div class="about-container">
+    <div class="about-story__grid">
+      <div class="about-story__media about-reveal">
+        {%- if story_img != blank -%}
+          {{ story_img | image_url: width: 2000 | image_tag:
+            loading: 'lazy',
+            class: 'about-story__img',
+            alt: story_alt,
+            widths: '600, 900, 1200, 1600, 2000',
+            sizes: '(min-width: 750px) 50vw, 100vw'
+          }}
+        {%- else -%}
+          <img
+            src="{{ 'about-story-bottle.jpg' | asset_url }}"
+            alt="CR7 Cristiano Ronaldo Fragrance"
+            class="about-story__img"
+            loading="lazy"
+            width="1200"
+            height="900"
+          >
+        {%- endif -%}
+      </div>
+
+      <div class="about-story__content about-reveal">
+        {%- if section.settings.eyebrow != blank -%}
+          <div class="about-eyebrow-row">
+            <span class="about-eyebrow">{{ section.settings.eyebrow | escape }}</span>
+            <span class="about-hairline" aria-hidden="true"></span>
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.heading != blank -%}
+          <h2 class="about-heading about-story__heading">
+            {{- section.settings.heading | escape | newline_to_br -}}
+          </h2>
+        {%- endif -%}
+
+        <div class="about-story__copy">
+          {%- if section.settings.paragraph_1 != blank -%}
+            <p class="about-paragraph about-story__p">{{ section.settings.paragraph_1 | escape }}</p>
+          {%- endif -%}
+          {%- if section.settings.paragraph_2 != blank -%}
+            <p class="about-paragraph about-story__p">{{ section.settings.paragraph_2 | escape }}</p>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "About Story",
+  "tag": "section",
+  "class": "section-about-story",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#0a0a0a"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Muted text",
+      "default": "#55595e"
+    },
+    {
+      "type": "color",
+      "id": "hairline_color",
+      "label": "Hairline",
+      "default": "#cfcfcf"
+    },
+    {
+      "type": "color",
+      "id": "panel_color",
+      "label": "Placeholder panel",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Story image"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "OUR STORY"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "A Legacy of\nGreatness"
+    },
+    {
+      "type": "textarea",
+      "id": "paragraph_1",
+      "label": "First paragraph",
+      "default": "Born from the relentless drive of Cristiano Ronaldo, CR7 Fragrances embodies the spirit of never giving up. Each scent is crafted for those who dare to dream, strive for more, and live life with passion."
+    },
+    {
+      "type": "textarea",
+      "id": "paragraph_2",
+      "label": "Second paragraph",
+      "default": "From the pitch to everyday life, CR7 is a symbol of strength, elegance and unstoppable energy."
+    }
+  ],
+  "presets": [
+    {
+      "name": "About Story"
+    }
+  ]
+}
+{% endschema %}
+

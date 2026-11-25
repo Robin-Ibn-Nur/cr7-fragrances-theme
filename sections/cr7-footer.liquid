@@ -1,0 +1,199 @@
+{%- comment -%}
+  CR7 Footer Section
+  Dark emerald-smoke newsletter banner + clean white 5-column responsive footer.
+{%- endcomment -%}
+
+{{ 'cr7-footer.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign contact_url = pages['contact'].url | default: '/pages/contact'
+  if pages['faq'] != blank
+    assign faq_url = pages['faq'].url
+    if pages['faq'].template_suffix != 'faq'
+      assign faq_url = faq_url | append: '?view=faq'
+    endif
+  elsif pages['faqs'] != blank
+    assign faq_url = pages['faqs'].url
+    if pages['faqs'].template_suffix != 'faq'
+      assign faq_url = faq_url | append: '?view=faq'
+    endif
+  else
+    assign faq_url = contact_url | append: '?view=faq'
+  endif
+  assign privacy_url = shop.privacy_policy.url | default: '/policies/privacy-policy'
+  assign terms_url = shop.terms_of_service.url | default: contact_url
+-%}
+
+<footer id="CR7-Footer-{{ section.id }}" class="cr7-footer" data-section-id="{{ section.id }}">
+  {%- comment -%} Top Dark Emerald-Smoke Newsletter Banner {%- endcomment -%}
+  <div class="cr7-footer__banner">
+    <div class="cr7-footer__smoke" aria-hidden="true"></div>
+    <div class="cr7-footer__container cr7-footer__banner-inner">
+      <div>
+        <p class="cr7-footer__banner-eyebrow">THE INNER CIRCLE</p>
+        <h2 class="cr7-footer__banner-title">{{ section.settings.newsletter_heading | default: 'Join the CR7 Club' | escape }}</h2>
+        <p class="cr7-footer__banner-sub">{{ section.settings.newsletter_subtext | default: 'Get exclusive deals and early access to new products.' | escape }}</p>
+      </div>
+
+      <div class="cr7-footer__form">
+        {%- form 'customer', id: 'cr7-footer-newsletter' -%}
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          <div class="cr7-footer__input-group">
+            <label for="cr7-footer-email-{{ section.id }}" class="visually-hidden">Email address</label>
+            <input
+              id="cr7-footer-email-{{ section.id }}"
+              type="email"
+              name="contact[email]"
+              class="cr7-footer__input"
+              value="{{ form.email }}"
+              autocomplete="email"
+              autocorrect="off"
+              autocapitalize="off"
+              placeholder="{{ section.settings.email_placeholder | default: 'Your email address' | escape }}"
+              required
+            >
+            <button type="submit" class="cr7-footer__submit">
+              {{ section.settings.button_label | default: 'SUBSCRIBE' | escape }}
+            </button>
+          </div>
+          {%- if form.posted_successfully? -%}
+            <p class="cr7-footer__form-msg" role="status">Thank you for subscribing to the CR7 Club.</p>
+          {%- elsif form.errors -%}
+            <p class="cr7-footer__form-msg cr7-footer__form-msg--error" role="alert">
+              {{ form.errors.translated_fields.email | capitalize }} {{ form.errors.messages.email }}
+            </p>
+          {%- endif -%}
+        {%- endform -%}
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} Bottom White 5-Column Footer {%- endcomment -%}
+  <div class="cr7-footer__main">
+    <div class="cr7-footer__container cr7-footer__grid">
+      {%- comment -%} Col 1: Premium CR7 Typographic Wordmark {%- endcomment -%}
+      <div class="cr7-footer__col">
+        <a href="{{ routes.root_url }}" class="cr7-footer__brand" aria-label="{{ shop.name | escape }}">
+          <span class="cr7-footer__brand-mark">CR7<span class="cr7-footer__brand-dot" aria-hidden="true">.</span></span>
+          <span class="cr7-footer__brand-sub">FRAGRANCES</span>
+        </a>
+      </div>
+
+      {%- comment -%} Col 2: Explore {%- endcomment -%}
+      <div class="cr7-footer__col">
+        <h3 class="cr7-footer__col-title">{{ section.settings.explore_heading | default: 'Explore' | escape }}</h3>
+        <ul class="cr7-footer__links">
+          <li><a href="{{ routes.all_products_collection_url }}" class="cr7-footer__link">Shop All</a></li>
+          <li><a href="{{ collections['energy'].url | default: '/collections/energy' }}" class="cr7-footer__link">Fragrances</a></li>
+          <li><a href="{{ collections['cr7'].url | default: '/collections/cr7' }}" class="cr7-footer__link">Gifts for Him</a></li>
+        </ul>
+      </div>
+
+      {%- comment -%} Col 3: Support {%- endcomment -%}
+      <div class="cr7-footer__col">
+        <h3 class="cr7-footer__col-title">{{ section.settings.support_heading | default: 'Support' | escape }}</h3>
+        <ul class="cr7-footer__links">
+          <li><a href="{{ faq_url }}" class="cr7-footer__link">FAQs</a></li>
+          <li><a href="{{ contact_url }}" class="cr7-footer__link">Contact Us</a></li>
+        </ul>
+      </div>
+
+      {%- comment -%} Col 4: Follow Us {%- endcomment -%}
+      <div class="cr7-footer__col">
+        <h3 class="cr7-footer__col-title">{{ section.settings.social_heading | default: 'Follow Us' | escape }}</h3>
+        <div class="cr7-footer__socials">
+          <a href="{{ settings.social_instagram_link | default: 'https://www.instagram.com/cristiano/' }}" target="_blank" rel="noopener" class="cr7-footer__social" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <rect x="2" y="2" width="20" height="20" rx="5"/>
+              <circle cx="12" cy="12" r="4"/>
+              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+            </svg>
+          </a>
+          <a href="{{ settings.social_youtube_link | default: 'https://www.youtube.com/@cristiano' }}" target="_blank" rel="noopener" class="cr7-footer__social" aria-label="YouTube">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 00.5 6.2 31.4 31.4 0 000 12a31.4 31.4 0 00.5 5.8 3 3 0 002.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 002.1-2.1A31.4 31.4 0 0024 12a31.4 31.4 0 00-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/>
+            </svg>
+          </a>
+          <a href="{{ settings.social_tiktok_link | default: 'https://www.tiktok.com/@cristiano' }}" target="_blank" rel="noopener" class="cr7-footer__social" aria-label="TikTok">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.27 8.27 0 004.84 1.55V6.79a4.85 4.85 0 01-1.07-.1z"/>
+            </svg>
+          </a>
+          <a href="{{ settings.social_facebook_link | default: 'https://www.facebook.com/Cristiano/' }}" target="_blank" rel="noopener" class="cr7-footer__social" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M15.12 5.32H17V2.14A26.11 26.11 0 0014.26 2c-2.72 0-4.58 1.66-4.58 4.7v2.62H6.61v3.56h3.07V22h3.68v-9.12h3.06l.46-3.56h-3.52V7.05c0-1.05.29-1.73 1.76-1.73z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      {%- comment -%} Col 5: Legal & Copyright {%- endcomment -%}
+      <div class="cr7-footer__col">
+        <div class="cr7-footer__legal">
+          <a href="{{ privacy_url }}" class="cr7-footer__link">Privacy Policy</a>
+          <span class="cr7-footer__legal-sep" aria-hidden="true">|</span>
+          <a href="{{ terms_url }}" class="cr7-footer__link">Terms &amp; Conditions</a>
+        </div>
+        <p class="cr7-footer__copyright">&copy; {{ 'now' | date: '%Y' }} CR7 Fragrances. Powered by Shopify.</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "CR7 Footer",
+  "tag": "section",
+  "class": "section-cr7-footer",
+  "settings": [
+    {
+      "type": "text",
+      "id": "newsletter_heading",
+      "label": "Newsletter heading",
+      "default": "Join the CR7 Club"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_subtext",
+      "label": "Newsletter subtext",
+      "default": "Get exclusive deals and early access to new products."
+    },
+    {
+      "type": "text",
+      "id": "email_placeholder",
+      "label": "Email placeholder",
+      "default": "Your email address"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "SUBSCRIBE"
+    },
+    {
+      "type": "text",
+      "id": "explore_heading",
+      "label": "Explore column heading",
+      "default": "Explore"
+    },
+    {
+      "type": "text",
+      "id": "support_heading",
+      "label": "Support column heading",
+      "default": "Support"
+    },
+    {
+      "type": "text",
+      "id": "social_heading",
+      "label": "Follow Us column heading",
+      "default": "Follow Us"
+    }
+  ],
+  "presets": [
+    {
+      "name": "CR7 Footer"
+    }
+  ]
+}
+{% endschema %}
+

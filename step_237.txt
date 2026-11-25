@@ -1,0 +1,176 @@
+Created At: 2026-11-20T20:06:09+06:00
+Completed At: 2026-11-20T20:06:09+06:00
+Created At: 2026-11-20T20:06:09+06:00
+Completed At: 2026-11-20T20:06:09+06:00
+Showing lines 100-270 of 270
+100:   data-product-id="{{ product.id }}"
+101:   data-product-handle="{{ product.handle }}"
+102: >
+103:   <!-- Card Media Gallery Container -->
+104:   <div class="luxury-product-card__gallery{% if has_secondary %} has-secondary-image{% endif %}">
+105:     <a
+106:       href="{{ product.url }}"
+107:       class="luxury-product-card__media-link"
+108:       aria-label="{{ product.title | escape }}"
+109:       tabindex="-1"
+110:     >
+111:       {% if primary_image != blank %}
+112:         <img
+113:           src="{{ primary_image | image_url: width: 600 }}"
+114:           alt="{{ primary_image.alt | default: product.title | escape }}"
+115:           width="600"
+116:           height="700"
+117:           loading="lazy"
+118:           class="luxury-product-card__image luxury-product-card__image--primary"
+119:         >
+120:       {% else %}
+121:         {{ 'product-1' | placeholder_svg_tag: 'luxury-product-card__image luxury-product-card__image--placeholder' }}
+122:       {% endif %}
+123: 
+124:       {% if has_secondary %}
+125:         <img
+126:           src="{{ secondary_image | image_url: width: 600 }}"
+127:           alt="{{ secondary_image.alt | default: product.title | escape }}"
+128:           width="600"
+129:           height="700"
+130:           loading="lazy"
+131:           class="luxury-product-card__image luxury-product-card__image--secondary"
+132:         >
+133:       {% endif %}
+134:     </a>
+135: 
+136:     <!-- Floating Top Badges -->
+137:     <div class="luxury-product-card__badges">
+138:       {% if badge_text != blank %}
+139:         <span class="luxury-product-card__badge luxury-product-card__badge--bestseller">
+140:           {{ badge_text }}
+141:         </span>
+142:       {% endif %}
+143:     </div>
+144: 
+145:     <!-- Floating Wishlist Heart Button -->
+146:     <button
+147:       type="button"
+148:       class="luxury-product-card__wishlist"
+149:       data-wishlist-toggle
+150:       data-product-handle="{{ product.handle }}"
+151:       aria-label="Add {{ product.title | escape }} to wishlist"
+152:       aria-pressed="false"
+153:     >
+154:       <svg
+155:         class="luxury-product-card__wishlist-icon"
+156:         viewBox="0 0 24 24"
+157:         fill="none"
+158:         stroke="currentColor"
+159:         stroke-width="1.8"
+160:         stroke-linecap="round"
+161:         stroke-linejoin="round"
+162:         aria-hidden="true"
+163:       >
+164:         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+165:       </svg>
+166:     </button>
+167: 
+168:     <!-- Slide-Up Quick Add Button -->
+169:     <div class="luxury-product-card__quick-add-wrap">
+170:       {% if is_available and current_variant.id != blank %}
+171:         <product-form-component
+172:           data-section-id="product_list_MhFCTe"
+173:           data-product-id="{{ product.id }}"
+174:           on:submit="/handleSubmit"
+175:           class="luxury-product-card__product-form"
+176:         >
+177:           <div
+178:             class="visually-hidden"
+179:             aria-live="assertive"
+180:             role="status"
+181:             aria-atomic="true"
+182:             ref="liveRegion"
+183:           ></div>
+184:           {%- assign product_form_id = 'LuxuryProductForm-' | append: product.id -%}
+185:           {%- form 'product', product, id: product_form_id, novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+186:             <input
+187:               type="hidden"
+188:               name="id"
+189:               ref="variantId"
+190:               value="{{ current_variant.id }}"
+191:             >
+192:             <input
+193:               type="hidden"
+194:               name="quantity"
+195:               value="1"
+196:             >
+197:             <add-to-cart-component
+198:               ref="addToCartButtonContainer"
+199:               class="luxury-product-card__add-to-cart-component"
+200:             >
+201:               <button
+202:                 type="submit"
+203:                 name="add"
+204:                 ref="addToCartButton"
+205:                 on:click="/handleClick"
+206:                 class="luxury-product-card__quick-add"
+207:                 aria-label="Quick add {{ product.title | escape }} to cart"
+208:               >
+209:                 <span class="luxury-product-card__quick-add-icon" aria-hidden="true">+</span>
+210:                 <span class="luxury-product-card__quick-add-text">QUICK ADD</span>
+211:               </button>
+212:             </add-to-cart-component>
+213:           {%- endform -%}
+214:         </product-form-component>
+215:       {% else %}
+216:         <button
+217:           type="button"
+218:           class="luxury-product-card__quick-add is-disabled"
+219:           disabled
+220:           aria-disabled="true"
+221:         >
+222:           <span class="luxury-product-card__quick-add-text">SOLD OUT</span>
+223:         </button>
+224:       {% endif %}
+225:     </div>
+226:   </div>
+227: 
+228:   <!-- Card Details & Information -->
+229:   <div class="luxury-product-card__info">
+230:     <div class="luxury-product-card__kicker">
+231:       <span>CR7 FRAGRANCE • EAU DE PARFUM</span>
+232:     </div>
+233: 
+234:     <h3 class="luxury-product-card__title">
+235:       <a href="{{ product.url }}">{{ product.title | escape }}</a>
+236:     </h3>
+237: 
+238:     <!-- Olfactory Scent Notes Accord Badge -->
+239:     {% if scent_notes != blank %}
+240:       <div class="luxury-product-card__scent-notes" title="Signature Notes">
+241:         <span class="luxury-product-card__scent-notes-icon" aria-hidden="true">✦</span>
+242:         <span class="luxury-product-card__scent-notes-text">{{ scent_notes }}</span>
+243:       </div>
+244:     {% endif %}
+245: 
+246:     <!-- Price Section -->
+247:     <div class="luxury-product-card__price-wrapper">
+248:       <div class="luxury-product-card__price">
+249:         <span class="luxury-product-card__price-regular">
+250:           {{ current_variant.price | money }}
+251:         </span>
+252:         {% if is_on_sale %}
+253:           <s class="luxury-product-card__price-compare">
+254:             {{ current_variant.compare_at_price | money }}
+255:           </s>
+256:         {% endif %}
+257:       </div>
+258: 
+259:       <!-- Rating Rating Stars (Luxury Social Proof) -->
+260:       <div class="luxury-product-card__rating" aria-label="Rated {{ rating_val }} out of 5 stars with {{ reviews_count }} reviews">
+261:         <span class="luxury-product-card__stars" aria-hidden="true">★★★★★</span>
+262:         <span class="luxury-product-card__score">{{ rating_val }}</span>
+263:         <span class="luxury-product-card__reviews-count">({{ reviews_count }})</span>
+264:       </div>
+265:     </div>
+266:   </div>
+267: </div>
+268: 
+269: <script src="{{ 'luxury-product-card.js' | asset_url }}" defer></script>
+270: 

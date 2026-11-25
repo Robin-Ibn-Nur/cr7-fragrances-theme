@@ -1,0 +1,151 @@
+/* Product Fragrance Notes Section */
+
+.pn-block {
+  --pn-bg: #030504;
+  --pn-accent: #19e65a;
+  --pn-text: #ffffff;
+  --pn-muted: #a3ada7;
+  --pn-border: rgba(255, 255, 255, 0.12);
+
+  position: relative;
+  background-color: var(--pn-bg);
+  color: var(--pn-text);
+  padding-block: clamp(48px, 5vw, 80px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pn-block__container {
+  width: 100%;
+  max-width: var(--page-width, calc(var(--normal-page-width, 120rem) + (var(--page-margin, 40px) * 2)));
+  margin-inline: auto;
+  padding-inline: var(--page-margin, 40px);
+  box-sizing: border-box;
+}
+
+/* Header */
+.pn-block__header {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto clamp(36px, 4vw, 56px) auto;
+}
+
+.pn-block__title {
+  font-family: var(--font-body--family, inherit);
+  font-size: clamp(16px, 1.4vw, 18px);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+}
+
+.pn-block__subtitle {
+  font-family: var(--font-body--family, inherit);
+  font-size: clamp(13px, 1vw, 14px);
+  line-height: 1.5;
+  color: var(--pn-muted);
+  margin: 0;
+}
+
+/* Columns Grid */
+.pn-grid {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.pn-col {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 clamp(16px, 2.5vw, 36px);
+  box-sizing: border-box;
+}
+
+/* Vertical Dividers between columns */
+.pn-col:not(:last-child) {
+  border-right: 1px solid var(--pn-border);
+}
+
+/* Circular Note Image */
+.pn-col__image-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #0c120e;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  margin-bottom: 18px;
+  flex-shrink: 0;
+}
+
+.pn-col__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Tier Label */
+.pn-col__tier {
+  font-family: var(--font-body--family, inherit);
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 6px 0;
+  line-height: 1.2;
+}
+
+/* Note Description / Notes List */
+.pn-col__notes {
+  font-family: var(--font-body--family, inherit);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--pn-muted);
+  margin: 0;
+}
+
+/* Mobile View (<600px) */
+@media screen and (max-width: 599px) {
+  .pn-block__container {
+    padding-inline: var(--page-margin, 16px);
+  }
+
+  .pn-grid {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .pn-col {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    padding: 20px 0;
+    width: 100%;
+  }
+
+  .pn-col:not(:last-child) {
+    border-right: none;
+    border-bottom: 1px solid var(--pn-border);
+  }
+
+  .pn-col__image-wrap {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 0;
+    margin-right: 18px;
+  }
+
+  .pn-col__text-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

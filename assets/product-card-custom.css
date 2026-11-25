@@ -1,0 +1,492 @@
+/* Product Card Custom (Spec Card) */
+
+.pcc-card {
+  container-type: inline-size;
+  container-name: pcc-card;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-background, #ffffff);
+  border-radius: 15px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Pseudo-element for smooth 60fps shadow animation on hover */
+.pcc-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.2, 0, 0, 1);
+  z-index: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pcc-card:hover {
+    transform: translateY(-5px);
+  }
+  .pcc-card:hover::before {
+    opacity: 1;
+  }
+}
+
+/* Focus styles for keyboard accessibility */
+.pcc-card:focus-within {
+  box-shadow: 0 0 0 2px var(--color-foreground, #000000);
+}
+
+/* Badge (Top-right absolute) */
+.pcc-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.pcc-badge--sale {
+  background: linear-gradient(135deg, #ff4b4b, #e60000);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(230, 0, 0, 0.3);
+}
+
+.pcc-badge--sold-out {
+  background: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  backdrop-filter: blur(4px);
+}
+
+/* Image Wrap: 9:5 ratio, overflow hidden */
+.pcc-image-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 5;
+  overflow: hidden;
+  background-color: rgba(var(--color-foreground-rgb, 0, 0, 0) / 0.03);
+  z-index: 0;
+}
+
+.pcc-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.pcc-placeholder {
+  object-fit: contain;
+  padding: 10%;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pcc-card:hover .pcc-image {
+    transform: scale(1.05);
+  }
+}
+
+/* Dim card image if sold out */
+.pcc-card.is-sold-out .pcc-image {
+  opacity: 0.7;
+}
+
+/* Info block */
+.pcc-info {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(14px, 4.5cqw, 20px);
+  flex-grow: 1;
+  z-index: 1;
+}
+
+/* Category */
+.pcc-category {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(var(--color-foreground-rgb, 0, 0, 0) / 0.55);
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+
+/* Title */
+.pcc-title {
+  font-family: var(--font-heading-family, inherit);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.25;
+  margin: 0 0 8px 0;
+  color: var(--color-foreground, #111111);
+}
+
+.pcc-title-link {
+  color: inherit;
+  text-decoration: none;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Stretched-link: entire card is clickable, behind buttons/forms */
+.pcc-title-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.pcc-title-link:focus-visible {
+  outline: none;
+}
+
+/* Description */
+.pcc-description {
+  font-size: 13px;
+  line-height: 1.4;
+  color: rgba(var(--color-foreground-rgb, 0, 0, 0) / 0.7);
+  margin: 0 0 12px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Feature Chips */
+.pcc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.pcc-chip {
+  font-size: 10px;
+  font-weight: 500;
+  background-color: rgba(var(--color-foreground-rgb, 0, 0, 0) / 0.06);
+  color: var(--color-foreground, #222222);
+  border-radius: 10px;
+  padding: 3px 8px;
+  line-height: 1.2;
+}
+
+/* Bottom Row */
+.pcc-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  margin-bottom: 14px;
+}
+
+.pcc-price-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pcc-price-compare {
+  font-size: 13px;
+  text-decoration: line-through;
+  color: rgba(var(--color-foreground-rgb, 0, 0, 0) / 0.45);
+  line-height: 1;
+}
+
+.pcc-price-current-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.pcc-price-from {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(var(--color-foreground-rgb, 0, 0, 0) / 0.6);
+}
+
+.pcc-price-current {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-foreground, #111111);
+  line-height: 1.1;
+}
+
+/* Button & Form */
+.pcc-btn-col {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.pcc-form {
+  margin: 0;
+}
+
+:root,
+.pcc-card {
+  --pcc-btn-bg: #000000;
+  --pcc-btn-color: #ffffff;
+  --pcc-btn-bg-hover: #1a1a1a;
+}
+
+.pcc-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 15px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pcc-btn-color, #ffffff);
+  background: var(--pcc-btn-bg, #000000);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* Fixed shine animation (overflow hidden is on .pcc-btn) */
+.pcc-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  transition: none;
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pcc-btn:not(.is-sold-out):hover {
+    background: var(--pcc-btn-bg-hover, #1a1a1a);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  }
+
+  .pcc-btn:not(.is-sold-out):hover::before {
+    left: 140%;
+    transition: left 0.5s ease;
+  }
+
+  .pcc-btn:not(.is-sold-out):hover .pcc-btn-icon {
+    transform: rotate(-10deg) scale(1.1);
+  }
+}
+
+.pcc-btn-icon {
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+/* Dual-ring focus visible works on light and dark backgrounds */
+.pcc-btn:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px #000000;
+}
+
+/* Sold-out: muted disabled style */
+.pcc-btn.is-sold-out {
+  background: rgba(var(--color-foreground-rgb, 0, 0, 0) / 0.12) !important;
+  color: rgba(var(--color-foreground-rgb, 0, 0, 0) / 0.4) !important;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+  pointer-events: none;
+}
+
+/* Loading and Added states stay solid black with white text */
+.pcc-btn[aria-busy="true"],
+.pcc-btn[data-pcc-state="loading"],
+.pcc-btn[data-pcc-state="added"] {
+  background: var(--pcc-btn-bg, #000000) !important;
+  color: var(--pcc-btn-color, #ffffff) !important;
+  opacity: 1;
+}
+
+.pcc-btn[aria-busy="true"],
+.pcc-btn[data-pcc-state="loading"] {
+  cursor: wait;
+}
+
+/* Meta Row (Rating + Stock) */
+.pcc-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-top: 1px solid rgba(var(--color-foreground-rgb, 0, 0, 0) / 0.08);
+  padding-top: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+.pcc-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pcc-stars-wrap {
+  position: relative;
+  display: inline-flex;
+  width: 86px;
+  height: 16px;
+}
+
+.pcc-stars-bg {
+  display: flex;
+  gap: 2px;
+  color: #e2e8f0;
+}
+
+.pcc-stars-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  gap: 2px;
+  color: #f59e0b;
+}
+
+.pcc-rating-count {
+  font-size: 11px;
+  color: rgba(var(--color-foreground-rgb, 0, 0, 0) / 0.6);
+  line-height: 1;
+}
+
+.pcc-rating-text-short {
+  display: none;
+}
+
+.pcc-stock {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.pcc-stock--in {
+  color: #10b981;
+}
+
+.pcc-stock--low {
+  color: #f59e0b;
+}
+
+.pcc-stock--out {
+  color: rgba(var(--color-foreground-rgb, 0, 0, 0) / 0.45);
+}
+
+/* Container Queries for Fluid Card Responsiveness */
+@container pcc-card (max-width: 299px) {
+  .pcc-bottom-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .pcc-btn-col,
+  .pcc-form,
+  .pcc-btn {
+    width: 100%;
+  }
+
+  .pcc-btn {
+    justify-content: center;
+  }
+}
+
+@container pcc-card (max-width: 219px) {
+  .pcc-description,
+  .pcc-chips {
+    display: none;
+  }
+
+  .pcc-title {
+    font-size: 13.5px;
+    line-height: 1.25;
+    margin-bottom: 6px;
+  }
+
+  .pcc-rating-text-full {
+    display: none;
+  }
+
+  .pcc-rating-text-short {
+    display: inline;
+  }
+
+  .pcc-info {
+    padding: 10px 8px;
+  }
+
+  .pcc-btn {
+    padding: 7px 8px;
+    font-size: 11px;
+    gap: 5px;
+  }
+
+  .pcc-btn-icon {
+    width: 13px;
+    height: 13px;
+  }
+
+  .pcc-stars-wrap {
+    width: 72px;
+    transform: scale(0.85);
+    transform-origin: left center;
+  }
+
+  .pcc-stock {
+    font-size: 10px;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .pcc-card,
+  .pcc-card::before,
+  .pcc-image,
+  .pcc-btn,
+  .pcc-btn::before,
+  .pcc-btn-icon {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}

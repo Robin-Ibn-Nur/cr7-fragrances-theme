@@ -1,0 +1,187 @@
+{%- comment -%}
+  PDP Related Products Carousel Section
+  Progressive recommendations loading with fallback, horizontal scroll-snap track,
+  and support for Screenshot-style card or Store's standard card.
+{%- endcomment -%}
+
+{%- liquid
+  # Determine products to render: recommendations or collection fallback
+  assign related_products = recommendations.products
+  if recommendations.performed == false or related_products.size == 0
+    if product.collections.size > 0
+      assign related_products = product.collections.first.products | reject: 'id', product.id
+    else
+      assign related_products = collections.all.products | reject: 'id', product.id
+    endif
+  endif
+
+  assign has_products = false
+  if related_products.size > 0 or request.design_mode
+    assign has_products = true
+  endif
+
+  # Heading with highlighted words
+  assign heading_text = section.settings.heading
+  assign highlight_word = section.settings.highlight_text
+  if highlight_word != blank and heading_text contains highlight_word
+    assign highlighted_replacement = '<em>' | append: highlight_word | append: '</em>'
+    assign heading_html = heading_text | replace: highlight_word, highlighted_replacement
+  else
+    assign heading_html = heading_text
+  endif
+-%}
+
+{%- if has_products -%}
+  <section
+    id="PDP-Related-{{ section.id }}"
+    class="pdp-section pdp-related"
+    data-section-id="{{ section.id }}"
+    data-section-type="pdp-related"
+    data-product-id="{{ product.id }}"
+    data-recommendations-url="{{ routes.product_recommendations_url }}?product_id={{ product.id }}&section_id={{ section.id }}&limit=8&intent=related"
+    style="
+      --pdp-bg: {{ section.settings.background_color }};
+      --pdp-text: {{ section.settings.text_color }};
+      --pdp-muted: {{ section.settings.muted_color }};
+      --pdp-border: {{ section.settings.border_color }};
+    "
+  >
+    <div class="pdp-container">
+      {%- comment -%} Section Header {%- endcomment -%}
+      <div class="pdp-related__header">
+        <div class="pdp-related__title-group">
+          {%- if section.settings.eyebrow != blank -%}
+            <p class="pdp-related__eyebrow">
+              <span class="pdp-related__dash" aria-hidden="true"></span>
+              <span>{{ section.settings.eyebrow }}</span>
+            </p>
+          {%- endif -%}
+
+          {%- if section.settings.heading != blank -%}
+            <h2 class="pdp-related__title">{{ heading_html }}</h2>
+          {%- endif -%}
+        </div>
+
+        {%- comment -%} Desktop Prev / Next Carousel Arrows {%- endcomment -%}
+        <div class="pdp-related__arrows" aria-label="Carousel navigation">
+          <button
+            type="button"
+            class="pdp-related__arrow pdp-related__arrow--prev"
+            data-pdp-related-prev
+            aria-label="Previous products"
+            disabled
+          >
+            {% render 'pdp-icon', icon: 'chevron-left' %}
+          </button>
+          <button
+            type="button"
+            class="pdp-related__arrow pdp-related__arrow--next"
+            data-pdp-related-next
+            aria-label="Next products"
+          >
+            {% render 'pdp-icon', icon: 'chevron-right' %}
+          </button>
+        </div>
+      </div>
+
+      {%- comment -%} Carousel Track {%- endcomment -%}
+      <div class="pdp-related__track-wrap" data-pdp-related-track-wrap role="region" aria-label="Related products carousel">
+        <div class="pdp-related__track" data-pdp-related-track>
+          {%- for rel_product in related_products limit: section.settings.max_products -%}
+            <div class="pdp-related__item">
+              {%- if section.settings.card_style == 'standard' -%}
+                {% render 'product-card-morris', product: rel_product %}
+              {%- else -%}
+                {% render 'pdp-related-card', product: rel_product %}
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </div>
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "PDP Related Products",
+  "tag": "section",
+  "class": "section-pdp-related",
+  "settings": [
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#111827"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Muted Color",
+      "default": "#6b7280"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#e5e7eb"
+    },
+    {
+      "type": "header",
+      "content": "Header Text"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow Text",
+      "default": "Related Products"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Explore Related Products"
+    },
+    {
+      "type": "text",
+      "id": "highlight_text",
+      "label": "Word(s) to Highlight in Accent Color",
+      "default": "Related Products"
+    },
+    {
+      "type": "header",
+      "content": "Card Style"
+    },
+    {
+      "type": "select",
+      "id": "card_style",
+      "label": "Product Card Style",
+      "options": [
+        { "value": "screenshot", "label": "Screenshot style" },
+        { "value": "standard", "label": "Store's standard card" }
+      ],
+      "default": "standard"
+    },
+    {
+      "type": "range",
+      "id": "max_products",
+      "min": 4,
+      "max": 12,
+      "step": 1,
+      "label": "Maximum Products to Show",
+      "default": 8
+    }
+  ],
+  "presets": [
+    {
+      "name": "PDP Related Products"
+    }
+  ]
+}
+{% endschema %}

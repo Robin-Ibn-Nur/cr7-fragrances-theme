@@ -1,0 +1,581 @@
+/* ==========================================================================
+   ABOUT PAGE (Black & White Editorial Layout)
+   Scoped entirely to .about-section and its descendants
+   ========================================================================== */
+
+:root:has(.about-section),
+body:has(.about-section),
+main:has(.about-section),
+.page-wrapper:has(.about-section) {
+  background-color: #ffffff;
+  color: #0a0a0a;
+}
+
+.about-section {
+  --about-bg: #ffffff;
+  --about-text: #0a0a0a;
+  --about-muted: #55595e;
+  --about-body: #222222;
+  --about-hairline: #cfcfcf;
+  --about-divider: #bbbbbb;
+  --about-panel: #f5f5f5;
+  --about-serif: var(--font-heading--family, Georgia, serif);
+  --about-body-serif: var(--font-body--family, var(--about-serif));
+  --about-sans: var(--font-subheading--family, -apple-system, BlinkMacSystemFont, sans-serif);
+
+  background-color: var(--about-bg);
+  color: var(--about-text);
+  color-scheme: light;
+  width: 100%;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* Matches header container width & margins identically */
+.about-container {
+  width: 100%;
+  max-width: var(--page-width, calc(var(--normal-page-width, 120rem) + (var(--page-margin, 40px) * 2)));
+  margin-inline: auto;
+  padding-inline: var(--page-margin, 40px);
+  box-sizing: border-box;
+}
+
+@media screen and (max-width: 749px) {
+  .about-container {
+    padding-inline: var(--page-margin, 16px);
+  }
+}
+
+/* Shared Editorial Typography & Link */
+.about-eyebrow-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.about-eyebrow {
+  font-family: var(--about-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--about-text);
+  line-height: 1.2;
+}
+
+.about-hairline {
+  flex: 0 0 clamp(60px, 11vw, 120px);
+  height: 1px;
+  background-color: var(--about-hairline);
+}
+
+.about-heading {
+  font-family: var(--about-serif);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--about-text);
+  margin: 0;
+}
+
+.about-paragraph {
+  font-family: var(--about-body-serif);
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--about-body);
+  margin: 0;
+}
+
+.about-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-family: var(--about-sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--about-text);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 10px;
+  width: fit-content;
+}
+
+.about-link:focus-visible {
+  outline: 2px solid var(--about-text);
+  outline-offset: 4px;
+}
+
+.about-link__arrow {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transition: transform 200ms ease;
+}
+
+.about-link:hover .about-link__arrow {
+  transform: translateX(4px);
+}
+
+[dir='rtl'] .about-link:hover .about-link__arrow {
+  transform: translateX(-4px);
+}
+
+/* Reveal animation (active only when JS adds .about-js) */
+.about-js .about-reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 500ms ease, transform 500ms ease;
+}
+
+.about-js .about-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   1. ABOUT HERO
+   ========================================================================== */
+.about-hero {
+  overflow: hidden;
+  padding-top: clamp(16px, 2vw, 28px);
+}
+
+.about-hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 48%) minmax(0, 45%);
+  justify-content: space-between;
+  align-items: stretch;
+  min-height: clamp(420px, 46vw, 680px);
+  gap: 24px;
+}
+
+.about-hero__content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-block: clamp(32px, 5vw, 72px);
+  min-width: 0;
+}
+
+.about-hero__heading {
+  font-size: clamp(46px, 7.4vw, 120px);
+  margin-bottom: clamp(20px, 2.5vw, 32px);
+}
+
+.about-hero__desc {
+  font-size: clamp(16px, 1.8vw, 20px);
+  max-width: 38ch;
+  margin-bottom: clamp(20px, 2.5vw, 32px);
+}
+
+.about-hero__media {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.about-hero__img-wrap {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.about-hero__img {
+  width: 100%;
+  height: auto;
+  max-height: clamp(420px, 46vw, 680px);
+  object-fit: contain;
+  object-position: bottom right;
+  display: block;
+}
+
+.about-hero__img--blend {
+  mix-blend-mode: multiply;
+}
+
+.about-hero__placeholder {
+  width: 100%;
+  aspect-ratio: 4/5;
+  background-color: var(--about-panel);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.about-hero__placeholder svg {
+  width: 100%;
+  height: 100%;
+  fill: #d4d4d8;
+}
+
+/* ==========================================================================
+   2. ABOUT STORY
+   ========================================================================== */
+.about-story {
+  padding-block: clamp(56px, 7vw, 104px);
+}
+
+.about-story__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 45%) minmax(0, 38%);
+  justify-content: start;
+  column-gap: clamp(40px, 6vw, 80px);
+  align-items: center;
+}
+
+.about-story__media {
+  width: 100%;
+  aspect-ratio: 1.29 / 1;
+  background-color: var(--about-panel);
+  overflow: hidden;
+  min-width: 0;
+}
+
+.about-story__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.about-story__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-story__placeholder svg {
+  width: 100%;
+  height: 100%;
+  fill: #d4d4d8;
+}
+
+.about-story__content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-inline-start: clamp(0px, 5vw, 72px);
+}
+
+.about-story__heading {
+  font-size: clamp(32px, 4.3vw, 60px);
+  margin-bottom: clamp(20px, 2.4vw, 32px);
+}
+
+.about-story__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.about-story__p {
+  font-size: clamp(15px, 1.55vw, 18px);
+}
+
+/* ==========================================================================
+   3. ABOUT VALUES
+   ========================================================================== */
+.about-values {
+  padding-block: clamp(48px, 6vw, 88px);
+  text-align: center;
+}
+
+.about-values__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: clamp(36px, 4.5vw, 56px);
+}
+
+.about-values__eyebrow-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 2.5vw, 32px);
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.about-values__hairline {
+  flex: 0 1 120px;
+  height: 1px;
+  background-color: var(--about-hairline);
+}
+
+.about-values__eyebrow {
+  font-family: var(--about-sans);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--about-text);
+  line-height: 1.2;
+}
+
+.about-values__heading {
+  font-size: clamp(36px, 5vw, 72px);
+}
+
+.about-values__grid {
+  display: grid;
+  grid-template-columns: repeat(var(--about-values-cols, 4), minmax(0, 1fr));
+  align-items: center;
+}
+
+.about-value {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 20px;
+  min-width: 0;
+}
+
+.about-value + .about-value::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 90px;
+  background-color: var(--about-divider);
+}
+
+.about-value__icon {
+  width: 36px;
+  height: 36px;
+  color: var(--about-text);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-value__icon svg,
+.about-value__icon img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  display: block;
+}
+
+.about-value__title {
+  font-family: var(--about-serif);
+  font-size: 19px;
+  font-weight: 400;
+  color: var(--about-text);
+  margin: 0 0 6px;
+  line-height: 1.25;
+}
+
+.about-value__tagline {
+  font-family: var(--about-sans);
+  font-size: 13px;
+  color: var(--about-muted);
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* ==========================================================================
+   4. ABOUT CTA PANEL
+   ========================================================================== */
+.about-cta {
+  padding-block: clamp(40px, 5vw, 72px) clamp(64px, 8vw, 112px);
+}
+
+.about-cta__panel {
+  background-color: var(--about-panel);
+  padding: clamp(24px, 4vw, 48px) clamp(24px, 5vw, 64px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(28px, 4vw, 56px);
+}
+
+.about-cta__content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.about-cta__heading {
+  font-size: clamp(32px, 4.3vw, 60px);
+  margin-bottom: 16px;
+}
+
+.about-cta__desc {
+  font-size: 15px;
+  color: var(--about-muted);
+  max-width: 34ch;
+  margin-bottom: 24px;
+}
+
+.about-cta__signature-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.about-cta__signature {
+  width: min(100%, var(--about-sig-width, 270px));
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+/* Self-writing Ink Signature (transparent on light panel, zero black background) */
+.about-sig {
+  width: min(100%, var(--about-sig-width, 270px));
+  color: var(--about-text);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.about-sig__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+.about-sig__path {
+  stroke-dasharray: var(--sig-len, 600);
+  stroke-dashoffset: var(--sig-len, 600);
+  transition: stroke-dashoffset 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.about-sig__path--2 {
+  transition-duration: 1200ms;
+  transition-delay: 420ms;
+}
+
+.about-sig__path--3 {
+  transition-duration: 750ms;
+  transition-delay: 1150ms;
+}
+
+.about-sig.is-drawn .about-sig__path,
+html:not(.about-js) .about-sig__path {
+  stroke-dashoffset: 0;
+}
+
+.about-sig__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--about-hairline);
+}
+
+.about-sig__name {
+  font-family: var(--about-sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--about-text);
+}
+
+.about-sig__role {
+  font-family: var(--about-sans);
+  font-size: 12px;
+  color: var(--about-muted);
+}
+
+/* ==========================================================================
+   5. RESPONSIVE BREAKPOINTS
+   ========================================================================== */
+@media screen and (min-width: 750px) and (max-width: 989px) {
+  .about-hero__grid {
+    grid-template-columns: minmax(0, 55%) minmax(0, 45%);
+    min-height: 380px;
+  }
+
+  .about-story__content {
+    margin-inline-start: 0;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .about-hero__grid {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    gap: 16px;
+  }
+
+  .about-hero__content {
+    padding-block: 24px 8px;
+  }
+
+  .about-hero__img {
+    max-height: none;
+  }
+
+  .about-story__grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .about-story__content {
+    margin-inline-start: 0;
+  }
+
+  .about-values__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid var(--about-hairline);
+  }
+
+  .about-value {
+    padding: 24px 12px;
+    border-bottom: 1px solid var(--about-hairline);
+  }
+
+  .about-value:nth-child(odd) {
+    border-inline-end: 1px solid var(--about-hairline);
+  }
+
+  .about-value + .about-value::before {
+    display: none;
+  }
+
+  .about-cta__panel {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .about-cta__signature-wrap {
+    justify-content: flex-start;
+  }
+
+  .about-cta__signature {
+    width: 60%;
+    max-width: var(--about-sig-width, 270px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-js .about-reveal,
+  .about-js .about-reveal.is-visible,
+  .about-link__arrow {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .about-sig__path {
+    stroke-dashoffset: 0 !important;
+    transition: none !important;
+  }
+}
+

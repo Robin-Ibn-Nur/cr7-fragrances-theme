@@ -1,0 +1,60 @@
+{%- doc -%}
+  PDP Partial Stars Rating Snippet
+  @param {number} rating - Average rating score (0 to 5)
+  @param {number} [rating_count] - Review count
+  @param {string} [star_size='15px'] - Size of each star
+  @param {string} [star_color='#f5a623'] - Filled star color
+  @param {string} [empty_color='#e5e7eb'] - Empty star color
+  @param {boolean} [show_text=true] - Whether to render text next to stars
+  @param {string} [class] - Optional extra class
+{%- enddoc -%}
+
+{%- liquid
+  assign rating = rating | default: 0 | plus: 0.0
+  assign rating_count = rating_count | default: 0
+  assign star_size = star_size | default: '15px'
+  assign star_color = star_color | default: '#f5a623'
+  assign empty_color = empty_color | default: '#e5e7eb'
+  assign rating_rounded = rating | round: 1
+-%}
+
+<div
+  class="pdp-stars {{ class }}"
+  role="img"
+  aria-label="Rated {{ rating_rounded }} out of 5 stars{% if rating_count > 0 %} based on {{ rating_count }} reviews{% endif %}"
+  style="--pdp-star-size: {{ star_size }}; --pdp-star-filled: {{ star_color }}; --pdp-star-empty: {{ empty_color }}; display: inline-flex; align-items: center; gap: 4px;"
+>
+  <div class="pdp-stars__svgs" style="display: inline-flex; align-items: center; gap: 2px;" aria-hidden="true">
+    {%- for i in (1..5) -%}
+      {%- liquid
+        assign star_threshold = i | plus: 0.0
+        assign prev_threshold = star_threshold | minus: 1.0
+        assign fill_pct = 0
+        if rating >= star_threshold
+          assign fill_pct = 100
+        elsif rating > prev_threshold
+          assign remainder = rating | minus: prev_threshold
+          assign fill_pct = remainder | times: 100 | round
+        endif
+      -%}
+      <svg width="{{ star_size }}" height="{{ star_size }}" viewBox="0 0 24 24" style="flex-shrink: 0;">
+        <defs>
+          <linearGradient id="pdp-star-grad-{{ forloop.index }}-{{ rating_rounded | replace: '.', '-' }}">
+            <stop offset="{{ fill_pct }}%" stop-color="var(--pdp-star-filled, #f5a623)" />
+            <stop offset="{{ fill_pct }}%" stop-color="var(--pdp-star-empty, #e5e7eb)" />
+          </linearGradient>
+        </defs>
+        <polygon
+          fill="url(#pdp-star-grad-{{ forloop.index }}-{{ rating_rounded | replace: '.', '-' }})"
+          points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+        />
+      </svg>
+    {%- endfor -%}
+  </div>
+
+  {%- if show_text and rating > 0 -%}
+    <span class="pdp-stars__text" style="font-size: 13px; font-weight: 500; color: inherit; margin-left: 4px;">
+      {{ rating_rounded }}{% if rating_count > 0 %} <span style="color: var(--pdp-muted, #6b7280);">({{ rating_count }} reviews)</span>{% endif %}
+    </span>
+  {%- endif -%}
+</div>

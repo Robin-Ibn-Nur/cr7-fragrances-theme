@@ -1,0 +1,279 @@
+/* Product Fragrance Profile (Notes Pyramid & Performance Meters) */
+
+.pfp-section {
+  --pfp-bg: #030504;
+  --pfp-surface: rgba(255, 255, 255, 0.03);
+  --pfp-surface-hover: rgba(255, 255, 255, 0.06);
+  --pfp-text: #ffffff;
+  --pfp-muted: #a3ada7;
+  --pfp-accent: #19e65a;
+  --pfp-border: rgba(255, 255, 255, 0.12);
+  --pfp-radius: 6px;
+
+  position: relative;
+  background-color: var(--pfp-bg);
+  color: var(--pfp-text);
+  padding-block: clamp(56px, 6vw, 96px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: clip;
+}
+
+.pfp-section__container {
+  width: 100%;
+  max-width: var(--page-width, calc(var(--normal-page-width, 120rem) + (var(--page-margin, 40px) * 2)));
+  margin-inline: auto;
+  padding-inline: var(--page-margin, 40px);
+  box-sizing: border-box;
+  position: relative;
+  z-index: 2;
+}
+
+/* Header */
+.pfp-section__header {
+  text-align: center;
+  max-width: 640px;
+  margin-inline: auto;
+  margin-bottom: clamp(40px, 5vw, 64px);
+}
+
+.pfp-section__eyebrow {
+  font-family: var(--font-body--family, inherit);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--pfp-accent);
+  margin: 0 0 8px 0;
+}
+
+.pfp-section__title {
+  font-family: var(--pfp-serif-font, var(--font-heading--family), Georgia, serif);
+  font-size: clamp(28px, 3.2vw, 42px);
+  font-weight: 500;
+  line-height: 1.15;
+  color: #ffffff;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.02em;
+}
+
+.pfp-section__subtitle {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--pfp-muted);
+  margin: 0;
+}
+
+/* Pyramid Grid (3 Tiers: Top, Heart, Base) */
+.pfp-pyramid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(20px, 3vw, 36px);
+  margin-bottom: clamp(40px, 5vw, 64px);
+}
+
+.pfp-tier {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: clamp(24px, 3vw, 36px) clamp(16px, 2vw, 24px);
+  background-color: var(--pfp-surface);
+  border: 1px solid var(--pfp-border);
+  border-radius: var(--pfp-radius);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.pfp-tier:hover {
+  transform: translateY(-2px);
+  border-color: rgba(25, 230, 90, 0.4);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45), 0 0 20px rgba(25, 230, 90, 0.08);
+}
+
+/* Optional Tier Round Image */
+.pfp-tier__image-wrap {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 20px;
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  background-color: #070a08;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.pfp-tier__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pfp-tier__name {
+  font-family: var(--font-body--family, inherit);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  margin: 0 0 6px 0;
+}
+
+.pfp-tier__desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--pfp-muted);
+  margin: 0 0 18px 0;
+  max-width: 28ch;
+}
+
+/* Notes List / Pills */
+.pfp-tier__notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: auto;
+}
+
+.pfp-note-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+/* Specs & Performance Bar Row */
+.pfp-specs {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: clamp(24px, 3.5vw, 48px);
+  padding: clamp(28px, 3.5vw, 40px);
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--pfp-border);
+  border-radius: var(--pfp-radius);
+}
+
+.pfp-meters {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  justify-content: center;
+}
+
+.pfp-meter-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pfp-meter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.pfp-meter-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #ffffff;
+}
+
+.pfp-meter-value-text {
+  font-size: 12.5px;
+  color: var(--pfp-muted);
+}
+
+/* 5 Segments Bar */
+.pfp-meter-segments {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.pfp-meter-segment {
+  height: 6px;
+  flex: 1;
+  border-radius: 3px;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+.pfp-meter-segment--filled {
+  background-color: var(--pfp-accent);
+  box-shadow: 0 0 8px rgba(25, 230, 90, 0.4);
+}
+
+/* Best For Column */
+.pfp-bestfor {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  padding-left: clamp(20px, 3vw, 40px);
+}
+
+.pfp-bestfor__title {
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #ffffff;
+  margin: 0 0 14px 0;
+}
+
+.pfp-bestfor__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pfp-bestfor-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: var(--pfp-radius);
+  font-size: 12px;
+  font-weight: 500;
+  background-color: rgba(25, 230, 90, 0.08);
+  border: 1px solid rgba(25, 230, 90, 0.3);
+  color: #ffffff;
+}
+
+/* Responsive */
+@media screen and (max-width: 900px) {
+  .pfp-pyramid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .pfp-specs {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .pfp-bestfor {
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-left: 0;
+    padding-top: 24px;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .pfp-section__container {
+    padding-inline: var(--page-margin, 16px);
+  }
+  .pfp-specs {
+    padding: 20px;
+  }
+}

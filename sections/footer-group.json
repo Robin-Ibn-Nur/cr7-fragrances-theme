@@ -1,0 +1,21 @@
+{
+  "type": "footer",
+  "name": "t:names.footer",
+  "sections": {
+    "cr7_footer": {
+      "type": "cr7-footer",
+      "settings": {
+        "newsletter_heading": "Join the CR7 Club",
+        "newsletter_subtext": "Get exclusive deals and early access to new products.",
+        "email_placeholder": "Your email address",
+        "button_label": "SUBSCRIBE",
+        "explore_heading": "Explore",
+        "support_heading": "Support",
+        "social_heading": "Follow Us"
+      }
+    }
+  },
+  "order": [
+    "cr7_footer"
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "sections": {
+    "pdp_main": {
+      "type": "pdp-main",
+      "blocks": {
+        "reassurance_1": {
+          "type": "reassurance",
+          "settings": {
+            "icon": "truck",
+            "text": "Free shipping on qualifying orders"
+          }
+        },
+        "reassurance_2": {
+          "type": "reassurance",
+          "settings": {
+            "icon": "return",
+            "text": "30-day returns"
+          }
+        },
+        "reassurance_3": {
+          "type": "reassurance",
+          "settings": {
+            "icon": "shield",
+            "text": "Secure checkout"
+          }
+        }
+      },
+      "block_order": [
+        "reassurance_1",
+        "reassurance_2",
+        "reassurance_3"
+      ],
+      "settings": {
+        "show_upsell": true,
+        "upsell_heading": "Complete your set",
+        "upsell_max_items": 3,
+        "upsell_preselect": false,
+        "show_sticky_bar": true,
+        "low_stock_threshold": 5,
+        "show_wishlist": true,
+        "show_sku": true,
+        "show_tags": false,
+        "show_share": false
+      }
+    },
+    "pdp_tabs": {
+      "type": "pdp-tabs",
+      "settings": {}
+    },
+    "pdp_related": {
+      "type": "pdp-related",
+      "settings": {
+        "eyebrow": "You may also like",
+        "heading": "Related Products",
+        "highlight_text": "",
+        "card_style": "standard"
+      }
+    },
+    "pdp_services": {
+      "type": "pdp-services",
+      "blocks": {
+        "service_1": {
+          "type": "service",
+          "settings": {
+            "icon": "truck",
+            "title": "Complimentary Delivery",
+            "subtitle": "On qualifying orders"
+          }
+        },
+        "service_2": {
+          "type": "service",
+          "settings": {
+            "icon": "shield",
+            "title": "Authentic Guarantee",
+            "subtitle": "Direct from official store"
+          }
+        },
+        "service_3": {
+          "type": "service",
+          "settings": {
+            "icon": "return",
+            "title": "Easy Returns",
+            "subtitle": "30-day return policy"
+          }
+        }
+      },
+      "block_order": [
+        "service_1",
+        "service_2",
+        "service_3"
+      ],
+      "settings": {}
+    }
+  },
+  "order": [
+    "pdp_main",
+    "pdp_tabs",
+    "pdp_related",
+    "pdp_services"
+  ]
+}

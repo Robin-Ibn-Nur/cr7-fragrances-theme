@@ -1,0 +1,74 @@
+{
+  "sections": {
+    "cr7_faq": {
+      "type": "cr7-faq",
+      "blocks": {
+        "q1": {
+          "type": "faq",
+          "settings": {
+            "category": "orders",
+            "question": "How long does delivery take?",
+            "answer": "All orders are dispatched within 24–48 business hours. Standard delivery takes 2–5 business days, and complimentary express shipping is available on qualifying orders."
+          }
+        },
+        "q2": {
+          "type": "faq",
+          "settings": {
+            "category": "orders",
+            "question": "How can I track my order?",
+            "answer": "Once your fragrance ships, you will receive an email confirmation with a live tracking link so you can follow your delivery step by step."
+          }
+        },
+        "q3": {
+          "type": "faq",
+          "settings": {
+            "category": "fragrances",
+            "question": "Which CR7 fragrance is best for everyday wear vs. evening?",
+            "answer": "CR7 Energy and CR7 Play It Cool feature crisp citrus and aromatic notes ideal for daytime and active wear, while Cristiano Ronaldo Legacy and CR7 Game On offer warmer woody and amber depth for evenings."
+          }
+        },
+        "q4": {
+          "type": "faq",
+          "settings": {
+            "category": "fragrances",
+            "question": "How long do the fragrances last on skin?",
+            "answer": "Our Eau de Parfum and Eau de Toilette formulations are crafted for 6–10 hours of lasting sillage. Apply to pulse points—wrists, neck, and behind the ears—for optimal projection."
+          }
+        },
+        "q5": {
+          "type": "faq",
+          "settings": {
+            "category": "returns",
+            "question": "What is your 30-day return policy?",
+            "answer": "Unopened fragrances in their original sealed presentation box may be returned within 30 days of delivery for a full refund."
+          }
+        },
+        "q6": {
+          "type": "faq",
+          "settings": {
+            "category": "returns",
+            "question": "Are all CR7 Fragrances 100% authentic?",
+            "answer": "Yes. Every bottle is 100% authentic and ships directly from our official authorized CR7 Fragrances distribution."
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "q5",
+        "q6"
+      ],
+      "settings": {
+        "eyebrow": "CLIENT CONCIERGE",
+        "heading": "Frequently Asked Questions",
+        "subtitle": "Everything you need to know about CR7 Fragrances, shipping, returns, and product authenticity."
+      }
+    }
+  },
+  "order": [
+    "cr7_faq"
+  ]
+}
+

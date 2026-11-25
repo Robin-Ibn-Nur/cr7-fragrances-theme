@@ -1,0 +1,805 @@
+{%- comment -%}
+  Premium Main Product Section (Buy Section)
+  Calm, spacious, conversion-focused PDP matching header, animated footer, and custom card.
+{%- endcomment -%}
+
+{{ 'main-product-premium.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'main-product-premium.js' | asset_url }}" type="module" defer></script>
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign primary_image = current_variant.featured_media.preview_image | default: product.featured_media.preview_image | default: product.featured_image
+
+  # Eyebrow: product.vendor or section setting
+  assign eyebrow_text = section.settings.eyebrow | default: product.vendor
+
+  # Sub-line: custom.subtitle or variant size/title
+  assign subline_text = product.metafields.custom.subtitle.value | default: product.metafields.custom.subtitle
+  if subline_text == blank and product.has_only_default_variant == false
+    assign subline_text = current_variant.title
+  endif
+
+  # Short description
+  assign short_desc = product.metafields.custom.short_description.value | default: product.metafields.custom.short_description
+  if short_desc == blank
+    assign short_desc = product.description | strip_html | strip_newlines | truncatewords: 26
+  endif
+
+  # Rating metadata
+  assign rating_obj = product.metafields.reviews.rating.value | default: product.metafields.reviews.rating
+  assign rating_val = 0
+  if rating_obj.rating != blank
+    assign rating_val = rating_obj.rating | plus: 0
+  elsif rating_obj != blank
+    assign rating_val = rating_obj | plus: 0
+  endif
+  if rating_val == 0 and section.settings.fallback_rating > 0
+    assign rating_val = section.settings.fallback_rating
+  endif
+
+  assign rating_count = product.metafields.reviews.rating_count.value | default: product.metafields.reviews.rating_count | default: 0 | plus: 0
+  if rating_count == 0 and section.settings.fallback_rating_count > 0
+    assign rating_count = section.settings.fallback_rating_count
+  endif
+
+  # Sale & Discount calculations
+  assign is_on_sale = false
+  assign discount_percent = 0
+  if current_variant.compare_at_price > current_variant.price
+    assign is_on_sale = true
+    assign price_diff = current_variant.compare_at_price | minus: current_variant.price
+    assign discount_percent = price_diff | times: 100.0 | divided_by: current_variant.compare_at_price | round
+  endif
+
+  # Inventory / Quantity limits
+  assign max_qty = 9999
+  if current_variant.inventory_management != nil and current_variant.inventory_policy == 'deny'
+    if current_variant.inventory_quantity > 0
+      assign max_qty = current_variant.inventory_quantity
+    endif
+  endif
+-%}
+
+<section
+  id="MainProduct-{{ section.id }}"
+  class="mpp-hero"
+  data-section-id="{{ section.id }}"
+  data-section-type="main-product-premium"
+  data-animated="{{ section.settings.enable_animation }}"
+  style="
+    --mpp-bg: {{ section.settings.background_color }};
+    --mpp-accent: {{ section.settings.accent_color }};
+    --mpp-accent-dark: {{ section.settings.accent_dark }};
+    --mpp-text: {{ section.settings.text_color }};
+    --mpp-muted: {{ section.settings.muted_color }};
+    --mpp-border: {{ section.settings.border_color }};
+    --mpp-star: {{ section.settings.star_color }};
+    --mpp-aspect-ratio: {{ section.settings.image_aspect_ratio }};
+    --mpp-serif-font: {{ section.settings.serif_font.family }}, var(--font-heading--family), Georgia, serif;
+    --mpp-watermark-opacity: {{ section.settings.watermark_opacity | divided_by: 100.0 }};
+  "
+>
+  {%- comment -%} Ambient Glow & Mist Layers (Contained, no overflow: hidden on main container) {%- endcomment -%}
+  <div class="mpp-hero__ambient" aria-hidden="true">
+    <div class="mpp-hero__glow mpp-hero__glow--left"></div>
+    <div class="mpp-hero__glow mpp-hero__glow--right"></div>
+    <div class="mpp-hero__glow mpp-hero__glow--center"></div>
+  </div>
+
+  {%- if section.settings.watermark_text != blank -%}
+    <div class="mpp-hero__watermark" aria-hidden="true">{{ section.settings.watermark_text }}</div>
+  {%- endif -%}
+
+  <div class="mpp-hero__container">
+    {%- comment -%} ==================== GALLERY COLUMN (~55%) ==================== {%- endcomment -%}
+    <div class="mpp-gallery">
+      {%- comment -%} Thumbnails Strip (Desktop: Vertical strip left, Mobile: horizontal wrap) {%- endcomment -%}
+      {%- if product.media.size > 1 -%}
+        <div class="mpp-gallery__thumbnails-wrap" role="region" aria-label="Product thumbnails">
+          <div class="mpp-gallery__thumbnails" data-mpp-thumbnails>
+            {%- for media in product.media -%}
+              {%- liquid
+                assign is_active = false
+                if media.id == current_variant.featured_media.id or forloop.first and current_variant.featured_media == nil
+                  assign is_active = true
+                endif
+                assign thumb_alt = media.alt | default: product.title | escape
+              -%}
+              <button
+                type="button"
+                class="mpp-gallery__thumb"
+                data-mpp-thumb
+                data-index="{{ forloop.index0 }}"
+                data-media-id="{{ media.id }}"
+                data-full-src="{{ media.preview_image | image_url: width: 1400 }}"
+                data-srcset="{{ media.preview_image | image_url: width: 600 }} 600w, {{ media.preview_image | image_url: width: 900 }} 900w, {{ media.preview_image | image_url: width: 1400 }} 1400w"
+                data-alt="{{ thumb_alt }}"
+                aria-label="Show image {{ forloop.index }} of {{ product.media.size }}"
+                {% if is_active %}aria-current="true"{% endif %}
+              >
+                {{ media.preview_image | image_url: width: 160 | image_tag:
+                  loading: 'lazy',
+                  class: 'mpp-gallery__thumb-img',
+                  alt: thumb_alt
+                }}
+              </button>
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Main Stage Image Container (Opens Lightbox on Click) {%- endcomment -%}
+      <div class="mpp-gallery__stage">
+        <div
+          class="mpp-gallery__stage-box"
+          data-mpp-stage-box
+          role="button"
+          tabindex="0"
+          aria-label="Open image in fullscreen lightbox"
+          title="Click to zoom in lightbox"
+        >
+          {%- comment -%} Desktop & Mobile Stage Image {%- endcomment -%}
+          <div class="mpp-gallery__stage-slider" data-mpp-slider>
+            {%- if primary_image != blank -%}
+              {%- assign stage_alt = product.title | escape -%}
+              {{ primary_image | image_url: width: 1600 | image_tag:
+                loading: 'eager',
+                fetchpriority: 'high',
+                class: 'mpp-gallery__stage-img',
+                data-mpp-stage-img: '',
+                alt: stage_alt,
+                widths: '600, 900, 1200, 1600'
+              }}
+            {%- else -%}
+              {{ 'product-1' | placeholder_svg_tag: 'mpp-gallery__stage-img' }}
+            {%- endif -%}
+          </div>
+
+          {%- comment -%} Mobile Counter Pill ("1 / 6") {%- endcomment -%}
+          {%- if product.media.size > 1 -%}
+            <div class="mpp-gallery__counter" data-mpp-counter aria-hidden="true">
+              <span data-mpp-counter-current>1</span> / <span>{{ product.media.size }}</span>
+            </div>
+          {%- endif -%}
+
+          {%- comment -%} Zoom Hint Icon {%- endcomment -%}
+          <div class="mpp-gallery__zoom-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {%- comment -%} ==================== INFO COLUMN (~45% STICKY) ==================== {%- endcomment -%}
+    <div class="mpp-buybox">
+      {%- comment -%} a. Brand / Collection Eyebrow {%- endcomment -%}
+      {%- if eyebrow_text != blank -%}
+        <p class="mpp-buybox__eyebrow">{{ eyebrow_text }}</p>
+      {%- endif -%}
+
+      {%- comment -%} b. Title {%- endcomment -%}
+      <h1 class="mpp-buybox__title">{{ product.title }}</h1>
+
+      {%- comment -%} c. Sub-line (e.g. Eau de Parfum · 100 ml) {%- endcomment -%}
+      {%- if subline_text != blank -%}
+        <p class="mpp-buybox__subline">{{ subline_text }}</p>
+      {%- endif -%}
+
+      {%- comment -%} d. Rating Row {%- endcomment -%}
+      {%- if section.settings.show_rating and rating_val > 0 -%}
+        <a href="#pp-reviews" class="mpp-buybox__rating-link" aria-label="Skip to customer reviews">
+          {% render 'product-rating-stars',
+            rating: rating_val,
+            rating_count: rating_count,
+            star_size: '15px',
+            star_color: section.settings.star_color,
+            empty_star_color: 'rgba(255, 255, 255, 0.2)',
+            show_text: true
+          %}
+        </a>
+      {%- endif -%}
+
+      {%- comment -%} e. Price Row {%- endcomment -%}
+      <div class="mpp-buybox__price-row" data-mpp-price-row>
+        <span class="mpp-buybox__price-current">
+          {%- if product.price_varies and product.has_only_default_variant == false -%}From {%- endif -%}
+          {{ current_variant.price | money_with_currency }}
+        </span>
+
+        {%- if is_on_sale -%}
+          <s class="mpp-buybox__price-compare">
+            {{ current_variant.compare_at_price | money_with_currency }}
+          </s>
+          {%- if discount_percent > 0 -%}
+            <span class="mpp-buybox__badge-sale">{{ discount_percent }}% OFF</span>
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- if current_variant.unit_price_measurement -%}
+          <span class="mpp-buybox__unit-price">
+            ({{ current_variant.unit_price | money }} / {{ current_variant.unit_price_measurement.reference_value }}{{ current_variant.unit_price_measurement.reference_unit }})
+          </span>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} f. Short Description / Mood Line {%- endcomment -%}
+      {%- if short_desc != blank -%}
+        <p class="mpp-buybox__description">{{ short_desc }}</p>
+      {%- endif -%}
+
+      {%- comment -%} g. Scent Family Chips {%- endcomment -%}
+      {%- assign scent_families = product.metafields.custom.scent_family.value | default: product.metafields.custom.scent_family -%}
+      {%- if scent_families != blank -%}
+        <div class="mpp-scent-chips" role="group" aria-label="Scent Family">
+          {%- liquid
+            if scent_families.first != blank
+              for family in scent_families limit: 4
+                echo '<span class="mpp-scent-chip">' | append: family | append: '</span>'
+              endfor
+            else
+              assign split_scents = scent_families | split: ','
+              for family in split_scents limit: 4
+                assign f_trim = family | strip
+                if f_trim != blank
+                  echo '<span class="mpp-scent-chip">' | append: f_trim | append: '</span>'
+                endif
+              endfor
+            endif
+          -%}
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} h & i. Form: Variant Picker & Buy Controls {%- endcomment -%}
+      {%- form 'product', product, class: 'mpp-form', id: 'mpp-product-form' -%}
+        <input type="hidden" name="id" value="{{ current_variant.id }}">
+
+        {%- comment -%} Size / Variant Selector (Pills with strikethrough for unavailable) {%- endcomment -%}
+        {%- if product.has_only_default_variant -%}
+          <div class="mpp-variant-picker" role="group" aria-label="Product size">
+            <div class="mpp-variant-picker__group">
+              <span class="mpp-variant-picker__option-name">Size</span>
+              <div class="mpp-variant-picker__pills">
+                <label class="mpp-variant-pill">
+                  <input type="radio" checked class="mpp-variant-pill__input">
+                  <span class="mpp-variant-pill__label">
+                    <span class="mpp-variant-pill__name">{{ subline_text | default: '100 ml' }}</span>
+                    {%- if current_variant.price -%}
+                      <span class="mpp-variant-pill__price">{{ current_variant.price | money }}</span>
+                    {%- endif -%}
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+        {%- else -%}
+          <div class="mpp-variant-picker" role="radiogroup" aria-label="Product options">
+            {%- for option in product.options_with_values -%}
+              <div class="mpp-variant-picker__group" data-option-index="{{ forloop.index0 }}">
+                <span class="mpp-variant-picker__option-name">{{ option.name }}</span>
+                <div class="mpp-variant-picker__pills">
+                  {%- for value in option.values -%}
+                    {%- liquid
+                      assign is_checked = false
+                      if option.selected_value == value
+                        assign is_checked = true
+                      endif
+
+                      # Find variant matching this option value
+                      assign val_variant = nil
+                      for v in product.variants
+                        if v.options[forloop.parentloop.index0] == value
+                          assign val_variant = v
+                          break
+                        endif
+                      endfor
+
+                      assign is_val_available = true
+                      if val_variant != nil and val_variant.available == false
+                        assign is_val_available = false
+                      endif
+                    -%}
+                    <label class="mpp-variant-pill{% unless is_val_available %} mpp-variant-pill--disabled{% endunless %}">
+                      <input
+                        type="radio"
+                        name="option-{{ option.position }}"
+                        value="{{ value | escape }}"
+                        class="mpp-variant-pill__input"
+                        {% if is_checked %}checked{% endif %}
+                      >
+                      <span class="mpp-variant-pill__label">
+                        <span class="mpp-variant-pill__name">{{ value }}</span>
+                        {%- if product.price_varies and val_variant != nil -%}
+                          <span class="mpp-variant-pill__price">{{ val_variant.price | money }}</span>
+                        {%- endif -%}
+                        {%- unless is_val_available -%}
+                          <span class="mpp-variant-pill__strike" aria-hidden="true"></span>
+                        {%- endunless -%}
+                      </span>
+                    </label>
+                  {%- endfor -%}
+                </div>
+              </div>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+        {%- comment -%} i. Quantity + Add to Cart + Wishlist {%- endcomment -%}
+        <div class="mpp-purchase-row">
+          <div class="mpp-quantity" role="group" aria-label="Quantity selector">
+            <button type="button" class="mpp-quantity__btn" data-mpp-qty-minus aria-label="Decrease quantity">−</button>
+            <input
+              type="number"
+              name="quantity"
+              value="1"
+              min="1"
+              max="{{ max_qty }}"
+              class="mpp-quantity__input"
+              data-mpp-qty-input
+              aria-label="Quantity"
+            >
+            <button type="button" class="mpp-quantity__btn" data-mpp-qty-plus aria-label="Increase quantity">+</button>
+          </div>
+
+          <button
+            type="submit"
+            name="add"
+            class="mpp-btn-add"
+            data-mpp-add-btn
+            {% unless current_variant.available %}disabled{% endunless %}
+          >
+            <svg class="mpp-btn-add__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6zM3 6h18M16 10a4 4 0 01-8 0"/>
+            </svg>
+            <span data-mpp-btn-text>
+              {%- if current_variant.available -%}
+                Add to cart
+              {%- else -%}
+                Sold out
+              {%- endif -%}
+            </span>
+          </button>
+
+          {%- if section.settings.show_wishlist -%}
+            <button
+              type="button"
+              class="mpp-wishlist-icon-btn"
+              data-mpp-wishlist-btn
+              data-product-handle="{{ product.handle }}"
+              aria-pressed="false"
+              aria-label="Add {{ product.title | escape }} to Wishlist"
+              title="Save to Wishlist"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+              </svg>
+            </button>
+          {%- endif -%}
+        </div>
+
+        {%- if section.settings.show_dynamic_checkout -%}
+          <div class="mpp-dynamic-checkout" style="margin-top: 10px;">
+            {{ form | payment_button }}
+          </div>
+        {%- endif -%}
+
+        <div class="mpp-form__status" data-mpp-status aria-live="polite"></div>
+      {%- endform -%}
+
+      {%- comment -%} j. Trust Row (3-4 items) {%- endcomment -%}
+      {%- assign trust_blocks = section.blocks | where: 'type', 'trust_item' -%}
+      {%- if trust_blocks.size > 0 -%}
+        <div class="mpp-trust-row" role="region" aria-label="Trust features">
+          {%- for block in trust_blocks -%}
+            <div class="mpp-trust-item" {{ block.shopify_attributes }}>
+              {%- if block.settings.custom_icon != blank -%}
+                {{ block.settings.custom_icon | image_url: width: 44 | image_tag: class: 'mpp-trust-item__icon', loading: 'lazy' }}
+              {%- else -%}
+                <div class="mpp-trust-item__icon">
+                  {%- case block.settings.icon -%}
+                    {%- when 'shield-check' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                    {%- when 'truck' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                    {%- when 'lock' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                    {%- when 'return' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+                    {%- when 'headset' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg>
+                    {%- when 'box' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                    {%- else -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="6 2 18 2 22 8 12 22 2 8 6 2"/><line x1="2" y1="8" x2="22" y2="8"/></svg>
+                  {%- endcase -%}
+                </div>
+              {%- endif -%}
+              <div class="mpp-trust-item__text">
+                <span class="mpp-trust-item__title">{{ block.settings.title }}</span>
+                <span class="mpp-trust-item__subtitle">{{ block.settings.subtitle }}</span>
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} k. Delivery Microcopy {%- endcomment -%}
+      {%- if section.settings.delivery_microcopy != blank -%}
+        <div class="mpp-delivery-microcopy">
+          {{ section.settings.delivery_microcopy }}
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} l. Accordions (<details>/<summary>) {%- endcomment -%}
+      <div class="mpp-accordions">
+        {%- if product.description != blank -%}
+          <details class="mpp-accordion" {% if section.settings.first_accordion_open %}open{% endif %}>
+            <summary class="mpp-accordion__summary">
+              <span class="mpp-accordion__title">Description</span>
+              <span class="mpp-accordion__icon" aria-hidden="true">+</span>
+            </summary>
+            <div class="mpp-accordion__content rte">
+              {{ product.description }}
+            </div>
+          </details>
+        {%- endif -%}
+
+        {%- assign ingredients_text = product.metafields.custom.ingredients.value | default: product.metafields.custom.ingredients -%}
+        {%- if ingredients_text != blank or section.settings.show_ingredients_default -%}
+          <details class="mpp-accordion">
+            <summary class="mpp-accordion__summary">
+              <span class="mpp-accordion__title">Ingredients</span>
+              <span class="mpp-accordion__icon" aria-hidden="true">+</span>
+            </summary>
+            <div class="mpp-accordion__content rte">
+              {%- if ingredients_text != blank -%}
+                {{ ingredients_text }}
+              {%- else -%}
+                <p>Alcohol Denat., Parfum (Fragrance), Aqua (Water), Limonene, Linalool, Hydroxycitronellal, Coumarin, Citronellol, Citral, Geraniol.</p>
+              {%- endif -%}
+            </div>
+          </details>
+        {%- endif -%}
+
+        {%- assign how_to_use_text = product.metafields.custom.how_to_use.value | default: product.metafields.custom.how_to_use -%}
+        {%- if how_to_use_text != blank -%}
+          <details class="mpp-accordion">
+            <summary class="mpp-accordion__summary">
+              <span class="mpp-accordion__title">How to Use</span>
+              <span class="mpp-accordion__icon" aria-hidden="true">+</span>
+            </summary>
+            <div class="mpp-accordion__content rte">
+              {{ how_to_use_text }}
+            </div>
+          </details>
+        {%- endif -%}
+
+        {%- if section.settings.shipping_returns_content != blank -%}
+          <details class="mpp-accordion">
+            <summary class="mpp-accordion__summary">
+              <span class="mpp-accordion__title">Shipping & Returns</span>
+              <span class="mpp-accordion__icon" aria-hidden="true">+</span>
+            </summary>
+            <div class="mpp-accordion__content rte">
+              {{ section.settings.shipping_returns_content }}
+            </div>
+          </details>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} m. App Blocks Support {%- endcomment -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == '@app' -%}
+          <div class="mpp-app-block" {{ block.shopify_attributes }}>
+            {% render block %}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+
+  {%- comment -%} Lightbox Modal (<dialog>) {%- endcomment -%}
+  <dialog id="mpp-lightbox" class="mpp-lightbox" aria-label="Product Media Fullscreen Lightbox">
+    <div class="mpp-lightbox__inner">
+      <button type="button" class="mpp-lightbox__close" data-mpp-lightbox-close aria-label="Close Lightbox">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+
+      {%- if product.media.size > 1 -%}
+        <button type="button" class="mpp-lightbox__nav mpp-lightbox__nav--prev" data-mpp-lightbox-prev aria-label="Previous Image">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+      {%- endif -%}
+
+      <div class="mpp-lightbox__stage">
+        <img src="" alt="" class="mpp-lightbox__img" data-mpp-lightbox-img>
+        <div class="mpp-lightbox__counter" data-mpp-lightbox-counter></div>
+      </div>
+
+      {%- if product.media.size > 1 -%}
+        <button type="button" class="mpp-lightbox__nav mpp-lightbox__nav--next" data-mpp-lightbox-next aria-label="Next Image">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      {%- endif -%}
+    </div>
+  </dialog>
+
+  {%- comment -%} Sticky Mobile Add-to-Cart Bar (< 750px) {%- endcomment -%}
+  <div class="mpp-mobile-bar" data-mpp-mobile-bar aria-hidden="true">
+    <div class="mpp-mobile-bar__inner">
+      <div class="mpp-mobile-bar__media">
+        {%- if primary_image != blank -%}
+          {%- assign bar_alt = product.title | escape -%}
+          {{ primary_image | image_url: width: 100 | image_tag:
+            class: 'mpp-mobile-bar__thumb',
+            loading: 'lazy',
+            alt: bar_alt
+          }}
+        {%- endif -%}
+        <div class="mpp-mobile-bar__text">
+          <span class="mpp-mobile-bar__title">{{ product.title }}</span>
+          <span class="mpp-mobile-bar__price" data-mpp-mobile-bar-price>{{ current_variant.price | money }}</span>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="mpp-mobile-bar__btn"
+        data-mpp-mobile-bar-btn
+        {% unless current_variant.available %}disabled{% endunless %}
+      >
+        {%- if current_variant.available -%}Add to Cart{%- else -%}Sold Out{%- endif -%}
+      </button>
+    </div>
+  </div>
+
+  <script type="application/json" data-mpp-variants-json>
+    {{ product.variants | json }}
+  </script>
+</section>
+
+{{ product | structured_data }}
+
+{% schema %}
+{
+  "name": "Main Product (Premium)",
+  "tag": "section",
+  "class": "section-main-product-premium",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colors & Tokens"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#030504"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#19e65a"
+    },
+    {
+      "type": "color",
+      "id": "accent_dark",
+      "label": "Accent Dark",
+      "default": "#0a9f3a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Muted Text",
+      "default": "#a3ada7"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border",
+      "default": "rgba(255, 255, 255, 0.12)"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Rating Star Color",
+      "default": "#f2b01e"
+    },
+    {
+      "type": "font_picker",
+      "id": "serif_font",
+      "label": "Title Font",
+      "default": "playfair_display_n5"
+    },
+    {
+      "type": "header",
+      "content": "Gallery"
+    },
+    {
+      "type": "select",
+      "id": "image_aspect_ratio",
+      "label": "Main Image Aspect Ratio",
+      "options": [
+        { "value": "4/5", "label": "4:5 (Standard Portrait)" },
+        { "value": "1/1", "label": "1:1 (Square)" },
+        { "value": "3/4", "label": "3:4 (Tall)" }
+      ],
+      "default": "4/5"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animation",
+      "label": "Enable Ambient Glow Animation",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "watermark_text",
+      "label": "Watermark Text (Optional)",
+      "default": "CR7"
+    },
+    {
+      "type": "range",
+      "id": "watermark_opacity",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "%",
+      "label": "Watermark Opacity",
+      "default": 6
+    },
+    {
+      "type": "header",
+      "content": "Content & Toggles"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow Text (Optional)",
+      "default": "CR7 SIGNATURE COLLECTION"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "label": "Show Rating Row",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "fallback_rating",
+      "min": 0,
+      "max": 5,
+      "step": 0.1,
+      "label": "Default Rating (if metafield blank)",
+      "default": 4.8
+    },
+    {
+      "type": "number",
+      "id": "fallback_rating_count",
+      "label": "Default Review Count (if metafield blank)",
+      "default": 2500
+    },
+    {
+      "type": "checkbox",
+      "id": "show_wishlist",
+      "label": "Show Wishlist Icon Button",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dynamic_checkout",
+      "label": "Show Dynamic Checkout Button",
+      "default": false
+    },
+    {
+      "type": "richtext",
+      "id": "delivery_microcopy",
+      "label": "Delivery Microcopy",
+      "default": "<p><em>Order by 2pm for same-day dispatch. Complimentary luxury packaging included.</em></p>"
+    },
+    {
+      "type": "header",
+      "content": "Accordions"
+    },
+    {
+      "type": "checkbox",
+      "id": "first_accordion_open",
+      "label": "First Accordion Open by Default",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_ingredients_default",
+      "label": "Show Default Ingredients if Metafield Blank",
+      "default": true
+    },
+    {
+      "type": "richtext",
+      "id": "shipping_returns_content",
+      "label": "Shipping & Returns Info",
+      "default": "<p>Complimentary tracked standard shipping on all orders over £39. Fast dispatch within 24 hours. Hassle-free 30-day returns on unopened bottles.</p>"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "trust_item",
+      "name": "Trust Item",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "gem", "label": "Gem / Diamond" },
+            { "value": "truck", "label": "Delivery Truck" },
+            { "value": "lock", "label": "Lock / Secure" },
+            { "value": "shield-check", "label": "Shield Check" },
+            { "value": "return", "label": "Return / Arrow" },
+            { "value": "headset", "label": "Headset / Support" }
+          ],
+          "default": "gem"
+        },
+        {
+          "type": "image_picker",
+          "id": "custom_icon",
+          "label": "Custom Icon Image (Optional)"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "100% Authentic"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "default": "Products Guaranteed"
+        }
+      ]
+    },
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Main Product (Premium)",
+      "blocks": [
+        {
+          "type": "trust_item",
+          "settings": {
+            "icon": "gem",
+            "title": "100% Authentic",
+            "subtitle": "Guaranteed"
+          }
+        },
+        {
+          "type": "trust_item",
+          "settings": {
+            "icon": "truck",
+            "title": "Free UK Delivery",
+            "subtitle": "on Orders Over £39"
+          }
+        },
+        {
+          "type": "trust_item",
+          "settings": {
+            "icon": "lock",
+            "title": "Secure Payments",
+            "subtitle": "Shop with Confidence"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

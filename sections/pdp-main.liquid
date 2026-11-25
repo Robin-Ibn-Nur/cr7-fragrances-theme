@@ -1,0 +1,787 @@
+{%- comment -%}
+  PDP Main Section (Breadcrumb + Gallery + Buy Box + Upsell + Sticky Bar)
+  Premium, minimal, conversion-focused white aesthetic.
+{%- endcomment -%}
+
+{{ 'pdp.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'pdp.js' | asset_url }}" type="module" defer></script>
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign primary_image = current_variant.featured_media.preview_image | default: product.featured_media.preview_image | default: product.featured_image
+
+  # Category fallback
+  assign category_title = product.type
+  if category_title == blank and product.collections.size > 0
+    assign category_title = product.collections.first.title
+  endif
+
+  # Short description
+  assign short_desc = product.metafields.custom.short_description.value | default: product.metafields.custom.short_description
+  if short_desc == blank
+    assign short_desc = product.description | strip_html | strip_newlines | truncatewords: 30
+  endif
+
+  # Highlights metafield (list of single line text, max 4)
+  assign highlights = product.metafields.custom.highlights.value
+
+  # Reviews data
+  assign rating_obj = product.metafields.reviews.rating.value | default: product.metafields.reviews.rating
+  assign rating_val = 0
+  if rating_obj.rating != blank
+    assign rating_val = rating_obj.rating | plus: 0
+  elsif rating_obj != blank
+    assign rating_val = rating_obj | plus: 0
+  endif
+  assign rating_count = product.metafields.reviews.rating_count.value | default: product.metafields.reviews.rating_count | default: 0 | plus: 0
+
+  # Stock & real low-stock determination
+  assign is_in_stock = current_variant.available
+  assign low_stock_threshold = section.settings.low_stock_threshold | default: 5 | plus: 0
+  assign show_low_stock = false
+  if is_in_stock and low_stock_threshold > 0 and current_variant.inventory_management != nil and current_variant.inventory_policy == 'deny'
+    if current_variant.inventory_quantity > 0 and current_variant.inventory_quantity <= low_stock_threshold
+      assign show_low_stock = true
+    endif
+  endif
+
+  # Quantity limits
+  assign max_qty = 9999
+  if current_variant.inventory_management != nil and current_variant.inventory_policy == 'deny'
+    if current_variant.inventory_quantity > 0
+      assign max_qty = current_variant.inventory_quantity
+    endif
+  endif
+
+  # Reassurance blocks
+  assign reassurance_blocks = section.blocks | where: 'type', 'reassurance'
+
+  # Share URL & Title encoded
+  assign share_url = shop.url | append: product.url | url_encode
+  assign share_title = product.title | url_encode
+-%}
+
+<section
+  id="PDP-Main-{{ section.id }}"
+  class="pdp-section pdp-main"
+  data-section-id="{{ section.id }}"
+  data-section-type="pdp-main"
+  data-money-format="{{ shop.money_format | escape }}"
+  data-currency-code="{{ localization.country.currency.iso_code | escape }}"
+  data-low-stock-threshold="{{ low_stock_threshold }}"
+  style="
+    --pdp-bg: {{ section.settings.background_color }};
+    --pdp-text: {{ section.settings.text_color }};
+    --pdp-muted: {{ section.settings.muted_color }};
+    --pdp-panel-bg: {{ section.settings.panel_bg_color }};
+    --pdp-border: {{ section.settings.border_color }};
+    --pdp-gallery-aspect: {{ section.settings.gallery_aspect_ratio }};
+    --pdp-gallery-fit: {{ section.settings.gallery_image_fit }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="pdp-container">
+    {%- comment -%} 1. Breadcrumb {%- endcomment -%}
+    <nav class="pdp-breadcrumb" aria-label="Breadcrumb">
+      <div class="pdp-breadcrumb__item">
+        <a href="{{ routes.root_url }}" class="pdp-breadcrumb__link">Home</a>
+        <span class="pdp-breadcrumb__sep" aria-hidden="true">/</span>
+      </div>
+
+      <div class="pdp-breadcrumb__item">
+        <a href="{{ routes.collections_url }}" class="pdp-breadcrumb__link">Shop</a>
+        <span class="pdp-breadcrumb__sep" aria-hidden="true">/</span>
+      </div>
+
+      {%- if category_title != blank -%}
+        <div class="pdp-breadcrumb__item">
+          {%- if product.collections.size > 0 -%}
+            <a href="{{ product.collections.first.url }}" class="pdp-breadcrumb__link">{{ category_title }}</a>
+          {%- else -%}
+            <span class="pdp-breadcrumb__link">{{ category_title }}</span>
+          {%- endif -%}
+          <span class="pdp-breadcrumb__sep" aria-hidden="true">/</span>
+        </div>
+      {%- endif -%}
+
+      <div class="pdp-breadcrumb__item" aria-current="page">
+        <span class="pdp-breadcrumb__current">{{ product.title }}</span>
+      </div>
+    </nav>
+
+    {%- comment -%} 2. Main Two-Column Grid (Gallery | Buy Box) {%- endcomment -%}
+    <div class="pdp-main__grid">
+      {%- comment -%} Left Column: Gallery {%- endcomment -%}
+      <div class="pdp-gallery" data-pdp-gallery>
+        <div class="pdp-gallery__panel" data-pdp-gallery-panel tabindex="0" role="region" aria-label="Product Media Gallery">
+          {%- if product.media.size > 1 -%}
+            <button
+              type="button"
+              class="pdp-gallery__nav pdp-gallery__nav--prev"
+              data-pdp-nav-prev
+              aria-label="Previous image"
+              disabled
+            >
+              {% render 'pdp-icon', icon: 'chevron-left' %}
+            </button>
+          {%- endif -%}
+
+          <div class="pdp-gallery__stage">
+            {%- if primary_image != blank -%}
+              {%- assign stage_alt = product.title | escape -%}
+              {{ primary_image | image_url: width: 1600 | image_tag:
+                loading: 'eager',
+                fetchpriority: 'high',
+                class: 'pdp-gallery__img',
+                data-pdp-stage-img: '',
+                alt: stage_alt,
+                widths: '600, 900, 1200, 1600'
+              }}
+            {%- else -%}
+              {{ 'product-1' | placeholder_svg_tag: 'pdp-gallery__img pdp-gallery__img--placeholder' }}
+            {%- endif -%}
+          </div>
+
+          {%- if product.media.size > 1 -%}
+            <button
+              type="button"
+              class="pdp-gallery__nav pdp-gallery__nav--next"
+              data-pdp-nav-next
+              aria-label="Next image"
+            >
+              {% render 'pdp-icon', icon: 'chevron-right' %}
+            </button>
+          {%- endif -%}
+        </div>
+
+        {%- if product.media.size > 1 -%}
+          <div class="pdp-gallery__thumbs-track" role="region" aria-label="Product thumbnails">
+            <div class="pdp-gallery__thumbs">
+              {%- for media in product.media -%}
+                {%- liquid
+                  assign is_active = false
+                  if media.id == current_variant.featured_media.id or forloop.first and current_variant.featured_media == nil
+                    assign is_active = true
+                  endif
+                  assign thumb_alt = media.alt | default: product.title | escape
+                -%}
+                <button
+                  type="button"
+                  class="pdp-gallery__thumb"
+                  data-pdp-thumb
+                  data-media-id="{{ media.id }}"
+                  data-full-src="{{ media.preview_image | image_url: width: 1400 }}"
+                  data-srcset="{{ media.preview_image | image_url: width: 600 }} 600w, {{ media.preview_image | image_url: width: 900 }} 900w, {{ media.preview_image | image_url: width: 1400 }} 1400w"
+                  data-alt="{{ thumb_alt }}"
+                  aria-label="Show image {{ forloop.index }} of {{ product.media.size }}"
+                  {% if is_active %}aria-current="true"{% endif %}
+                >
+                  {{ media.preview_image | image_url: width: 150 | image_tag:
+                    loading: 'lazy',
+                    class: 'pdp-gallery__thumb-img',
+                    alt: thumb_alt
+                  }}
+                </button>
+              {%- endfor -%}
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} Right Column: Buy Box {%- endcomment -%}
+      <div class="pdp-buybox">
+        {%- comment -%} 1. Category {%- endcomment -%}
+        {%- if category_title != blank -%}
+          <span class="pdp-buybox__category">{{ category_title }}</span>
+        {%- endif -%}
+
+        {%- comment -%} 2. Title + Wishlist Icon Button {%- endcomment -%}
+        <div class="pdp-buybox__title-row">
+          <h1 class="pdp-buybox__title">{{ product.title }}</h1>
+          {%- if section.settings.show_wishlist -%}
+            <button
+              type="button"
+              class="pdp-btn--wishlist"
+              data-pdp-wishlist-btn
+              data-product-handle="{{ product.handle }}"
+              aria-pressed="false"
+              aria-label="Save {{ product.title | escape }} to Wishlist"
+              title="Save to Wishlist"
+            >
+              {% render 'pdp-icon', icon: 'heart' %}
+            </button>
+          {%- endif -%}
+        </div>
+
+        {%- comment -%} 3. Rating {%- endcomment -%}
+        {%- if rating_val > 0 -%}
+          <a href="#pdp-tab-reviews" class="pdp-buybox__rating-link" data-pdp-rating-link aria-label="Skip to reviews">
+            {% render 'pdp-stars',
+              rating: rating_val,
+              rating_count: rating_count,
+              star_size: '14px',
+              star_color: '#f5a623',
+              empty_color: '#e5e7eb',
+              show_text: true
+            %}
+          </a>
+        {%- endif -%}
+
+        {%- comment -%} 4. Price {%- endcomment -%}
+        <div class="pdp-buybox__price-row" data-pdp-price-row data-variant-price="{{ current_variant.price }}">
+          <span class="pdp-buybox__price-current">{{ current_variant.price | money }}</span>
+          {%- if current_variant.compare_at_price > current_variant.price -%}
+            <s class="pdp-buybox__price-compare">{{ current_variant.compare_at_price | money }}</s>
+          {%- endif -%}
+        </div>
+
+        {%- comment -%} 5. Stock Text (Dot + Label + Real Scarcity) {%- endcomment -%}
+        <div
+          class="pdp-buybox__stock{% if is_in_stock %} pdp-buybox__stock--in{% else %} pdp-buybox__stock--out{% endif %}"
+          data-pdp-stock
+        >
+          <span class="pdp-buybox__stock-dot" aria-hidden="true"></span>
+          <span class="pdp-buybox__stock-text">
+            {%- if is_in_stock -%}In stock{%- else -%}Out of stock{%- endif -%}
+          </span>
+          {%- if show_low_stock -%}
+            <span class="pdp-buybox__stock-low">· Only {{ current_variant.inventory_quantity }} left</span>
+          {%- endif -%}
+        </div>
+
+        {%- comment -%} 6. Short Description {%- endcomment -%}
+        {%- if short_desc != blank -%}
+          <p class="pdp-buybox__desc">{{ short_desc }}</p>
+        {%- endif -%}
+
+        {%- comment -%} 7. Highlights (Metafield custom.highlights, max 4) {%- endcomment -%}
+        {%- if highlights != blank and highlights.size > 0 -%}
+          <ul class="pdp-highlights">
+            {%- for line in highlights limit: 4 -%}
+              {%- if line != blank -%}
+                <li class="pdp-highlights__item">
+                  <span class="pdp-highlights__icon" aria-hidden="true">
+                    {% render 'pdp-icon', icon: 'check' %}
+                  </span>
+                  <span>{{ line }}</span>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+
+        {%- comment -%} 8 & 9 & 10. Form: Options, Quantity + Add to Cart, Buy Now {%- endcomment -%}
+        {%- form 'product', product, class: 'pdp-form', id: 'pdp-product-form' -%}
+          <input type="hidden" name="id" value="{{ current_variant.id }}">
+
+          {%- unless product.has_only_default_variant -%}
+            <div class="pdp-options" role="radiogroup" aria-label="Product options">
+              {%- for option in product.options_with_values -%}
+                {%- liquid
+                  assign is_color = false
+                  assign opt_name_lower = option.name | downcase
+                  if opt_name_lower contains 'color' or opt_name_lower contains 'colour'
+                    assign is_color = true
+                  endif
+                -%}
+
+                <div class="pdp-option" data-pdp-option-group="{{ forloop.index0 }}">
+                  <span class="pdp-option__label">
+                    {{ option.name }}:
+                    {%- if is_color -%}
+                      <span class="pdp-option__label-val" data-pdp-color-val>{{ option.selected_value }}</span>
+                    {%- endif -%}
+                  </span>
+
+                  <div class="pdp-option__values">
+                    {%- for value in option.values -%}
+                      {%- liquid
+                        assign is_checked = false
+                        if option.selected_value == value
+                          assign is_checked = true
+                        endif
+
+                        assign val_variant = nil
+                        for v in product.variants
+                          if v.options[forloop.parentloop.index0] == value
+                            assign val_variant = v
+                            break
+                          endif
+                        endfor
+
+                        assign is_val_available = true
+                        if val_variant != nil and val_variant.available == false
+                          assign is_val_available = false
+                        endif
+                      -%}
+
+                      {%- if is_color -%}
+                        {%- liquid
+                          assign swatch_bg = value | downcase | remove: ' '
+                          assign swatch_color = swatch_bg
+                          if value.swatch.color != blank
+                            assign swatch_color = value.swatch.color
+                          endif
+                        -%}
+                        <label class="pdp-swatch-wrap" title="{{ value | escape }}">
+                          <input
+                            type="radio"
+                            name="option-{{ option.position }}"
+                            value="{{ value | escape }}"
+                            class="pdp-swatch-input"
+                            {% if is_checked %}checked{% endif %}
+                            {% unless is_val_available %}disabled{% endunless %}
+                          >
+                          <span
+                            class="pdp-swatch"
+                            style="background-color: {{ swatch_color }};"
+                            aria-label="{{ value | escape }}"
+                          ></span>
+                        </label>
+                      {%- else -%}
+                        <label class="pdp-pill-wrap">
+                          <input
+                            type="radio"
+                            name="option-{{ option.position }}"
+                            value="{{ value | escape }}"
+                            class="pdp-pill-input"
+                            {% if is_checked %}checked{% endif %}
+                            {% unless is_val_available %}disabled{% endunless %}
+                          >
+                          <span class="pdp-pill">{{ value }}</span>
+                        </label>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </div>
+                </div>
+              {%- endfor -%}
+            </div>
+          {%- endunless -%}
+
+          <div class="pdp-purchase-stack">
+            <div class="pdp-purchase-row">
+              <div class="pdp-qty" role="group" aria-label="Quantity selector">
+                <button type="button" class="pdp-qty__btn" data-pdp-qty-minus aria-label="Decrease quantity">−</button>
+                <input
+                  type="number"
+                  name="quantity"
+                  value="1"
+                  min="1"
+                  max="{{ max_qty }}"
+                  class="pdp-qty__input"
+                  data-pdp-qty-input
+                  aria-label="Product quantity"
+                >
+                <button type="button" class="pdp-qty__btn" data-pdp-qty-plus aria-label="Increase quantity">+</button>
+              </div>
+
+              <button
+                type="submit"
+                name="add"
+                class="pdp-btn--primary button button-custom"
+                data-pdp-add-btn
+                {% unless current_variant.available %}disabled{% endunless %}
+              >
+                {%- if current_variant.available -%}
+                  Add to cart
+                {%- else -%}
+                  Sold out
+                {%- endif -%}
+              </button>
+            </div>
+
+            {%- if current_variant.available -%}
+              <button
+                type="button"
+                class="pdp-btn--secondary button-secondary"
+                data-pdp-buy-now-btn
+              >
+                Buy now
+              </button>
+            {%- endif -%}
+          </div>
+
+          <div class="pdp-form-status" data-pdp-status aria-live="polite"></div>
+        {%- endform -%}
+
+        {%- comment -%} 11. Dynamic Upsell ("Complete your set") {%- endcomment -%}
+        {%- if section.settings.show_upsell -%}
+          {% render 'pdp-upsell', product: product, section: section, recommendations: recommendations %}
+        {%- endif -%}
+
+        {%- comment -%} 12. Reassurance Row (max 3 blocks) {%- endcomment -%}
+        {%- if reassurance_blocks.size > 0 -%}
+          <div class="pdp-reassurance" role="list">
+            {%- for block in reassurance_blocks limit: 3 -%}
+              <div class="pdp-reassurance__item" role="listitem" {{ block.shopify_attributes }}>
+                <span class="pdp-reassurance__icon" aria-hidden="true">
+                  {% render 'pdp-icon', icon: block.settings.icon %}
+                </span>
+                <span class="pdp-reassurance__text">{{ block.settings.text }}</span>
+              </div>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+        {%- comment -%} 13. Delivery Microcopy {%- endcomment -%}
+        {%- if section.settings.delivery_microcopy != blank -%}
+          <div class="pdp-delivery-copy rte">
+            {{ section.settings.delivery_microcopy }}
+          </div>
+        {%- endif -%}
+
+        {%- comment -%} 14. Meta Lines (SKU, optional Tags/Share) {%- endcomment -%}
+        {%- liquid
+          assign has_sku = false
+          if section.settings.show_sku and current_variant.sku != blank
+            assign has_sku = true
+          endif
+          assign has_tags = false
+          if section.settings.show_tags and product.tags.size > 0
+            assign has_tags = true
+          endif
+          assign has_share = section.settings.show_share
+        -%}
+        {%- if has_sku or has_tags or has_share -%}
+          <div class="pdp-meta">
+            {%- if section.settings.show_sku -%}
+              <div class="pdp-meta__row" data-pdp-sku-row {% unless current_variant.sku != blank %}hidden{% endunless %}>
+                <span class="pdp-meta__label">SKU</span>
+                <span class="pdp-meta__value" data-pdp-sku>{{ current_variant.sku }}</span>
+              </div>
+            {%- endif -%}
+
+            {%- if has_tags -%}
+              <div class="pdp-meta__row">
+                <span class="pdp-meta__label">Tags</span>
+                <span class="pdp-meta__value">
+                  {%- for tag in product.tags limit: 6 -%}
+                    {{ tag }}{% unless forloop.last %}, {% endunless %}
+                  {%- endfor -%}
+                </span>
+              </div>
+            {%- endif -%}
+
+            {%- if has_share -%}
+              <div class="pdp-meta__row">
+                <span class="pdp-meta__label">Share</span>
+                <div class="pdp-meta__share-links">
+                  <a
+                    href="https://www.facebook.com/sharer/sharer.php?u={{ share_url }}"
+                    target="_blank"
+                    rel="noopener"
+                    class="pdp-share-link"
+                    aria-label="Share on Facebook"
+                    title="Facebook"
+                  >
+                    {% render 'pdp-icon', icon: 'facebook' %}
+                  </a>
+                  <a
+                    href="https://twitter.com/intent/tweet?text={{ share_title }}&url={{ share_url }}"
+                    target="_blank"
+                    rel="noopener"
+                    class="pdp-share-link"
+                    aria-label="Share on X"
+                    title="X"
+                  >
+                    {% render 'pdp-icon', icon: 'twitter' %}
+                  </a>
+                  <a
+                    href="https://pinterest.com/pin/create/button/?url={{ share_url }}&description={{ share_title }}"
+                    target="_blank"
+                    rel="noopener"
+                    class="pdp-share-link"
+                    aria-label="Pin on Pinterest"
+                    title="Pinterest"
+                  >
+                    {% render 'pdp-icon', icon: 'pinterest' %}
+                  </a>
+                  <a
+                    href="https://api.whatsapp.com/send?text={{ share_title }}%20{{ share_url }}"
+                    target="_blank"
+                    rel="noopener"
+                    class="pdp-share-link"
+                    aria-label="Share on WhatsApp"
+                    title="WhatsApp"
+                  >
+                    {% render 'pdp-icon', icon: 'whatsapp' %}
+                  </a>
+                </div>
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- comment -%} 15. App Blocks (@app) {%- endcomment -%}
+        {%- assign app_blocks = section.blocks | where: 'type', '@app' -%}
+        {%- if app_blocks.size > 0 -%}
+          <div class="pdp-app-blocks">
+            {%- for block in app_blocks -%}
+              <div class="pdp-app-block" {{ block.shopify_attributes }}>
+                {% render block %}
+              </div>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+
+  {%- if section.settings.show_sticky_bar -%}
+    {% render 'pdp-sticky-bar',
+      product: product,
+      current_variant: current_variant,
+      primary_image: primary_image
+    %}
+  {%- endif -%}
+
+  <script type="application/json" data-pdp-variants-json>
+    {{ product.variants | json }}
+  </script>
+</section>
+
+<script type="application/ld+json">
+  {{ product | structured_data }}
+</script>
+
+{% schema %}
+{
+  "name": "PDP Main",
+  "tag": "section",
+  "class": "section-pdp-main",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Page Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#111827"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Muted Text Color",
+      "default": "#6b7280"
+    },
+    {
+      "type": "color",
+      "id": "panel_bg_color",
+      "label": "Image Panel Background",
+      "default": "#f4f4f5"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#e5e7eb"
+    },
+    {
+      "type": "header",
+      "content": "Gallery Settings"
+    },
+    {
+      "type": "select",
+      "id": "gallery_aspect_ratio",
+      "label": "Image Panel Aspect Ratio",
+      "options": [
+        { "value": "5/6", "label": "5:6 (Portrait Standard)" },
+        { "value": "4/5", "label": "4:5 (Classic)" },
+        { "value": "1/1", "label": "1:1 (Square)" }
+      ],
+      "default": "5/6"
+    },
+    {
+      "type": "select",
+      "id": "gallery_image_fit",
+      "label": "Image Object Fit",
+      "options": [
+        { "value": "contain", "label": "Contain" },
+        { "value": "cover", "label": "Cover" }
+      ],
+      "default": "contain"
+    },
+    {
+      "type": "header",
+      "content": "Dynamic Upsell"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_upsell",
+      "label": "Show upsell module",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "upsell_heading",
+      "label": "Upsell heading",
+      "default": "Complete your set"
+    },
+    {
+      "type": "range",
+      "id": "upsell_max_items",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "label": "Maximum upsell items",
+      "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "upsell_preselect",
+      "label": "Preselect add-ons",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Sticky Add-to-Cart Bar"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sticky_bar",
+      "label": "Enable sticky add-to-cart bar",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Buy Box & Inventory"
+    },
+    {
+      "type": "range",
+      "id": "low_stock_threshold",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "label": "Low-stock threshold (0 = off)",
+      "default": 5
+    },
+    {
+      "type": "richtext",
+      "id": "delivery_microcopy",
+      "label": "Delivery microcopy"
+    },
+    {
+      "type": "header",
+      "content": "Toggles"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_wishlist",
+      "label": "Show Wishlist Button",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sku",
+      "label": "Show SKU line",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tags",
+      "label": "Show Tags line",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_share",
+      "label": "Show Social Share Links",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 112,
+      "step": 8,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 112,
+      "step": 8,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "reassurance",
+      "name": "Reassurance",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "truck", "label": "Truck" },
+            { "value": "shield", "label": "Shield" },
+            { "value": "return", "label": "Return" },
+            { "value": "gift", "label": "Gift" },
+            { "value": "box", "label": "Box" },
+            { "value": "card", "label": "Card" },
+            { "value": "check", "label": "Check" }
+          ],
+          "default": "truck"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Free shipping on qualifying orders"
+        }
+      ]
+    },
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [
+    {
+      "name": "PDP Main",
+      "blocks": [
+        {
+          "type": "reassurance",
+          "settings": {
+            "icon": "truck",
+            "text": "Free shipping on qualifying orders"
+          }
+        },
+        {
+          "type": "reassurance",
+          "settings": {
+            "icon": "return",
+            "text": "30-day returns"
+          }
+        },
+        {
+          "type": "reassurance",
+          "settings": {
+            "icon": "shield",
+            "text": "Secure checkout"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

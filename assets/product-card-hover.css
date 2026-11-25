@@ -1,0 +1,446 @@
+/**
+ * Premium Luxury E-Commerce Product Card Styles
+ * High-end aesthetic for CR7 Fragrance & Lifestyle
+ */
+
+.luxury-product-card,
+.pch-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 14px;
+  box-sizing: border-box;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.35s ease,
+              background-color 0.35s ease,
+              box-shadow 0.35s ease;
+  will-change: transform;
+}
+
+.luxury-product-card:hover,
+.pch-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.02);
+}
+
+/* Card Media Gallery Container */
+.luxury-product-card__gallery,
+.pch-card__gallery {
+  position: relative;
+  aspect-ratio: 1 / 1.15;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 0%, rgba(15, 15, 15, 0.6) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.luxury-product-card__media-link,
+.pch-card__media-link {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Imagery & Dual-Image Crossfade */
+.luxury-product-card__image,
+.pch-card__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: auto;
+  object-fit: contain;
+  object-position: center;
+  transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+              transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+
+.luxury-product-card__image--primary,
+.pch-card__image--primary {
+  max-width: 86%;
+  max-height: 86%;
+  opacity: 1;
+  z-index: 1;
+  transform: scale(1);
+}
+
+.luxury-product-card__image--secondary,
+.pch-card__image--secondary {
+  opacity: 0;
+  z-index: 2;
+  object-fit: cover;
+  transform: scale(1.06);
+}
+
+/* Hover crossfade triggers */
+.luxury-product-card:hover .luxury-product-card__image--primary,
+.pch-card:hover .pch-card__image--primary {
+  transform: scale(1.04);
+}
+
+.luxury-product-card__gallery.has-secondary-image:hover .luxury-product-card__image--primary,
+.pch-card__gallery.has-secondary-image:hover .pch-card__image--primary,
+.luxury-product-card:hover .luxury-product-card__gallery.has-secondary-image .luxury-product-card__image--primary,
+.pch-card:hover .pch-card__gallery.has-secondary-image .pch-card__image--primary {
+  opacity: 0;
+}
+
+.luxury-product-card__gallery.has-secondary-image:hover .luxury-product-card__image--secondary,
+.pch-card__gallery.has-secondary-image:hover .pch-card__image--secondary,
+.luxury-product-card:hover .luxury-product-card__gallery.has-secondary-image .luxury-product-card__image--secondary,
+.pch-card:hover .pch-card__gallery.has-secondary-image .pch-card__image--secondary {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Sold Out Dimming */
+.luxury-product-card.is-sold-out .luxury-product-card__image,
+.pch-card.is-sold-out .pch-card__image {
+  filter: grayscale(0.55) opacity(0.65);
+}
+
+/* Floating Top Badges (Top-Left) */
+.luxury-product-card__badges,
+.pch-card__badges {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.luxury-product-card__badge,
+.pch-card__badge {
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  font-family: var(--font-body--family, inherit);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Floating Wishlist Heart Button (Top-Right) */
+.luxury-product-card__wishlist,
+.pch-card__wishlist {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(10, 10, 10, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #ffffff;
+  padding: 0;
+  transition: transform 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.luxury-product-card__wishlist:hover,
+.pch-card__wishlist:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  transform: scale(1.1);
+}
+
+.luxury-product-card__wishlist-icon {
+  width: 17px;
+  height: 17px;
+  transition: fill 0.25s ease, stroke 0.25s ease;
+}
+
+.luxury-product-card__wishlist.is-active,
+.pch-card__wishlist.is-active,
+.luxury-product-card__wishlist[aria-pressed='true'],
+.pch-card__wishlist[aria-pressed='true'] {
+  color: #ff3b30 !important;
+  border-color: rgba(255, 59, 48, 0.6) !important;
+  background: rgba(28, 6, 6, 0.8) !important;
+}
+
+.luxury-product-card__wishlist.is-active svg,
+.pch-card__wishlist.is-active svg,
+.luxury-product-card__wishlist[aria-pressed='true'] svg,
+.pch-card__wishlist[aria-pressed='true'] svg {
+  fill: #ff3b30 !important;
+  stroke: #ff3b30 !important;
+}
+
+/* Slide-Up Quick Add Button */
+.luxury-product-card__quick-add-wrap,
+.pch-card__quick-add-wrap {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.luxury-product-card__quick-add,
+.pch-card__quick-add {
+  width: 100%;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 9999px;
+  background: #ffffff;
+  color: #000000;
+  font-family: var(--font-body--family, inherit);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 1px solid #ffffff;
+  cursor: pointer;
+  text-decoration: none;
+  transform: translateY(125%);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.3s ease,
+              background-color 0.25s ease,
+              color 0.25s ease,
+              border-color 0.25s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  box-sizing: border-box;
+}
+
+.luxury-product-card:hover .luxury-product-card__quick-add,
+.pch-card:hover .pch-card__quick-add {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.luxury-product-card__quick-add:hover,
+.pch-card__quick-add:hover {
+  background: #000000;
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+.luxury-product-card__quick-add.is-loading,
+.pch-card__quick-add.is-loading,
+.pch-card__quick-add[aria-busy="true"] {
+  pointer-events: none;
+  background: #d4d4d4;
+  color: #222222;
+}
+
+.luxury-product-card__quick-add.is-added,
+.pch-card__quick-add.is-success {
+  background: #1a8754;
+  color: #ffffff;
+  border-color: #1a8754;
+}
+
+.luxury-product-card__quick-add.is-disabled,
+.pch-card__quick-add.is-disabled {
+  background: rgba(35, 35, 35, 0.85);
+  color: #777777;
+  border-color: rgba(255, 255, 255, 0.1);
+  cursor: not-allowed;
+}
+
+/* Product Information & Editorial Details */
+.luxury-product-card__info,
+.pch-card__info {
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.luxury-product-card__kicker,
+.pch-card__kicker {
+  font-family: var(--font-body--family, inherit);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #888888;
+  margin-bottom: 5px;
+}
+
+.luxury-product-card__title,
+.pch-card__title {
+  margin: 0 0 6px 0;
+  font-family: var(--font-heading--family, inherit);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.35;
+}
+
+.luxury-product-card__title a,
+.pch-card__title a {
+  color: #ffffff;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.luxury-product-card__title a:hover,
+.pch-card__title a:hover {
+  color: #d1d5db;
+}
+
+/* Review Stars & Social Proof */
+.luxury-product-card__rating,
+.pch-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 6px;
+  font-size: 0.75rem;
+}
+
+.luxury-product-card__stars,
+.pch-card__stars {
+  color: #f59e0b;
+  letter-spacing: 2px;
+  font-size: 0.85rem;
+}
+
+.luxury-product-card__score,
+.pch-card__score {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.luxury-product-card__reviews-count,
+.pch-card__reviews-count {
+  color: #888888;
+  font-size: 0.72rem;
+}
+
+/* Olfactory Scent Notes Accord Pill */
+.luxury-product-card__scent-notes,
+.pch-card__scent-notes {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-block: 4px 8px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  font-family: var(--font-body--family, inherit);
+  font-size: 0.6875rem;
+  color: #b5b5b5;
+  letter-spacing: 0.05em;
+  width: fit-content;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.luxury-product-card__scent-notes-icon,
+.pch-card__scent-notes-icon {
+  color: #ffffff;
+  font-size: 0.625rem;
+}
+
+/* Price Section */
+.luxury-product-card__price-wrapper,
+.pch-card__price-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.luxury-product-card__price,
+.pch-card__price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-body--family, inherit);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+}
+
+.pch-card__price-from {
+  font-size: 0.8em;
+  font-weight: 400;
+  opacity: 0.75;
+}
+
+.luxury-product-card__price-compare,
+.pch-card__price-compare {
+  color: #777777;
+  font-size: 0.85rem;
+  font-weight: 400;
+  text-decoration: line-through;
+}
+
+.pch-card__discount-tag {
+  background: rgba(239, 68, 68, 0.16);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 9999px;
+}
+
+/* Mobile & Touch Viewport Rules (< 750px) */
+@media screen and (max-width: 749px) {
+  .luxury-product-card,
+  .pch-card {
+    padding: 10px;
+  }
+
+  .luxury-product-card__quick-add,
+  .pch-card__quick-add {
+    transform: translateY(0);
+    opacity: 1;
+    height: 38px;
+    padding: 0 12px;
+    font-size: 0.6875rem;
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "sections": {
+    "about_hero": {
+      "type": "about-hero",
+      "settings": {
+        "eyebrow": "ABOUT CR7 FRAGRANCES",
+        "heading": "More Than\na Fragrance.",
+        "text": "CR7 Fragrances is a celebration of confidence, ambition and the winning mindset. Inspired by Cristiano Ronaldo, it's more than a fragrance — it's a lifestyle.",
+        "link_label": "OUR COLLECTION",
+        "blend_image": true
+      }
+    },
+    "about_story": {
+      "type": "about-story",
+      "settings": {
+        "eyebrow": "OUR STORY",
+        "heading": "A Legacy of\nGreatness",
+        "paragraph_1": "Born from the relentless drive of Cristiano Ronaldo, CR7 Fragrances embodies the spirit of never giving up. Each scent is crafted for those who dare to dream, strive for more, and live life with passion.",
+        "paragraph_2": "From the pitch to everyday life, CR7 is a symbol of strength, elegance and unstoppable energy."
+      }
+    },
+    "about_values": {
+      "type": "about-values",
+      "blocks": {
+        "val_1": {
+          "type": "value",
+          "settings": {
+            "icon": "trophy",
+            "name": "Confidence",
+            "tagline": "Believe in yourself."
+          }
+        },
+        "val_2": {
+          "type": "value",
+          "settings": {
+            "icon": "diamond",
+            "name": "Elegance",
+            "tagline": "Stand out effortlessly."
+          }
+        },
+        "val_3": {
+          "type": "value",
+          "settings": {
+            "icon": "star",
+            "name": "Ambition",
+            "tagline": "Aim higher."
+          }
+        },
+        "val_4": {
+          "type": "value",
+          "settings": {
+            "icon": "infinity",
+            "name": "Legacy",
+            "tagline": "Leave a mark."
+          }
+        }
+      },
+      "block_order": [
+        "val_1",
+        "val_2",
+        "val_3",
+        "val_4"
+      ],
+      "settings": {
+        "eyebrow": "OUR VALUES",
+        "heading": "What Drives Us"
+      }
+    },
+    "about_cta": {
+      "type": "about-cta",
+      "settings": {
+        "heading": "Live Bold.\nSmell Legendary.",
+        "text": "Experience the power of CR7 Fragrances — because true success never goes unnoticed.",
+        "link_label": "SHOP THE COLLECTION",
+        "signature_width": 270
+      }
+    }
+  },
+  "order": [
+    "about_hero",
+    "about_story",
+    "about_values",
+    "about_cta"
+  ]
+}
+

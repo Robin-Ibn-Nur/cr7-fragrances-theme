@@ -1,0 +1,600 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+/* ==========================================================================
+   Luxury Product Card - Matched to Store Aesthetics
+   ========================================================================== */
+
+.lilac-product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  background: var(--color-background, #ffffff);
+  border-radius: 0;
+  padding-bottom: 6px;
+  width: 100%;
+  max-width: var(--lpc-max-w, 100%);
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lilac-product-card.has-lift:hover {
+  transform: translateY(-4px);
+}
+
+/* Thumbnail Container - Zero Border & Zero Padding */
+.lilac-product-card__thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--lpc-ratio, 4 / 5);
+  background-color: var(--lpc-thumb-bg, #f8f8f8);
+  border-radius: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none !important;
+  box-shadow: none !important;
+  transition: box-shadow 0.35s ease;
+  box-sizing: border-box;
+}
+
+.lilac-product-card:hover .lilac-product-card__thumb {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+  border: none !important;
+}
+
+/* Image Link & Container - 0 Padding */
+.lilac-product-card__image-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  padding: 0 !important;
+  box-sizing: border-box;
+  text-decoration: none;
+}
+
+.lilac-product-card__image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--lpc-thumb-bg, #f8f8f8);
+  padding: 0 !important;
+}
+
+.lilac-product-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover !important;
+  display: block;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform, opacity;
+}
+
+.lilac-product-card__img--primary {
+  opacity: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.lilac-product-card__img--secondary {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.lilac-product-card.has-zoom:hover .lilac-product-card__img {
+  transform: scale(1.06);
+}
+
+/* Hide primary image on hover when secondary exists */
+.lilac-product-card.has-secondary:hover .lilac-product-card__img--primary {
+  opacity: 0;
+}
+
+.lilac-product-card.has-secondary:hover .lilac-product-card__img--secondary {
+  opacity: 1;
+}
+
+/* Ribbon Pin Badge */
+.lilac-product-card__ribbon {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 22px;
+  height: 28px;
+  background-color: #111111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.lilac-product-card__ribbon svg {
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.lilac-product-card__sale-badge--sold-out {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #111111 !important;
+  color: #ffffff;
+  font-family: var(--font-subheading--family, sans-serif);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  z-index: 4;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  line-height: 1.2;
+}
+
+/* Quick View Hover Button (Top-Right) */
+.lilac-product-card__quickview-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  color: #111111;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.3s cubic-bezier(0.25, 1, 0.5, 1), transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.25s ease, color 0.25s ease;
+}
+
+.lilac-product-card:hover .lilac-product-card__quickview-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.lilac-product-card__quickview-btn:hover {
+  background-color: #111111;
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+/* Bottom Slide-up Add to Cart Button - Floats up on hover */
+.lilac-product-card__add-btn {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 5;
+  background-color: #3a8432;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 13px 18px;
+  font-family: var(--font-subheading--family, sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+  white-space: nowrap;
+}
+
+.lilac-product-card:hover .lilac-product-card__add-btn {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.lilac-product-card__add-btn:hover {
+  background-color: #429639;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(58, 132, 50, 0.45);
+}
+
+.lilac-product-card__add-btn.is-sold-out {
+  background-color: #2a2a2a;
+  color: #888888;
+  cursor: not-allowed;
+  border-color: transparent;
+}
+
+/* Spinner for Quick Add */
+.lilac-btn-spinner {
+  display: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: lilacSpin 0.6s linear infinite;
+}
+
+@keyframes lilacSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Loading & Added States: Stays pinned and visible */
+.lilac-product-card__add-btn.is-loading,
+.lilac-product-card__add-btn.is-added {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+}
+
+/* LOADING */
+.lilac-product-card__add-btn.is-loading {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  cursor: wait;
+}
+
+.lilac-product-card__add-btn.is-loading .lilac-product-card__add-text {
+  visibility: hidden;
+}
+
+.lilac-product-card__add-btn.is-loading .lilac-btn-spinner {
+  display: block !important;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -7px 0 0 -7px;
+}
+
+/* ADDED */
+.lilac-product-card__add-btn.is-added {
+  background-color: #2b7a4b !important;
+  color: #ffffff !important;
+}
+
+.lilac-product-card__add-btn.is-added .lilac-product-card__add-text {
+  visibility: hidden;
+}
+
+.lilac-product-card__add-btn.is-added .lilac-btn-check {
+  display: flex !important;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Information Section - Left Aligned, Normal Weight & Elevated Letter Spacing */
+.lilac-product-card__info {
+  padding: 14px 2px 4px 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start !important;
+  text-align: left !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Title: Normal Font-Weight, Elevated Letter Spacing */
+.lilac-product-card__title {
+  font-family: var(--font-heading--family, serif);
+  font-size: 15px;
+  font-weight: 400 !important;
+  color: #111111;
+  margin: 0 0 6px 0;
+  line-height: 1.4;
+  text-align: left !important;
+  letter-spacing: 1.2px !important;
+  text-transform: uppercase;
+  width: 100%;
+}
+
+.lilac-product-card__title a {
+  color: #111111;
+  text-decoration: none;
+  font-weight: 400 !important;
+  letter-spacing: inherit;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.2s ease;
+}
+
+.lilac-product-card__title a:hover {
+  color: #3a8432;
+}
+
+/* Rating Row: Normal Font-Weight & Elevated Letter Spacing */
+.lilac-product-card__rating {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start !important;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1;
+  margin-bottom: 8px;
+  width: 100%;
+  font-weight: 400 !important;
+  letter-spacing: 1px !important;
+}
+
+.lilac-stars-group {
+  display: inline-flex;
+  gap: 3px;
+  color: #f59e0b;
+}
+
+.lilac-product-card__rating .lilac-star--empty {
+  color: #d1d5db;
+}
+
+.lilac-product-card__review-count {
+  font-family: var(--font-subheading--family, sans-serif);
+  font-size: 12px;
+  font-weight: 400 !important;
+  letter-spacing: 1px !important;
+  color: #666666;
+}
+
+/* Price Row: Normal Font-Weight, Elevated Letter Spacing */
+.lilac-product-card__price-wrap {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start !important;
+  gap: 10px;
+  width: 100%;
+  line-height: 1.2;
+}
+
+.lilac-product-card__price {
+  font-family: var(--font-subheading--family, sans-serif);
+  font-size: 15px;
+  font-weight: 400 !important;
+  letter-spacing: 1px !important;
+  color: #111111;
+}
+
+.lilac-price-from {
+  font-size: 12px;
+  font-weight: 400 !important;
+  letter-spacing: 0.8px;
+  color: #777777;
+}
+
+.lilac-product-card__price--compare {
+  font-family: var(--font-subheading--family, sans-serif);
+  font-size: 13px;
+  font-weight: 400 !important;
+  letter-spacing: 0.8px !important;
+  text-decoration: line-through;
+  color: #888888;
+}
+
+/* Touch-only devices fallback */
+@media (hover: none) and (pointer: coarse) {
+  .lilac-product-card__add-btn {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .lilac-product-card__quickview-btn {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Quick View Modal */
+.lilac-quickview-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  overflow: hidden;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s;
+}
+
+.lilac-quickview-modal.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.lilac-quickview-modal__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+}
+
+.lilac-quickview-modal__content {
+  position: relative;
+  background: #ffffff;
+  width: 820px;
+  max-width: calc(100% - 32px);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 36px;
+  border-radius: 4px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+  transform: scale(0.92);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 2;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.lilac-quickview-modal.is-open .lilac-quickview-modal__content {
+  transform: scale(1);
+}
+
+.lilac-quickview-modal__close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: transparent;
+  border: none;
+  font-size: 30px;
+  line-height: 1;
+  color: #111111;
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.lilac-quickview-modal__close:hover {
+  color: #3a8432;
+  transform: scale(1.15);
+}
+
+.lilac-quickview-modal__grid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 32px;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .lilac-quickview-modal__grid {
+    grid-template-columns: 1fr;
+  }
+  .lilac-quickview-modal__content {
+    padding: 24px 18px;
+  }
+}
+
+.lilac-quickview-modal__media img {
+  width: 100%;
+  max-height: 380px;
+  object-fit: contain;
+  background: #f8f8f8;
+  padding: 12px;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.lilac-quickview-modal__brand {
+  font-family: var(--font-subheading--family, sans-serif);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #3a8432;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.lilac-quickview-modal__title {
+  font-family: var(--font-heading--family, serif);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: #111111;
+  margin: 0 0 10px 0;
+  line-height: 1.25;
+}
+
+.lilac-quickview-modal__price-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.lilac-quickview-modal__price {
+  font-family: var(--font-subheading--family, sans-serif);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: #111111;
+}
+
+.lilac-quickview-modal__desc {
+  font-family: var(--font-body--family, serif);
+  font-size: 14px;
+  line-height: 1.6;
+  color: #4b5563;
+  margin-bottom: 24px;
+}
+
+.lilac-quickview-modal__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #3a8432;
+  color: #ffffff;
+  padding: 14px 32px;
+  font-family: var(--font-subheading--family, sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.lilac-quickview-modal__btn:hover {
+  background-color: #429639;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(58, 132, 50, 0.45);
+}
+
+.lilac-quickview-modal__more {
+  display: block;
+  margin-top: 16px;
+  font-family: var(--font-subheading--family, sans-serif);
+  font-size: 13px;
+  color: #111111;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: color 0.2s ease;
+}
+
+.lilac-quickview-modal__more:hover {
+  color: #3a8432;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .lilac-product-card,
+  .lilac-product-card__thumb,
+  .lilac-product-card__img,
+  .lilac-product-card__add-btn,
+  .lilac-product-card__quickview-btn,
+  .lilac-quickview-modal__content {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}

@@ -1,0 +1,316 @@
+{%- doc -%}
+  Premium Luxury E-Commerce Product Card
+  Renders a high-end, professional product card with dual-image hover cross-fade,
+  floating status badges, interactive wishlist toggle, olfactory scent notes pill,
+  randomized social proof review stars & counts, and smooth slide-up Quick Add.
+
+  @param {object} product - The Shopify product object
+  @param {string} [class] - Optional extra class names for the card
+{%- enddoc -%}
+
+{%- if product != blank and product.id != blank -%}
+  {{ 'product-card-hover.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'product-card-hover.js' | asset_url }}" type="module" defer></script>
+  <script src="{{ 'luxury-product-card.js' | asset_url }}" defer></script>
+
+  {%- liquid
+    assign current_variant = product.selected_or_first_available_variant
+    assign is_available = product.available
+    assign has_multiple_variants = false
+    if product.variants.size > 1
+      assign has_multiple_variants = true
+    endif
+
+    assign primary_image = product.featured_media.preview_image | default: product.featured_image
+    assign secondary_image = product.images[1] | default: product.media[1].preview_image
+
+    assign has_secondary = false
+    if secondary_image != blank and secondary_image != primary_image
+      assign has_secondary = true
+    endif
+
+    # Calculate discount percentage if on sale
+    assign is_on_sale = false
+    if current_variant.compare_at_price > current_variant.price
+      assign is_on_sale = true
+      assign savings_amount = current_variant.compare_at_price | minus: current_variant.price
+      assign savings_percent = savings_amount | times: 100.0 | divided_by: current_variant.compare_at_price | round
+    endif
+
+    # Determine luxury status badge
+    assign badge_text = ''
+    if is_on_sale
+      assign badge_text = 'SAVE ' | append: savings_percent | append: '%'
+    elsif product.handle contains 'legacy' or product.handle == 'cr7-energy-1'
+      assign badge_text = 'BESTSELLER'
+    elsif product.handle contains 'discover' or product.handle == 'cr7-energy'
+      assign badge_text = 'NEW ARRIVAL'
+    elsif product.handle contains 'origins'
+      assign badge_text = 'SIGNATURE'
+    endif
+
+    # Scent notes mapping for fragrance luxury appeal
+    assign scent_notes = ''
+    case product.handle
+      when 'cr7-energy-1'
+        assign scent_notes = 'Bergamot • Pink Pepper • Cedarwood'
+      when 'cristiano-ronaldo-legacy'
+        assign scent_notes = 'Bergamot • Cinnamon • Ambergris'
+      when 'cristiano-ronaldo-discover'
+        assign scent_notes = 'Citrus • Mandarin • Vetiver'
+      when 'cr7'
+        assign scent_notes = 'Cardamom • Tobacco • Amber'
+      when 'cr7-play-it-cool'
+        assign scent_notes = 'Mandarin • Sea Notes • Musk'
+      when 'cr7-game-on'
+        assign scent_notes = 'Cardamom • Violet • Tonka Bean'
+      when 'cristiano-ronaldo-origins'
+        assign scent_notes = 'Mandarin • Bay Leaf • Patchouli'
+      when 'cr7-energy'
+        assign scent_notes = 'Grapefruit • Geranium • Vanilla'
+      else
+        assign scent_notes = 'Calabrian Citrus • Woods • Amber'
+    endcase
+
+    # Deterministic randomized luxury ratings & reviews (stable per product id)
+    assign id_seed = product.id | modulo: 7
+    case id_seed
+      when 0
+        assign rating_val = '5.0'
+        assign star_count = 5
+        assign reviews_count = 482
+      when 1
+        assign rating_val = '4.9'
+        assign star_count = 5
+        assign reviews_count = 346
+      when 2
+        assign rating_val = '4.9'
+        assign star_count = 5
+        assign reviews_count = 528
+      when 3
+        assign rating_val = '4.8'
+        assign star_count = 5
+        assign reviews_count = 214
+      when 4
+        assign rating_val = '4.9'
+        assign star_count = 5
+        assign reviews_count = 318
+      when 5
+        assign rating_val = '4.8'
+        assign star_count = 5
+        assign reviews_count = 196
+      when 6
+        assign rating_val = '4.7'
+        assign star_count = 4
+        assign reviews_count = 175
+    endcase
+
+    # Override for specific CR7 hero products
+    case product.handle
+      when 'cristiano-ronaldo-legacy'
+        assign rating_val = '5.0'
+        assign reviews_count = 482
+      when 'cr7'
+        assign rating_val = '4.9'
+        assign reviews_count = 528
+      when 'cr7-energy-1'
+        assign rating_val = '4.9'
+        assign reviews_count = 314
+      when 'cr7-game-on'
+        assign rating_val = '4.9'
+        assign reviews_count = 342
+      when 'cr7-play-it-cool'
+        assign rating_val = '4.8'
+        assign reviews_count = 235
+      when 'cristiano-ronaldo-discover'
+        assign rating_val = '4.8'
+        assign reviews_count = 196
+      when 'cristiano-ronaldo-origins'
+        assign rating_val = '4.7'
+        assign reviews_count = 184
+      when 'cr7-energy'
+        assign rating_val = '4.8'
+        assign reviews_count = 165
+    endcase
+
+    assign form_id = 'PchLuxuryForm-' | append: product.id | append: '-' | append: forloop.index0
+  -%}
+
+  <div
+    class="pch-card luxury-product-card{% if class != blank %} {{ class }}{% endif %}{% unless is_available %} is-sold-out{% endunless %}"
+    data-product-id="{{ product.id }}"
+    data-product-handle="{{ product.handle }}"
+  >
+    <!-- Media & Image Gallery with Dual-Image Crossfade -->
+    <div class="pch-card__gallery luxury-product-card__gallery{% if has_secondary %} has-secondary-image{% endif %}">
+      <a
+        href="{{ product.url }}"
+        class="pch-card__media-link luxury-product-card__media-link"
+        aria-label="{{ product.title | escape }}"
+      >
+        {%- if primary_image != blank -%}
+          {{
+            primary_image
+            | image_url: width: 800
+            | image_tag:
+              loading: 'lazy',
+              widths: '300, 400, 600, 800',
+              sizes: '(min-width: 1200px) 400px, (min-width: 750px) 300px, 50vw',
+              alt: product.title,
+              class: 'pch-card__image luxury-product-card__image luxury-product-card__image--primary'
+          }}
+        {%- else -%}
+          {{ 'product-1' | placeholder_svg_tag: 'pch-card__image luxury-product-card__image' }}
+        {%- endif -%}
+
+        {%- if has_secondary -%}
+          {{
+            secondary_image
+            | image_url: width: 800
+            | image_tag:
+              loading: 'lazy',
+              widths: '300, 400, 600, 800',
+              sizes: '(min-width: 1200px) 400px, (min-width: 750px) 300px, 50vw',
+              alt: product.title,
+              class: 'pch-card__image luxury-product-card__image luxury-product-card__image--secondary'
+          }}
+        {%- endif -%}
+      </a>
+
+      <!-- Floating Status Badge (Top-Left) -->
+      {%- if badge_text != blank -%}
+        <div class="pch-card__badges luxury-product-card__badges">
+          <span class="pch-card__badge luxury-product-card__badge">
+            {{ badge_text }}
+          </span>
+        </div>
+      {%- endif -%}
+
+      <!-- Floating Wishlist Heart Button (Top-Right) -->
+      <button
+        type="button"
+        class="pch-card__wishlist luxury-product-card__wishlist"
+        data-wishlist-toggle
+        data-product-handle="{{ product.handle }}"
+        aria-label="Add {{ product.title | escape }} to wishlist"
+        aria-pressed="false"
+      >
+        <svg
+          class="luxury-product-card__wishlist-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+      </button>
+
+      <!-- Slide-Up Quick Add Button (Bottom of Media) -->
+      <div class="pch-card__quick-add-wrap luxury-product-card__quick-add-wrap">
+        {%- if is_available -%}
+          {%- if has_multiple_variants -%}
+            <a
+              href="{{ product.url }}"
+              class="pch-card__quick-add luxury-product-card__quick-add pch-card__quick-add--options"
+              aria-label="Choose options for {{ product.title | escape }}"
+            >
+              <span class="pch-card__btn-icon" aria-hidden="true">→</span>
+              <span class="pch-card__btn-text">CHOOSE OPTIONS</span>
+            </a>
+          {%- else -%}
+            {%- form 'product', product, id: form_id, class: 'pch-card__form', data-product-id: product.id -%}
+              <input type="hidden" name="id" value="{{ current_variant.id }}">
+              <input type="hidden" name="quantity" value="1">
+              <button
+                type="submit"
+                name="add"
+                class="pch-card__quick-add luxury-product-card__quick-add"
+                data-pch-add-button
+                aria-label="Quick add {{ product.title | escape }} to cart"
+              >
+                <span class="pch-card__btn-icon" aria-hidden="true">+</span>
+                <span class="pch-card__btn-text" data-pch-text>QUICK ADD</span>
+              </button>
+            {%- endform -%}
+          {%- endif -%}
+        {%- else -%}
+          <button
+            type="button"
+            class="pch-card__quick-add luxury-product-card__quick-add is-disabled"
+            disabled
+            aria-disabled="true"
+          >
+            <span class="pch-card__btn-text">SOLD OUT</span>
+          </button>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <!-- Product Information & Editorial Details -->
+    <div class="pch-card__info luxury-product-card__info">
+      <div class="pch-card__kicker luxury-product-card__kicker">
+        <span>CR7 FRAGRANCE • EAU DE PARFUM</span>
+      </div>
+
+      <h3 class="pch-card__title luxury-product-card__title">
+        <a href="{{ product.url }}">{{ product.title | escape }}</a>
+      </h3>
+
+      <!-- Review Stars & Rating (Requested by user) -->
+      <div
+        class="pch-card__rating luxury-product-card__rating"
+        aria-label="Rated {{ rating_val }} out of 5 stars with {{ reviews_count }} reviews"
+      >
+        <span class="pch-card__stars luxury-product-card__stars" aria-hidden="true">
+          {%- for i in (1..5) -%}
+            {%- if i <= star_count -%}
+              ★
+            {%- else -%}
+              ☆
+            {%- endif -%}
+          {%- endfor -%}
+        </span>
+        <span class="pch-card__score luxury-product-card__score">{{ rating_val }}</span>
+        <span class="pch-card__reviews-count luxury-product-card__reviews-count">({{ reviews_count }})</span>
+      </div>
+
+      <!-- Olfactory Scent Notes Pill -->
+      {%- if scent_notes != blank -%}
+        <div class="pch-card__scent-notes luxury-product-card__scent-notes" title="Signature Notes">
+          <span class="pch-card__scent-notes-icon luxury-product-card__scent-notes-icon" aria-hidden="true">✦</span>
+          <span class="pch-card__scent-notes-text luxury-product-card__scent-notes-text">{{ scent_notes }}</span>
+        </div>
+      {%- endif -%}
+
+      <!-- Price Section -->
+      <div class="pch-card__price-wrapper luxury-product-card__price-wrapper">
+        <div class="pch-card__price luxury-product-card__price">
+          {%- if product.price_varies -%}
+            <span class="pch-card__price-from">From </span>
+          {%- endif -%}
+          <span class="pch-card__price-regular">
+            {{ current_variant.price | money }}
+          </span>
+          {%- if is_on_sale -%}
+            <s class="pch-card__price-compare luxury-product-card__price-compare">
+              {{ current_variant.compare_at_price | money }}
+            </s>
+          {%- endif -%}
+        </div>
+
+        {%- if is_on_sale -%}
+          <span class="pch-card__discount-tag">
+            -{{ savings_percent }}%
+          </span>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <!-- Screen Reader Status Region -->
+    <div class="visually-hidden" aria-live="polite" data-pch-status></div>
+  </div>
+{%- endif -%}

@@ -1,0 +1,60 @@
+{%- doc -%}
+  PDP Sticky Add-to-Cart Bar
+  Fixed bottom bar that appears when the main CTA leaves the viewport
+  and hides when the main CTA or footer is visible.
+
+  @param {product} product - The main product
+  @param {object} current_variant - Currently selected or first available variant
+  @param {object} primary_image - Primary preview image
+{%- enddoc -%}
+
+<div
+  class="pdp-sticky"
+  data-pdp-sticky
+  aria-hidden="true"
+  inert
+>
+  <div class="pdp-sticky__inner">
+    <div class="pdp-sticky__product">
+      {%- if primary_image != blank -%}
+        {%- assign sticky_alt = product.title | escape -%}
+        <div class="pdp-sticky__thumb">
+          {{ primary_image | image_url: width: 120 | image_tag:
+            loading: 'lazy',
+            class: 'pdp-sticky__thumb-img',
+            data-pdp-sticky-img: '',
+            alt: sticky_alt,
+            width: 44,
+            height: 44
+          }}
+        </div>
+      {%- endif -%}
+
+      <div class="pdp-sticky__meta">
+        <span class="pdp-sticky__title">{{ product.title }}</span>
+        {%- unless product.has_only_default_variant -%}
+          <span class="pdp-sticky__variant" data-pdp-sticky-variant>{{ current_variant.title }}</span>
+        {%- endunless -%}
+      </div>
+    </div>
+
+    <div class="pdp-sticky__actions">
+      <div class="pdp-sticky__price-wrap" data-pdp-sticky-price-wrap>
+        <span class="pdp-sticky__price" data-pdp-sticky-price>{{ current_variant.price | money }}</span>
+      </div>
+      <button
+        type="button"
+        class="pdp-btn--primary pdp-sticky__btn button button-custom"
+        data-pdp-sticky-add
+        {% unless current_variant.available %}disabled{% endunless %}
+      >
+        {%- if current_variant.available -%}
+          Add to cart
+        {%- else -%}
+          Sold out
+        {%- endif -%}
+      </button>
+    </div>
+  </div>
+</div>
+

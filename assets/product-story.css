@@ -1,0 +1,224 @@
+/* Product Story Section (Editorial Block) */
+
+.ps-block {
+  --ps-bg: #030504;
+  --ps-accent: #19e65a;
+  --ps-text: #ffffff;
+  --ps-muted: #a3ada7;
+  --ps-border: rgba(255, 255, 255, 0.12);
+  --ps-radius: 6px;
+
+  position: relative;
+  background-color: var(--ps-bg);
+  color: var(--ps-text);
+  padding-block: clamp(56px, 6vw, 96px);
+  overflow: clip;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Ambient Glow Layers */
+.ps-block__ambient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.ps-block__glow {
+  position: absolute;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+.ps-block__glow--right {
+  width: clamp(350px, 45vw, 700px);
+  height: clamp(350px, 45vw, 700px);
+  top: 5%;
+  right: -50px;
+  background: radial-gradient(circle closest-side, rgba(25, 230, 90, 0.22) 0%, rgba(10, 159, 58, 0.06) 60%, transparent 100%);
+  opacity: 0.75;
+}
+
+.ps-block__glow--left {
+  width: clamp(280px, 35vw, 550px);
+  height: clamp(280px, 35vw, 550px);
+  bottom: -50px;
+  left: -50px;
+  background: radial-gradient(circle closest-side, rgba(25, 230, 90, 0.14) 0%, transparent 75%);
+  opacity: 0.6;
+}
+
+/* Main Container: Exact Header Width */
+.ps-block__container {
+  position: relative;
+  width: 100%;
+  max-width: var(--page-width, calc(var(--normal-page-width, 120rem) + (var(--page-margin, 40px) * 2)));
+  margin-inline: auto;
+  padding-inline: var(--page-margin, 40px);
+  box-sizing: border-box;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(36px, 5vw, 72px);
+  align-items: center;
+}
+
+/* Left Column: Editorial Image */
+.ps-block__media {
+  position: relative;
+  width: 100%;
+  border-radius: var(--ps-radius);
+  overflow: hidden;
+  border: 1px solid var(--ps-border);
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.ps-block__image-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/5;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ps-block__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ps-block__media:hover .ps-block__img {
+  transform: scale(1.03);
+}
+
+/* Right Column: Story Copy */
+.ps-block__content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 520px;
+}
+
+.ps-block__eyebrow {
+  font-family: var(--font-body--family, inherit);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ps-accent);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.ps-block__heading {
+  font-family: var(--ps-serif-font, inherit);
+  font-size: clamp(28px, 3.2vw, 44px);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin: 0;
+  word-break: break-word;
+}
+
+.ps-block__body {
+  font-family: var(--font-body--family, inherit);
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--ps-muted);
+}
+.ps-block__body p {
+  margin: 0 0 12px 0;
+}
+.ps-block__body p:last-child {
+  margin-bottom: 0;
+}
+
+/* Perfumer Attribution */
+.ps-block__perfumer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--ps-radius);
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ps-border);
+  width: fit-content;
+  margin-top: 4px;
+}
+
+.ps-block__perfumer-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ps-accent);
+}
+
+.ps-block__perfumer-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+/* Outlined Button */
+.ps-block__actions {
+  margin-top: 8px;
+}
+
+.ps-block__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  border-radius: 9999px;
+  border: 1px solid var(--ps-border);
+  background: transparent;
+  color: #ffffff;
+  font-family: var(--font-body--family, inherit);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  width: fit-content;
+}
+
+.ps-block__btn:hover {
+  border-color: var(--ps-accent);
+  color: var(--ps-accent);
+  background-color: rgba(25, 230, 90, 0.06);
+  transform: translateY(-1px);
+}
+
+.ps-block__btn:focus-visible {
+  outline: 2px solid var(--ps-accent);
+  outline-offset: 3px;
+}
+
+.ps-block__btn-arrow {
+  transition: transform 0.25s ease;
+}
+.ps-block__btn:hover .ps-block__btn-arrow {
+  transform: translateX(4px);
+}
+
+/* Responsive */
+@media screen and (max-width: 850px) {
+  .ps-block__container {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding-inline: var(--page-margin, 16px);
+  }
+  .ps-block__content {
+    max-width: 100%;
+  }
+}

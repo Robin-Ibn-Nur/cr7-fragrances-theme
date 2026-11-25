@@ -1,0 +1,130 @@
+{%- doc -%}
+  PDP Related Product Card (Screenshot Style)
+  @param {product} product - The product object to render
+  @param {string} [image_loading='lazy'] - Image loading attribute
+{%- enddoc -%}
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign primary_image = product.featured_media.preview_image | default: product.featured_image
+  assign is_available = product.available
+  assign has_only_default = product.has_only_default_variant
+
+  # Discount calculation
+  assign is_on_sale = false
+  assign discount_pct = 0
+  if current_variant.compare_at_price > current_variant.price
+    assign is_on_sale = true
+    assign price_diff = current_variant.compare_at_price | minus: current_variant.price
+    assign discount_pct = price_diff | times: 100.0 | divided_by: current_variant.compare_at_price | round
+  endif
+
+  # Rating
+  assign rating_obj = product.metafields.reviews.rating.value | default: product.metafields.reviews.rating
+  assign rating_val = 0
+  if rating_obj.rating != blank
+    assign rating_val = rating_obj.rating | plus: 0
+  elsif rating_obj != blank
+    assign rating_val = rating_obj | plus: 0
+  endif
+
+  # Category
+  assign category_name = product.type
+  if category_name == blank and product.collections.size > 0
+    assign category_name = product.collections.first.title
+  endif
+-%}
+
+<div class="pdp-rcard" data-product-handle="{{ product.handle }}">
+  {%- comment -%} Image Panel with Badge & Top-Right Actions {%- endcomment -%}
+  <div class="pdp-rcard__media-panel">
+    <a href="{{ product.url }}" class="pdp-rcard__media-link" aria-label="{{ product.title | escape }}">
+      {%- if primary_image != blank -%}
+        {%- assign card_alt = product.title | escape -%}
+        {{ primary_image | image_url: width: 800 | image_tag:
+          loading: image_loading,
+          class: 'pdp-rcard__img',
+          alt: card_alt,
+          widths: '300, 500, 800'
+        }}
+      {%- else -%}
+        {{ 'product-1' | placeholder_svg_tag: 'pdp-rcard__img pdp-rcard__img--placeholder' }}
+      {%- endif -%}
+    </a>
+
+    {%- if is_on_sale and discount_pct > 0 -%}
+      <span class="pdp-rcard__badge-sale" aria-label="{{ discount_pct }}% discount">
+        {{ discount_pct }}% off
+      </span>
+    {%- endif -%}
+
+    <div class="pdp-rcard__actions" aria-label="Quick actions">
+      <button
+        type="button"
+        class="pdp-rcard__btn pdp-rcard__btn--wishlist"
+        data-pdp-wishlist-btn
+        data-product-handle="{{ product.handle }}"
+        aria-pressed="false"
+        aria-label="Save {{ product.title | escape }} to Wishlist"
+        title="Save to Wishlist"
+      >
+        {% render 'pdp-icon', icon: 'heart' %}
+      </button>
+
+      {%- if is_available and has_only_default -%}
+        <button
+          type="button"
+          class="pdp-rcard__btn pdp-rcard__btn--quick-add"
+          data-pdp-quick-add
+          data-variant-id="{{ current_variant.id }}"
+          aria-label="Quick add {{ product.title | escape }} to cart"
+          title="Quick Add"
+        >
+          {% render 'pdp-icon', icon: 'cart' %}
+        </button>
+      {%- else -%}
+        <a
+          href="{{ product.url }}"
+          class="pdp-rcard__btn pdp-rcard__btn--choose-options"
+          aria-label="View options for {{ product.title | escape }}"
+          title="View Options"
+        >
+          {% render 'pdp-icon', icon: 'cart' %}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- comment -%} Card Content Below Panel {%- endcomment -%}
+  <div class="pdp-rcard__content">
+    <div class="pdp-rcard__top-row">
+      {%- if category_name != blank -%}
+        <span class="pdp-rcard__category">{{ category_name }}</span>
+      {%- else -%}
+        <span></span>
+      {%- endif -%}
+
+      {%- if rating_val > 0 -%}
+        <div class="pdp-rcard__rating">
+          <svg class="pdp-rcard__star" viewBox="0 0 24 24" fill="#f5a623" aria-hidden="true">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          <span class="pdp-rcard__rating-num">{{ rating_val | round: 1 }}</span>
+        </div>
+      {%- endif -%}
+    </div>
+
+    <h3 class="pdp-rcard__title">
+      <a href="{{ product.url }}" class="pdp-rcard__title-link">
+        {{ product.title }}
+      </a>
+    </h3>
+
+    <div class="pdp-rcard__price-row">
+      <span class="pdp-rcard__price-current">{{ current_variant.price | money }}</span>
+      {%- if is_on_sale -%}
+        <s class="pdp-rcard__price-compare">{{ current_variant.compare_at_price | money }}</s>
+      {%- endif -%}
+    </div>
+  </div>
+</div>

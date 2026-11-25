@@ -1,0 +1,230 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "blocks": {
+        "heading": {
+          "type": "text",
+          "name": "t:names.title",
+          "settings": {
+            "text": "<h1>{{ closest.page.title }}</h1>",
+            "width": "100%",
+            "max_width": "normal",
+            "alignment": "left",
+            "type_preset": "h2",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "text_color": "",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "page-content": {
+          "type": "page-content",
+          "settings": {
+            "text_color": ""
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "heading",
+        "page-content"
+      ],
+      "disabled": true,
+      "settings": {
+        "content_direction": "column",
+        "gap": 32,
+        "background_color": "{{ settings.color_palette.background }}",
+        "padding-block-start": 40,
+        "padding-block-end": 80
+      }
+    },
+    "custom_split_experience_p7aWLF": {
+      "type": "custom-split-experience",
+      "blocks": {
+        "image_EPgYVm": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/cris-1.jpg",
+            "overlay_opacity": 20
+          }
+        },
+        "heading_EmgLhU": {
+          "type": "heading",
+          "settings": {
+            "text": "For every moment",
+            "tag": "h2",
+            "column": "banner"
+          }
+        },
+        "text_rKrjLw": {
+          "type": "text",
+          "settings": {
+            "text": "<p>The right pick for every part of your day.</p>",
+            "column": "banner"
+          }
+        },
+        "badge_BcghUk": {
+          "type": "badge",
+          "settings": {
+            "icon": "bolt",
+            "title": "Everyday",
+            "subtitle": "Light & fresh",
+            "link": ""
+          }
+        },
+        "badge_XNzhCd": {
+          "type": "badge",
+          "settings": {
+            "icon": "moon",
+            "title": "Evenings",
+            "subtitle": "Bold & warm",
+            "link": ""
+          }
+        },
+        "badge_XcLi4J": {
+          "type": "badge",
+          "settings": {
+            "icon": "heart",
+            "title": "Special dates",
+            "subtitle": "Signature scent",
+            "link": ""
+          }
+        },
+        "button_j9mFQD": {
+          "type": "button",
+          "settings": {
+            "label": "Explore all",
+            "link": "",
+            "style": "outline",
+            "column": "banner"
+          }
+        },
+        "heading_9UHEgK": {
+          "type": "heading",
+          "settings": {
+            "text": "Gift the experience",
+            "tag": "h2",
+            "column": "products"
+          }
+        },
+        "text_tRHHgE": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Find the perfect gift.</p>",
+            "column": "products"
+          }
+        },
+        "product_h9qmkQ": {
+          "type": "product",
+          "settings": {
+            "product": "cristiano-ronaldo-fearless-eau-de-toilette-100ml-gift-set",
+            "custom_title": "",
+            "show_title": true,
+            "show_description": true,
+            "show_price": true,
+            "show_button": true,
+            "button_label": "Shop now"
+          }
+        },
+        "product_EWyDzE": {
+          "type": "product",
+          "settings": {
+            "product": "cristiano-ronaldo-legacy-eau-de-parfum",
+            "custom_title": "",
+            "show_title": true,
+            "show_description": true,
+            "show_price": true,
+            "show_button": true,
+            "button_label": "Shop now"
+          }
+        },
+        "product_FjAYQp": {
+          "type": "product",
+          "settings": {
+            "product": "the-cr7-get-ready-gift",
+            "custom_title": "",
+            "show_title": true,
+            "show_description": true,
+            "show_price": true,
+            "show_button": true,
+            "button_label": "Shop now"
+          }
+        },
+        "product_JgHnah": {
+          "type": "product",
+          "settings": {
+            "product": "legacy-luxe-gift-set",
+            "custom_title": "",
+            "show_title": true,
+            "show_description": true,
+            "show_price": true,
+            "show_button": true,
+            "button_label": "Shop now"
+          }
+        }
+      },
+      "block_order": [
+        "image_EPgYVm",
+        "heading_EmgLhU",
+        "text_rKrjLw",
+        "badge_BcghUk",
+        "badge_XNzhCd",
+        "badge_XcLi4J",
+        "button_j9mFQD",
+        "heading_9UHEgK",
+        "text_tRHHgE",
+        "product_h9qmkQ",
+        "product_EWyDzE",
+        "product_FjAYQp",
+        "product_JgHnah"
+      ],
+      "name": "Dual Promo",
+      "settings": {
+        "section_width": "theme",
+        "content_alignment": "left",
+        "grid_gap": 32,
+        "item_padding": 24,
+        "padding_top": 64,
+        "padding_bottom": 64,
+        "section_background_color": "{{ settings.color_palette.color1 }}",
+        "banner_text_color": "#ffffff",
+        "banner_content_background": "#0d0d0d",
+        "products_text_color": "{{ settings.color_palette.background }}",
+        "title_size_desktop": 42,
+        "title_size_mobile": 28,
+        "description_size_desktop": 16,
+        "description_size_mobile": 14,
+        "line_height": 1.2,
+        "letter_spacing": 0,
+        "font_weight": "600",
+        "visible_products_desktop": 3,
+        "visible_products_mobile": 1.2
+      }
+    }
+  },
+  "order": [
+    "main",
+    "custom_split_experience_p7aWLF"
+  ]
+}

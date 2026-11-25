@@ -1,0 +1,483 @@
+{%- comment -%}
+  Product Fragrance Profile Section
+  Signature notes pyramid (Top, Heart, Base), performance meters (Longevity, Sillage),
+  and "Best For" occasion/season chips.
+{%- endcomment -%}
+
+{{ 'product-fragrance-profile.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  # Notes Data Extraction (Metafield array, comma-separated string, or section settings)
+  assign top_raw = product.metafields.custom.notes_top.value | default: product.metafields.custom.notes_top
+  if top_raw == blank
+    assign top_raw = section.settings.default_notes_top
+  endif
+
+  assign heart_raw = product.metafields.custom.notes_heart.value | default: product.metafields.custom.notes_heart
+  if heart_raw == blank
+    assign heart_raw = section.settings.default_notes_heart
+  endif
+
+  assign base_raw = product.metafields.custom.notes_base.value | default: product.metafields.custom.notes_base
+  if base_raw == blank
+    assign base_raw = section.settings.default_notes_base
+  endif
+
+  # Images
+  assign top_img = product.metafields.custom.notes_top_image.value | default: product.metafields.custom.notes_top_image | default: section.settings.top_image
+  assign heart_img = product.metafields.custom.notes_heart_image.value | default: product.metafields.custom.notes_heart_image | default: section.settings.heart_image
+  assign base_img = product.metafields.custom.notes_base_image.value | default: product.metafields.custom.notes_base_image | default: section.settings.base_image
+
+  # Performance meters
+  assign longevity_score = product.metafields.custom.longevity.value | default: product.metafields.custom.longevity
+  if longevity_score == blank
+    assign longevity_score = section.settings.default_longevity
+  endif
+  assign longevity_score = longevity_score | plus: 0
+  if longevity_score < 1
+    assign longevity_score = 4
+  endif
+
+  assign sillage_score = product.metafields.custom.sillage.value | default: product.metafields.custom.sillage
+  if sillage_score == blank
+    assign sillage_score = section.settings.default_sillage
+  endif
+  assign sillage_score = sillage_score | plus: 0
+  if sillage_score < 1
+    assign sillage_score = 3
+  endif
+
+  # Best For Chips
+  assign best_for_raw = product.metafields.custom.best_for.value | default: product.metafields.custom.best_for
+  if best_for_raw == blank
+    assign best_for_raw = section.settings.default_best_for
+  endif
+
+  # Clean hide guard if nothing is present and not in design mode
+  assign has_content = false
+  if top_raw != blank or heart_raw != blank or base_raw != blank or request.design_mode
+    assign has_content = true
+  endif
+-%}
+
+{%- if has_content -%}
+  <section
+    id="pp-fragrance-profile"
+    class="pfp-section"
+    data-section-id="{{ section.id }}"
+    data-section-type="product-fragrance-profile"
+    style="
+      --pfp-bg: {{ section.settings.background_color }};
+      --pfp-accent: {{ section.settings.accent_color }};
+      --pfp-text: {{ section.settings.text_color }};
+      --pfp-muted: {{ section.settings.muted_color }};
+      --pfp-border: {{ section.settings.border_color }};
+      --pfp-serif-font: {{ section.settings.serif_font.family }}, var(--font-heading--family), Georgia, serif;
+    "
+  >
+    <div class="pfp-section__container">
+      <div class="pfp-section__header">
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="pfp-section__eyebrow">{{ section.settings.eyebrow }}</p>
+        {%- endif -%}
+        {%- if section.settings.heading != blank -%}
+          <h2 class="pfp-section__title">{{ section.settings.heading }}</h2>
+        {%- endif -%}
+        {%- if section.settings.subtitle != blank -%}
+          <p class="pfp-section__subtitle">{{ section.settings.subtitle }}</p>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} Notes Pyramid: 3 Tiers {%- endcomment -%}
+      <div class="pfp-pyramid" role="region" aria-label="Fragrance notes pyramid">
+        {%- comment -%} Tier 1: Top Notes {%- endcomment -%}
+        <div class="pfp-tier">
+          {%- if top_img != blank -%}
+            <div class="pfp-tier__image-wrap">
+              {%- assign top_alt = section.settings.top_name | escape -%}
+              {{ top_img | image_url: width: 200 | image_tag:
+                loading: 'lazy',
+                class: 'pfp-tier__image',
+                alt: top_alt
+              }}
+            </div>
+          {%- endif -%}
+          <h3 class="pfp-tier__name">{{ section.settings.top_name }}</h3>
+          <p class="pfp-tier__desc">{{ section.settings.top_desc }}</p>
+          <div class="pfp-tier__notes">
+            {%- liquid
+              if top_raw.first != blank
+                for note in top_raw
+                  echo '<span class="pfp-note-chip">' | append: note | append: '</span>'
+                endfor
+              else
+                assign split_notes = top_raw | split: ','
+                for note in split_notes
+                  assign trimmed = note | strip
+                  if trimmed != blank
+                    echo '<span class="pfp-note-chip">' | append: trimmed | append: '</span>'
+                  endif
+                endfor
+              endif
+            -%}
+          </div>
+        </div>
+
+        {%- comment -%} Tier 2: Heart Notes {%- endcomment -%}
+        <div class="pfp-tier">
+          {%- if heart_img != blank -%}
+            <div class="pfp-tier__image-wrap">
+              {%- assign heart_alt = section.settings.heart_name | escape -%}
+              {{ heart_img | image_url: width: 200 | image_tag:
+                loading: 'lazy',
+                class: 'pfp-tier__image',
+                alt: heart_alt
+              }}
+            </div>
+          {%- endif -%}
+          <h3 class="pfp-tier__name">{{ section.settings.heart_name }}</h3>
+          <p class="pfp-tier__desc">{{ section.settings.heart_desc }}</p>
+          <div class="pfp-tier__notes">
+            {%- liquid
+              if heart_raw.first != blank
+                for note in heart_raw
+                  echo '<span class="pfp-note-chip">' | append: note | append: '</span>'
+                endfor
+              else
+                assign split_notes = heart_raw | split: ','
+                for note in split_notes
+                  assign trimmed = note | strip
+                  if trimmed != blank
+                    echo '<span class="pfp-note-chip">' | append: trimmed | append: '</span>'
+                  endif
+                endfor
+              endif
+            -%}
+          </div>
+        </div>
+
+        {%- comment -%} Tier 3: Base Notes {%- endcomment -%}
+        <div class="pfp-tier">
+          {%- if base_img != blank -%}
+            <div class="pfp-tier__image-wrap">
+              {%- assign base_alt = section.settings.base_name | escape -%}
+              {{ base_img | image_url: width: 200 | image_tag:
+                loading: 'lazy',
+                class: 'pfp-tier__image',
+                alt: base_alt
+              }}
+            </div>
+          {%- endif -%}
+          <h3 class="pfp-tier__name">{{ section.settings.base_name }}</h3>
+          <p class="pfp-tier__desc">{{ section.settings.base_desc }}</p>
+          <div class="pfp-tier__notes">
+            {%- liquid
+              if base_raw.first != blank
+                for note in base_raw
+                  echo '<span class="pfp-note-chip">' | append: note | append: '</span>'
+                endfor
+              else
+                assign split_notes = base_raw | split: ','
+                for note in split_notes
+                  assign trimmed = note | strip
+                  if trimmed != blank
+                    echo '<span class="pfp-note-chip">' | append: trimmed | append: '</span>'
+                  endif
+                endfor
+              endif
+            -%}
+          </div>
+        </div>
+      </div>
+
+      {%- comment -%} Performance & Specs Row {%- endcomment -%}
+      <div class="pfp-specs">
+        <div class="pfp-meters" role="region" aria-label="Fragrance performance">
+          {%- comment -%} Longevity Meter {%- endcomment -%}
+          <div class="pfp-meter-row">
+            <div class="pfp-meter-header">
+              <span class="pfp-meter-label">{{ section.settings.longevity_label }}</span>
+              <span class="pfp-meter-value-text">{{ section.settings.longevity_desc }}</span>
+            </div>
+            <div
+              class="pfp-meter-segments"
+              role="meter"
+              aria-label="{{ section.settings.longevity_label }}"
+              aria-valuenow="{{ longevity_score }}"
+              aria-valuemin="1"
+              aria-valuemax="5"
+              aria-valuetext="{{ section.settings.longevity_desc }}"
+            >
+              {%- for i in (1..5) -%}
+                <div class="pfp-meter-segment{% if i <= longevity_score %} pfp-meter-segment--filled{% endif %}"></div>
+              {%- endfor -%}
+            </div>
+          </div>
+
+          {%- comment -%} Sillage Meter {%- endcomment -%}
+          <div class="pfp-meter-row">
+            <div class="pfp-meter-header">
+              <span class="pfp-meter-label">{{ section.settings.sillage_label }}</span>
+              <span class="pfp-meter-value-text">{{ section.settings.sillage_desc }}</span>
+            </div>
+            <div
+              class="pfp-meter-segments"
+              role="meter"
+              aria-label="{{ section.settings.sillage_label }}"
+              aria-valuenow="{{ sillage_score }}"
+              aria-valuemin="1"
+              aria-valuemax="5"
+              aria-valuetext="{{ section.settings.sillage_desc }}"
+            >
+              {%- for i in (1..5) -%}
+                <div class="pfp-meter-segment{% if i <= sillage_score %} pfp-meter-segment--filled{% endif %}"></div>
+              {%- endfor -%}
+            </div>
+          </div>
+        </div>
+
+        {%- comment -%} Best For Chips {%- endcomment -%}
+        <div class="pfp-bestfor">
+          <h4 class="pfp-bestfor__title">{{ section.settings.best_for_label }}</h4>
+          <div class="pfp-bestfor__chips">
+            {%- liquid
+              if best_for_raw.first != blank
+                for chip in best_for_raw
+                  echo '<span class="pfp-bestfor-chip">' | append: chip | append: '</span>'
+                endfor
+              else
+                assign split_chips = best_for_raw | split: ','
+                for chip in split_chips
+                  assign chip_trimmed = chip | strip
+                  if chip_trimmed != blank
+                    echo '<span class="pfp-bestfor-chip">' | append: chip_trimmed | append: '</span>'
+                  endif
+                endfor
+              endif
+            -%}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Fragrance Profile",
+  "tag": "section",
+  "class": "section-product-fragrance-profile",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colors & Typography"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#030504"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#19e65a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Muted Text",
+      "default": "#a3ada7"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border",
+      "default": "rgba(255, 255, 255, 0.12)"
+    },
+    {
+      "type": "font_picker",
+      "id": "serif_font",
+      "label": "Heading Font",
+      "default": "playfair_display_n5"
+    },
+    {
+      "type": "header",
+      "content": "Section Header"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "OLFACTORY PYRAMID"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Fragrance Notes & Profile"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "A masterfully balanced composition crafted for enduring presence."
+    },
+    {
+      "type": "header",
+      "content": "Top Notes"
+    },
+    {
+      "type": "text",
+      "id": "top_name",
+      "label": "Tier Name",
+      "default": "Top Notes"
+    },
+    {
+      "type": "text",
+      "id": "top_desc",
+      "label": "Description",
+      "default": "The first impression, lasting 15–30 minutes"
+    },
+    {
+      "type": "text",
+      "id": "default_notes_top",
+      "label": "Fallback Notes (comma-separated)",
+      "default": "Citrus, Bergamot, Crisp Apple"
+    },
+    {
+      "type": "image_picker",
+      "id": "top_image",
+      "label": "Optional Tier Image"
+    },
+    {
+      "type": "header",
+      "content": "Heart Notes"
+    },
+    {
+      "type": "text",
+      "id": "heart_name",
+      "label": "Tier Name",
+      "default": "Heart Notes"
+    },
+    {
+      "type": "text",
+      "id": "heart_desc",
+      "label": "Description",
+      "default": "The core character, lasting 2–4 hours"
+    },
+    {
+      "type": "text",
+      "id": "default_notes_heart",
+      "label": "Fallback Notes (comma-separated)",
+      "default": "Lavender, Clary Sage, Cedarwood"
+    },
+    {
+      "type": "image_picker",
+      "id": "heart_image",
+      "label": "Optional Tier Image"
+    },
+    {
+      "type": "header",
+      "content": "Base Notes"
+    },
+    {
+      "type": "text",
+      "id": "base_name",
+      "label": "Tier Name",
+      "default": "Base Notes"
+    },
+    {
+      "type": "text",
+      "id": "base_desc",
+      "label": "Description",
+      "default": "The lasting impression, 6+ hours"
+    },
+    {
+      "type": "text",
+      "id": "default_notes_base",
+      "label": "Fallback Notes (comma-separated)",
+      "default": "Amber, Tonka Bean, Sensual Musk"
+    },
+    {
+      "type": "image_picker",
+      "id": "base_image",
+      "label": "Optional Tier Image"
+    },
+    {
+      "type": "header",
+      "content": "Performance Meters"
+    },
+    {
+      "type": "text",
+      "id": "longevity_label",
+      "label": "Longevity Label",
+      "default": "Longevity"
+    },
+    {
+      "type": "range",
+      "id": "default_longevity",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "label": "Default Longevity Score (1-5)",
+      "default": 4
+    },
+    {
+      "type": "text",
+      "id": "longevity_desc",
+      "label": "Longevity Text",
+      "default": "Long lasting (7–10 hrs)"
+    },
+    {
+      "type": "text",
+      "id": "sillage_label",
+      "label": "Sillage Label",
+      "default": "Sillage"
+    },
+    {
+      "type": "range",
+      "id": "default_sillage",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "label": "Default Sillage Score (1-5)",
+      "default": 3
+    },
+    {
+      "type": "text",
+      "id": "sillage_desc",
+      "label": "Sillage Text",
+      "default": "Moderate (within arm's length)"
+    },
+    {
+      "type": "header",
+      "content": "Best For"
+    },
+    {
+      "type": "text",
+      "id": "best_for_label",
+      "label": "Best For Label",
+      "default": "Best For"
+    },
+    {
+      "type": "text",
+      "id": "default_best_for",
+      "label": "Default Occasions (comma-separated)",
+      "default": "Evening, Signature Scent, Formal, Autumn / Winter"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Fragrance Profile"
+    }
+  ]
+}
+{% endschema %}

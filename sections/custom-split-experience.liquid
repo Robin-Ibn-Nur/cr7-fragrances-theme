@@ -1,0 +1,1258 @@
+{%- doc -%}
+  Dual Promo Banner + Product Slider
+  A two-block section built for the Horizon theme.
+
+  Block 1 (banner, left column): flexible content area — add "Image",
+  "Heading", "Text", "Button" and "Badge" blocks in any order/quantity.
+  On mobile the image stays uncropped/uncovered at the top and all
+  banner content stacks in a solid panel underneath it.
+
+  Block 2 (products, right column): add "Product" blocks (title,
+  description, price, and a button all optional per block). 3 products
+  show at a time on desktop by default; adding more turns the row into
+  a draggable/swipeable slider with visible prev/next arrows. Same
+  behaviour, single-column, on mobile — the two blocks stack.
+
+  Font colors for the banner block and the products block are set
+  independently in the schema, so text stays legible no matter what
+  the theme's color scheme resolves to.
+{%- enddoc -%}
+
+{%- liquid
+  assign section_id = section.id
+  assign s = section.settings
+
+  # ---- width -----------------------------------------------------------
+  assign width_choice = s.section_width
+  case width_choice
+    when 'full'
+      assign section_max_width = '100%'
+      assign section_gutter = '0px'
+    when 'w1500'
+      assign section_max_width = '1500px'
+      assign section_gutter = 'var(--container-gutter, 1.5rem)'
+    when 'w1600'
+      assign section_max_width = '1600px'
+      assign section_gutter = 'var(--container-gutter, 1.5rem)'
+    else
+      assign section_max_width = 'var(--page-width, 1200px)'
+      assign section_gutter = 'var(--container-gutter, 1.5rem)'
+  endcase
+
+  # ---- alignment ---------------------------------------------------------
+  assign align_choice = s.content_alignment
+  case align_choice
+    when 'center'
+      assign flex_align = 'center'
+      assign text_align = 'center'
+    when 'right'
+      assign flex_align = 'flex-end'
+      assign text_align = 'right'
+    else
+      assign flex_align = 'flex-start'
+      assign text_align = 'left'
+  endcase
+
+  # ---- typography / spacing tokens ---------------------------------------
+  assign title_desktop = s.title_size_desktop
+  assign title_mobile = s.title_size_mobile
+  assign desc_desktop = s.description_size_desktop
+  assign desc_mobile = s.description_size_mobile
+  assign line_height_val = s.line_height
+  assign letter_spacing_val = s.letter_spacing
+  assign font_weight_val = s.font_weight
+  assign grid_gap_val = s.grid_gap
+  assign item_padding_val = s.item_padding
+  assign padding_top_val = s.padding_top
+  assign padding_bottom_val = s.padding_bottom
+  assign visible_desktop = s.visible_products_desktop
+  assign visible_mobile = s.visible_products_mobile
+
+  # ---- colors --------------------------------------------------------
+  assign bg_color = s.section_background_color
+  assign banner_text_color = s.banner_text_color
+  assign banner_panel_color = s.banner_content_background
+  assign products_text_color = s.products_text_color
+
+  # ---- has-slider flag -----------------------------------------------
+  assign product_block_count = 0
+  for block in section.blocks
+    if block.type == 'product'
+      assign product_block_count = product_block_count | plus: 1
+    endif
+  endfor
+  assign needs_arrows = false
+  if product_block_count > visible_desktop
+    assign needs_arrows = true
+  endif
+-%}
+
+{% style %}
+  #dpb-{{ section_id }} {
+    --dpb-max-width: {{ section_max_width }};
+    --dpb-gutter: {{ section_gutter }};
+    --dpb-gap: {{ grid_gap_val }}px;
+    --dpb-pt: {{ padding_top_val }}px;
+    --dpb-pb: {{ padding_bottom_val }}px;
+    --dpb-title-desktop: {{ title_desktop }}px;
+    --dpb-title-mobile: {{ title_mobile }}px;
+    --dpb-desc-desktop: {{ desc_desktop }}px;
+    --dpb-desc-mobile: {{ desc_mobile }}px;
+    --dpb-line-height: {{ line_height_val }};
+    --dpb-letter-spacing: {{ letter_spacing_val }}em;
+    --dpb-font-weight: {{ font_weight_val }};
+    --dpb-item-padding: {{ item_padding_val }}px;
+    --dpb-align-items: {{ flex_align }};
+    --dpb-text-align: {{ text_align }};
+    --dpb-visible-desktop: {{ visible_desktop }};
+    --dpb-visible-mobile: {{ visible_mobile }};
+    --dpb-bg: {{ bg_color }};
+    --dpb-banner-text: {{ banner_text_color }};
+    --dpb-banner-panel: {{ banner_panel_color }};
+    --dpb-products-text: {{ products_text_color }};
+    display: block;
+    width: 100%;
+    padding-top: var(--dpb-pt);
+    padding-bottom: var(--dpb-pb);
+    font-family: var(--font-body-family, inherit);
+    background: var(--dpb-bg);
+  }
+
+  #dpb-{{ section_id }} * {
+    box-sizing: border-box;
+  }
+
+  #dpb-{{ section_id }} .dpb-container {
+    max-width: var(--dpb-max-width);
+    margin-inline: auto;
+    padding-inline: var(--dpb-gutter);
+  }
+
+  #dpb-{{ section_id }} .dpb-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+    gap: var(--dpb-gap);
+  }
+
+  /* ---------- Banner column ---------- */
+  #dpb-{{ section_id }} .dpb-banner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: var(--dpb-align-items);
+    justify-content: center;
+    text-align: var(--dpb-text-align);
+    overflow: hidden;
+    border-radius: var(--dpb-radius, 0px);
+    padding: clamp(2rem, 4vw, 3.5rem);
+    min-height: 460px;
+    isolation: isolate;
+    color: var(--dpb-banner-text);
+  }
+
+  #dpb-{{ section_id }} .dpb-banner__media {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+  }
+
+  #dpb-{{ section_id }} .dpb-banner__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  #dpb-{{ section_id }} .dpb-banner__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--dpb-banner-panel);
+    opacity: var(--dpb-overlay-opacity, 0.3);
+  }
+
+  #dpb-{{ section_id }} .dpb-banner__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 34rem;
+    width: 100%;
+    align-items: var(--dpb-align-items);
+  }
+
+  #dpb-{{ section_id }} .dpb-heading {
+    margin: 0;
+    font-family: var(--font-heading-family, inherit);
+    font-size: var(--dpb-title-mobile);
+    line-height: var(--dpb-line-height);
+    letter-spacing: var(--dpb-letter-spacing);
+    font-weight: var(--dpb-font-weight);
+    text-transform: uppercase;
+    color: inherit;
+  }
+
+  #dpb-{{ section_id }} .dpb-text {
+    margin: 0;
+    font-size: var(--dpb-desc-mobile);
+    line-height: 1.55;
+    opacity: 0.88;
+    color: inherit;
+  }
+
+  #dpb-{{ section_id }} .dpb-text p {
+    margin: 0 0 0.5em;
+  }
+
+  #dpb-{{ section_id }} .dpb-text p:last-child {
+    margin-bottom: 0;
+  }
+
+  #dpb-{{ section_id }} .dpb-badges {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    padding-block: calc(var(--dpb-item-padding) / 2);
+  }
+
+  #dpb-{{ section_id }} .dpb-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    text-decoration: none;
+    color: inherit;
+    padding-block: calc(var(--dpb-item-padding) / 4);
+  }
+
+  #dpb-{{ section_id }} .dpb-badge__icon {
+    flex: none;
+    width: 2.2rem;
+    height: 2.2rem;
+    display: grid;
+    place-items: center;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    opacity: 0.9;
+  }
+
+  #dpb-{{ section_id }} .dpb-badge__icon svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+  }
+
+  #dpb-{{ section_id }} .dpb-badge__title {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: inherit;
+  }
+
+  #dpb-{{ section_id }} .dpb-badge__subtitle {
+    display: block;
+    font-size: 0.8rem;
+    opacity: 0.75;
+    color: inherit;
+  }
+
+  #dpb-{{ section_id }} .dpb-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    margin-top: 0.4rem;
+    padding: 0.85em 1.6em;
+    border-radius: var(--dpb-btn-radius, 999px);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid currentColor;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    background: transparent;
+    color: inherit;
+  }
+
+  #dpb-{{ section_id }} .dpb-button--solid {
+    background: currentColor;
+  }
+
+  #dpb-{{ section_id }} .dpb-button--solid span {
+    color: var(--dpb-bg);
+    mix-blend-mode: difference;
+  }
+
+  #dpb-{{ section_id }} .dpb-button:hover {
+    opacity: 0.75;
+  }
+
+  /* ---------- Products column ---------- */
+  #dpb-{{ section_id }} .dpb-products {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    min-width: 0;
+    color: var(--dpb-products-text);
+  }
+
+  #dpb-{{ section_id }} .dpb-products__head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    align-items: var(--dpb-align-items);
+    text-align: var(--dpb-text-align);
+  }
+
+  #dpb-{{ section_id }} .dpb-products__head .dpb-heading {
+    font-size: clamp(var(--dpb-title-mobile), 3vw, var(--dpb-title-desktop));
+  }
+
+  #dpb-{{ section_id }} .dpb-slider {
+    position: relative;
+  }
+
+  #dpb-{{ section_id }} .dpb-track {
+    display: flex;
+    gap: var(--dpb-gap);
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    cursor: grab;
+    padding-bottom: 0.25rem;
+    user-select: none;
+  }
+
+  #dpb-{{ section_id }} .dpb-track.is-dragging {
+    cursor: grabbing;
+    scroll-snap-type: none;
+  }
+
+  #dpb-{{ section_id }} .dpb-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  #dpb-{{ section_id }} .dpb-card {
+    flex: 0 0 calc((100% - (var(--dpb-visible-desktop) - 1) * var(--dpb-gap)) / var(--dpb-visible-desktop));
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    padding-block: var(--dpb-item-padding);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  #dpb-{{ section_id }} .dpb-card__link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+  }
+
+  #dpb-{{ section_id }} .dpb-card__media {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: currentColor;
+    background: color-mix(in srgb, currentColor 6%, transparent);
+    border-radius: var(--dpb-radius, 0px);
+  }
+
+  #dpb-{{ section_id }} .dpb-card__media img,
+  #dpb-{{ section_id }} .dpb-card__media svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  #dpb-{{ section_id }} .dpb-card:hover .dpb-card__media img {
+    transform: scale(1.04);
+  }
+
+  #dpb-{{ section_id }} .dpb-card__title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: inherit;
+  }
+
+  #dpb-{{ section_id }} .dpb-card__description {
+    font-size: 0.82rem;
+    line-height: 1.5;
+    opacity: 0.75;
+    color: inherit;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.4em;
+  }
+
+  #dpb-{{ section_id }} .dpb-card__price {
+    font-size: 0.88rem;
+    opacity: 0.85;
+    display: flex;
+    gap: 0.5em;
+    align-items: baseline;
+    color: inherit;
+  }
+
+  #dpb-{{ section_id }} .dpb-card__price s {
+    opacity: 0.55;
+  }
+
+  #dpb-{{ section_id }} .dpb-card .dpb-button {
+    align-self: flex-start;
+    margin-top: auto;
+    padding: 0.65em 1.25em;
+    font-size: 0.72rem;
+  }
+
+  #dpb-{{ section_id }} .dpb-arrows {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    color: var(--dpb-products-text);
+  }
+
+  #dpb-{{ section_id }} .dpb-arrow {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    background: transparent;
+    color: inherit;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    padding: 0;
+  }
+
+  #dpb-{{ section_id }} .dpb-arrow svg {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
+  #dpb-{{ section_id }} .dpb-arrow:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  #dpb-{{ section_id }} .dpb-arrow:focus-visible,
+  #dpb-{{ section_id }} .dpb-button:focus-visible,
+  #dpb-{{ section_id }} .dpb-badge:focus-visible,
+  #dpb-{{ section_id }} .dpb-card:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 749px) {
+    #dpb-{{ section_id }} .dpb-grid {
+      grid-template-columns: 1fr;
+    }
+
+    #dpb-{{ section_id }} .dpb-heading {
+      font-size: var(--dpb-title-mobile);
+    }
+
+    #dpb-{{ section_id }} .dpb-text {
+      font-size: var(--dpb-desc-mobile);
+    }
+
+    /* Image stays clean/uncovered on mobile; content moves to a solid
+       panel underneath it instead of overlaying the image. */
+    #dpb-{{ section_id }} .dpb-banner {
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      padding: 0;
+      min-height: 0;
+    }
+
+    #dpb-{{ section_id }} .dpb-banner__media {
+      position: static;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+    }
+
+    #dpb-{{ section_id }} .dpb-banner__overlay {
+      display: none;
+    }
+
+    #dpb-{{ section_id }} .dpb-banner__inner {
+      max-width: none;
+      background: var(--dpb-banner-panel);
+      padding: 1.75rem;
+      align-items: var(--dpb-align-items);
+    }
+
+    #dpb-{{ section_id }} .dpb-card {
+      flex: 0 0 calc((100% - (var(--dpb-visible-mobile) - 1) * var(--dpb-gap)) / var(--dpb-visible-mobile));
+    }
+  }
+
+  @media (min-width: 750px) {
+    #dpb-{{ section_id }} .dpb-heading {
+      font-size: var(--dpb-title-desktop);
+    }
+
+    #dpb-{{ section_id }} .dpb-text {
+      font-size: var(--dpb-desc-desktop);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #dpb-{{ section_id }} .dpb-track {
+      scroll-behavior: auto;
+    }
+
+    #dpb-{{ section_id }} .dpb-card__media img {
+      transition: none;
+    }
+  }
+{% endstyle %}
+
+<section id="dpb-{{ section_id }}" class="dpb-section">
+  <div class="dpb-container">
+    <div class="dpb-grid">
+
+      {%- comment -%} ---------- Block 1: Banner ---------- {%- endcomment -%}
+      <div class="dpb-banner">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'image' -%}
+            {%- liquid
+              assign img = block.settings.image
+              assign overlay_opacity = block.settings.overlay_opacity | times: 1.0 | divided_by: 100.0
+            -%}
+            <div class="dpb-banner__media" {{ block.shopify_attributes }}>
+              {%- if img != blank -%}
+                {{ img | image_url: width: 1600 | image_tag: loading: 'lazy', widths: '480,768,1200,1600', sizes: '(min-width: 750px) 50vw, 100vw' }}
+              {%- endif -%}
+            </div>
+            <div class="dpb-banner__overlay" style="--dpb-overlay-opacity: {{ overlay_opacity }};"></div>
+          {%- endif -%}
+        {%- endfor -%}
+
+        <div class="dpb-banner__inner">
+          {%- for block in section.blocks -%}
+            {%- case block.type -%}
+
+              {%- when 'heading' -%}
+                {%- if block.settings.column == 'banner' -%}
+                  {%- liquid
+                    assign tag = block.settings.tag
+                  -%}
+                  {%- if block.settings.text != blank -%}
+                    {%- if tag == 'h3' -%}
+                      <h3 class="dpb-heading" {{ block.shopify_attributes }}>{{ block.settings.text }}</h3>
+                    {%- elsif tag == 'h4' -%}
+                      <h4 class="dpb-heading" {{ block.shopify_attributes }}>{{ block.settings.text }}</h4>
+                    {%- else -%}
+                      <h2 class="dpb-heading" {{ block.shopify_attributes }}>{{ block.settings.text }}</h2>
+                    {%- endif -%}
+                  {%- endif -%}
+                {%- endif -%}
+
+              {%- when 'text' -%}
+                {%- if block.settings.column == 'banner' and block.settings.text != blank -%}
+                  <div class="dpb-text" {{ block.shopify_attributes }}>{{ block.settings.text }}</div>
+                {%- endif -%}
+
+              {%- when 'badge' -%}
+                {%- liquid
+                  assign badge_url = block.settings.link
+                  assign has_badge_link = false
+                  if badge_url != blank
+                    assign has_badge_link = true
+                  endif
+                -%}
+                {%- capture badge_icon -%}
+                  {%- case block.settings.icon -%}
+                    {%- when 'bolt' -%}
+                      <svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" stroke-linejoin="round" stroke-linecap="round"/></svg>
+                    {%- when 'moon' -%}
+                      <svg viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5Z" stroke-linejoin="round" stroke-linecap="round"/></svg>
+                    {%- when 'heart' -%}
+                      <svg viewBox="0 0 24 24"><path d="M12 20s-7-4.6-9.5-9.1A5 5 0 0 1 12 6a5 5 0 0 1 9.5 4.9C19 15.4 12 20 12 20Z" stroke-linejoin="round" stroke-linecap="round"/></svg>
+                    {%- when 'mountain' -%}
+                      <svg viewBox="0 0 24 24"><path d="m3 19 6-11 4 6 2-3 6 8H3Z" stroke-linejoin="round" stroke-linecap="round"/></svg>
+                    {%- when 'trophy' -%}
+                      <svg viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 0 1-10 0V4Z" stroke-linejoin="round"/><path d="M7 5H4a3 3 0 0 0 3 5M17 5h3a3 3 0 0 1-3 5M10 16v2H8v2h8v-2h-2v-2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    {%- when 'gift' -%}
+                      <svg viewBox="0 0 24 24"><rect x="4" y="9" width="16" height="11" rx="1"/><path d="M4 9h16v4H4zM12 9v11M12 9c-1.5-3-5-4-5-1.5S9 9 12 9Zm0 0c1.5-3 5-4 5-1.5S15 9 12 9Z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    {%- when 'shield' -%}
+                      <svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3 8 8 9 5-1 8-4.5 8-9V6l-8-3Z" stroke-linejoin="round" stroke-linecap="round"/></svg>
+                    {%- else -%}
+                      <svg viewBox="0 0 24 24"><path d="M12 2 15 9 22 10 17 15 18 22 12 18.5 6 22 7 15 2 10 9 9 12 2Z" stroke-linejoin="round" stroke-linecap="round"/></svg>
+                  {%- endcase -%}
+                {%- endcapture -%}
+
+                {%- if has_badge_link -%}
+                  <a href="{{ badge_url }}" class="dpb-badge" {{ block.shopify_attributes }}>
+                    <span class="dpb-badge__icon">{{ badge_icon }}</span>
+                    <span>
+                      {%- if block.settings.title != blank -%}
+                        <span class="dpb-badge__title">{{ block.settings.title }}</span>
+                      {%- endif -%}
+                      {%- if block.settings.subtitle != blank -%}
+                        <span class="dpb-badge__subtitle">{{ block.settings.subtitle }}</span>
+                      {%- endif -%}
+                    </span>
+                  </a>
+                {%- else -%}
+                  <div class="dpb-badge" {{ block.shopify_attributes }}>
+                    <span class="dpb-badge__icon">{{ badge_icon }}</span>
+                    <span>
+                      {%- if block.settings.title != blank -%}
+                        <span class="dpb-badge__title">{{ block.settings.title }}</span>
+                      {%- endif -%}
+                      {%- if block.settings.subtitle != blank -%}
+                        <span class="dpb-badge__subtitle">{{ block.settings.subtitle }}</span>
+                      {%- endif -%}
+                    </span>
+                  </div>
+                {%- endif -%}
+
+              {%- when 'button' -%}
+                {%- if block.settings.column == 'banner' and block.settings.label != blank -%}
+                  {%- liquid
+                    assign btn_class = 'dpb-button'
+                    if block.settings.style == 'solid'
+                      assign btn_class = 'dpb-button dpb-button--solid'
+                    endif
+                  -%}
+                  <a href="{{ block.settings.link | default: '#' }}" class="{{ btn_class }}" {{ block.shopify_attributes }}>
+                    <span>{{ block.settings.label }} →</span>
+                  </a>
+                {%- endif -%}
+
+            {%- endcase -%}
+          {%- endfor -%}
+        </div>
+      </div>
+
+      {%- comment -%} ---------- Block 2: Products ---------- {%- endcomment -%}
+      <div class="dpb-products">
+        <div class="dpb-products__head">
+          {%- for block in section.blocks -%}
+            {%- case block.type -%}
+              {%- when 'heading' -%}
+                {%- if block.settings.column == 'products' and block.settings.text != blank -%}
+                  <h2 class="dpb-heading" {{ block.shopify_attributes }}>{{ block.settings.text }}</h2>
+                {%- endif -%}
+              {%- when 'text' -%}
+                {%- if block.settings.column == 'products' and block.settings.text != blank -%}
+                  <div class="dpb-text" {{ block.shopify_attributes }}>{{ block.settings.text }}</div>
+                {%- endif -%}
+            {%- endcase -%}
+          {%- endfor -%}
+        </div>
+
+        {%- if needs_arrows -%}
+          <div class="dpb-arrows">
+            <button type="button" class="dpb-arrow" data-dpb-prev aria-label="Previous products">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6 9 12l6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button type="button" class="dpb-arrow" data-dpb-next aria-label="Next products">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        {%- endif -%}
+
+        <div class="dpb-slider">
+          <div class="dpb-track" data-dpb-track role="list">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'product' -%}
+                {%- liquid
+                  assign product = block.settings.product
+                  assign card_title = block.settings.custom_title
+                  if card_title == blank and product != blank
+                    assign card_title = product.title
+                  endif
+
+                  assign card_description = blank
+                  if block.settings.show_description and product != blank
+                    assign raw_description = product.description | strip_html | strip_newlines
+                    assign card_description = raw_description | truncatewords: 16
+                  endif
+
+                  assign button_label = block.settings.button_label
+                  if button_label == blank
+                    assign button_label = 'Shop now'
+                  endif
+                -%}
+                <div class="dpb-card" role="listitem" {{ block.shopify_attributes }}>
+                  {%- if product != blank -%}
+                    <a href="{{ product.url }}" class="dpb-card__link">
+                      <span class="dpb-card__media">
+                        {%- if product.featured_image != blank -%}
+                          {{ product.featured_image | image_url: width: 800 | image_tag: loading: 'lazy', widths: '300,450,600,800', sizes: '(min-width: 750px) 25vw, 60vw', alt: product.featured_image.alt }}
+                        {%- else -%}
+                          {{ 'product-1' | placeholder_svg_tag }}
+                        {%- endif -%}
+                      </span>
+
+                      {%- if block.settings.show_title and card_title != blank -%}
+                        <span class="dpb-card__title">{{ card_title }}</span>
+                      {%- endif -%}
+
+                      {%- if card_description != blank -%}
+                        <span class="dpb-card__description">{{ card_description }}</span>
+                      {%- endif -%}
+
+                      {%- if block.settings.show_price -%}
+                        <span class="dpb-card__price">
+                          {%- if product.compare_at_price > product.price -%}
+                            <s>{{ product.compare_at_price | money }}</s>
+                            <span>{{ product.price | money }}</span>
+                          {%- else -%}
+                            <span>{{ product.price | money }}</span>
+                          {%- endif -%}
+                        </span>
+                      {%- endif -%}
+
+                      {%- if block.settings.show_button -%}
+                        <span class="dpb-button">
+                          <span>{{ button_label }} →</span>
+                        </span>
+                      {%- endif -%}
+                    </a>
+                  {%- else -%}
+                    <span class="dpb-card__media">{{ 'product-1' | placeholder_svg_tag }}</span>
+                    <span class="dpb-card__title">Select a product</span>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'button' and block.settings.column == 'products' and block.settings.label != blank -%}
+            {%- liquid
+              assign btn_class2 = 'dpb-button'
+              if block.settings.style == 'solid'
+                assign btn_class2 = 'dpb-button dpb-button--solid'
+              endif
+            -%}
+            <a href="{{ block.settings.link | default: '#' }}" class="{{ btn_class2 }}" {{ block.shopify_attributes }}>
+              <span>{{ block.settings.label }} →</span>
+            </a>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    var root = document.getElementById('dpb-{{ section_id }}');
+    if (!root) return;
+
+    var track = root.querySelector('[data-dpb-track]');
+    var prevBtn = root.querySelector('[data-dpb-prev]');
+    var nextBtn = root.querySelector('[data-dpb-next]');
+    if (!track) return;
+
+    function cardStep() {
+      var card = track.querySelector('.dpb-card');
+      if (!card) return 0;
+      var style = getComputedStyle(track);
+      var gap = parseFloat(style.gap) || 0;
+      return card.getBoundingClientRect().width + gap;
+    }
+
+    function updateArrows() {
+      if (!prevBtn || !nextBtn) return;
+      var max = track.scrollWidth - track.clientWidth - 2;
+      prevBtn.disabled = track.scrollLeft <= 0;
+      nextBtn.disabled = track.scrollLeft >= max;
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', function () {
+        track.scrollBy({ left: -cardStep(), behavior: 'smooth' });
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function () {
+        track.scrollBy({ left: cardStep(), behavior: 'smooth' });
+      });
+    }
+
+    track.addEventListener('scroll', updateArrows, { passive: true });
+    window.addEventListener('resize', updateArrows);
+    updateArrows();
+
+    // Pointer-drag support (mouse only — touch devices already scroll natively)
+    var isDown = false;
+    var startX = 0;
+    var startScroll = 0;
+
+    track.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'mouse') return;
+      isDown = true;
+      track.classList.add('is-dragging');
+      startX = e.clientX;
+      startScroll = track.scrollLeft;
+      track.setPointerCapture(e.pointerId);
+    });
+
+    track.addEventListener('pointermove', function (e) {
+      if (!isDown) return;
+      var dx = e.clientX - startX;
+      track.scrollLeft = startScroll - dx;
+    });
+
+    function endDrag() {
+      if (!isDown) return;
+      isDown = false;
+      track.classList.remove('is-dragging');
+    }
+
+    track.addEventListener('pointerup', endDrag);
+    track.addEventListener('pointercancel', endDrag);
+    track.addEventListener('pointerleave', endDrag);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Dual Promo",
+  "class": "dpb-section-wrapper",
+  "max_blocks": 20,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "full", "label": "Full width" },
+        { "value": "theme", "label": "Theme default" },
+        { "value": "w1500", "label": "1500px" },
+        { "value": "w1600", "label": "1600px" }
+      ],
+      "default": "theme"
+    },
+    {
+      "type": "select",
+      "id": "content_alignment",
+      "label": "Content alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "label": "Grid gap",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "item_padding",
+      "label": "Item top/bottom padding",
+      "info": "Applies to badges and product cards",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Section top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Section bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "Section background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "banner_text_color",
+      "label": "Banner block font color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "banner_content_background",
+      "label": "Banner content panel / overlay color",
+      "info": "Used behind the banner text on desktop (as a scrim over the image) and behind the stacked content on mobile.",
+      "default": "#0d0d0d"
+    },
+    {
+      "type": "color",
+      "id": "products_text_color",
+      "label": "Products block font color",
+      "default": "#121212"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "title_size_desktop",
+      "label": "Title size (desktop)",
+      "min": 20,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "default": 42
+    },
+    {
+      "type": "range",
+      "id": "title_size_mobile",
+      "label": "Title size (mobile)",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "description_size_desktop",
+      "label": "Description size (desktop)",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "description_size_mobile",
+      "label": "Description size (mobile)",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "line_height",
+      "label": "Title line height",
+      "min": 1,
+      "max": 2,
+      "step": 0.1,
+      "default": 1.2
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Title letter spacing",
+      "min": -0.5,
+      "max": 0.5,
+      "step": 0.1,
+      "unit": "px",
+      "default": 0.1
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Title font weight",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semibold" },
+        { "value": "700", "label": "Bold" },
+        { "value": "800", "label": "Extrabold" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "header",
+      "content": "Product slider"
+    },
+    {
+      "type": "range",
+      "id": "visible_products_desktop",
+      "label": "Products visible (desktop)",
+      "info": "Arrows appear automatically once you add more products than this.",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "visible_products_mobile",
+      "label": "Products visible (mobile)",
+      "min": 1,
+      "max": 2,
+      "step": 0.1,
+      "default": 1.2
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Banner image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "label": "Overlay opacity (desktop)",
+          "min": 0,
+          "max": 80,
+          "step": 5,
+          "unit": "%",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "name": "Heading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Heading",
+          "default": "For every moment"
+        },
+        {
+          "type": "select",
+          "id": "tag",
+          "label": "Heading tag",
+          "options": [
+            { "value": "h2", "label": "H2" },
+            { "value": "h3", "label": "H3" },
+            { "value": "h4", "label": "H4" }
+          ],
+          "default": "h2"
+        },
+        {
+          "type": "select",
+          "id": "column",
+          "label": "Column",
+          "options": [
+            { "value": "banner", "label": "Banner (left)" },
+            { "value": "products", "label": "Products (right)" }
+          ],
+          "default": "banner"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>The right pick for every part of your day.</p>"
+        },
+        {
+          "type": "select",
+          "id": "column",
+          "label": "Column",
+          "options": [
+            { "value": "banner", "label": "Banner (left)" },
+            { "value": "products", "label": "Products (right)" }
+          ],
+          "default": "banner"
+        }
+      ]
+    },
+    {
+      "type": "badge",
+      "name": "Trust badge",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "bolt", "label": "Bolt" },
+            { "value": "moon", "label": "Moon" },
+            { "value": "heart", "label": "Heart" },
+            { "value": "mountain", "label": "Mountain" },
+            { "value": "trophy", "label": "Trophy" },
+            { "value": "gift", "label": "Gift" },
+            { "value": "shield", "label": "Shield" },
+            { "value": "star", "label": "Star" }
+          ],
+          "default": "bolt"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Everyday"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "default": "Add a short label"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link (optional)"
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "Button",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Explore all"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "select",
+          "id": "style",
+          "label": "Style",
+          "options": [
+            { "value": "outline", "label": "Outline" },
+            { "value": "solid", "label": "Solid" }
+          ],
+          "default": "outline"
+        },
+        {
+          "type": "select",
+          "id": "column",
+          "label": "Column",
+          "options": [
+            { "value": "banner", "label": "Banner (left)" },
+            { "value": "products", "label": "Products (right)" }
+          ],
+          "default": "banner"
+        }
+      ]
+    },
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "text",
+          "id": "custom_title",
+          "label": "Custom title (optional)"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_title",
+          "label": "Show title",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_description",
+          "label": "Show description",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_price",
+          "label": "Show price",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_button",
+          "label": "Show button",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Shop now"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Dual Promo",
+      "blocks": [
+        { "type": "heading", "settings": { "text": "For every moment", "column": "banner" } },
+        { "type": "text", "settings": { "text": "<p>The right pick for every part of your day.</p>", "column": "banner" } },
+        { "type": "badge", "settings": { "icon": "bolt", "title": "Everyday", "subtitle": "Light & fresh" } },
+        { "type": "badge", "settings": { "icon": "moon", "title": "Evenings", "subtitle": "Bold & warm" } },
+        { "type": "badge", "settings": { "icon": "heart", "title": "Special dates", "subtitle": "Signature scent" } },
+        { "type": "button", "settings": { "label": "Explore all", "style": "outline", "column": "banner" } },
+        { "type": "heading", "settings": { "text": "Gift the experience", "column": "products" } },
+        { "type": "text", "settings": { "text": "<p>Find the perfect gift.</p>", "column": "products" } },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" }
+      ]
+    }
+  ]
+}
+{% endschema %}

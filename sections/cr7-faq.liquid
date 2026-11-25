@@ -1,0 +1,183 @@
+{%- comment -%}
+  CR7 Luxury FAQ Section
+  Searchable, categorized FAQ page with smooth single-open accordion.
+{%- endcomment -%}
+
+{{ 'cr7-faq.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'cr7-faq.js' | asset_url }}" defer></script>
+
+<section class="cr7-faq" data-cr7-faq data-section-id="{{ section.id }}">
+  <div class="cr7-faq__container">
+    <nav class="cr7-faq__breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ page.title | default: 'FAQs' }}</span>
+    </nav>
+
+    <header class="cr7-faq__header">
+      <div class="cr7-faq__eyebrow-row">
+        <span class="cr7-faq__eyebrow">{{ section.settings.eyebrow | default: 'CLIENT CONCIERGE' | escape }}</span>
+        <span class="cr7-faq__hairline" aria-hidden="true"></span>
+      </div>
+      <h1 class="cr7-faq__title">
+        {{ section.settings.heading | default: 'Frequently Asked Questions' | escape }}<span class="cr7-faq__dot">.</span>
+      </h1>
+      {%- if section.settings.subtitle != blank -%}
+        <p class="cr7-faq__subtitle">{{ section.settings.subtitle | escape }}</p>
+      {%- endif -%}
+    </header>
+
+    <div class="cr7-faq__controls">
+      <div class="cr7-faq__search">
+        <svg class="cr7-faq__search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input
+          type="search"
+          class="cr7-faq__search-input"
+          data-cr7-faq-search
+          placeholder="Search questions..."
+          aria-label="Search FAQs"
+        >
+      </div>
+
+      <div class="cr7-faq__tabs" role="group" aria-label="FAQ categories">
+        <button type="button" class="cr7-faq__tab" data-cr7-faq-tab="all" aria-pressed="true">All</button>
+        <button type="button" class="cr7-faq__tab" data-cr7-faq-tab="orders" aria-pressed="false">Orders &amp; Shipping</button>
+        <button type="button" class="cr7-faq__tab" data-cr7-faq-tab="fragrances" aria-pressed="false">Fragrances</button>
+        <button type="button" class="cr7-faq__tab" data-cr7-faq-tab="returns" aria-pressed="false">Returns &amp; Authenticity</button>
+      </div>
+    </div>
+
+    <div class="cr7-faq__list">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign is_first = forloop.first
+          assign cat_label = 'Orders & Shipping'
+          if block.settings.category == 'fragrances'
+            assign cat_label = 'Fragrances'
+          elsif block.settings.category == 'returns'
+            assign cat_label = 'Returns & Authenticity'
+          endif
+        -%}
+        <div
+          class="cr7-faq__item{% if is_first %} is-open{% endif %}"
+          data-cr7-faq-item
+          data-category="{{ block.settings.category | default: 'orders' }}"
+          {{ block.shopify_attributes }}
+        >
+          <button
+            type="button"
+            class="cr7-faq__btn"
+            data-cr7-faq-btn
+            aria-expanded="{% if is_first %}true{% else %}false{% endif %}"
+            aria-controls="cr7-faq-{{ block.id }}"
+          >
+            <span class="cr7-faq__btn-left">
+              <span class="cr7-faq__cat">{{ cat_label }}</span>
+              <span class="cr7-faq__q">{{ block.settings.question | escape }}</span>
+            </span>
+            <span class="cr7-faq__plus" aria-hidden="true">+</span>
+          </button>
+
+          <div
+            id="cr7-faq-{{ block.id }}"
+            class="cr7-faq__panel"
+            data-cr7-faq-panel
+            aria-hidden="{% if is_first %}false{% else %}true{% endif %}"
+          >
+            <div class="cr7-faq__panel-inner">
+              <div class="cr7-faq__body">
+                {{ block.settings.answer | escape }}
+              </div>
+            </div>
+          </div>
+        </div>
+      {%- endfor -%}
+
+      <div class="cr7-faq__empty" data-cr7-faq-empty hidden>
+        No questions matched your search. Please try another keyword or contact our concierge.
+      </div>
+    </div>
+
+    <div class="cr7-faq__cta-box">
+      <div>
+        <h2 class="cr7-faq__cta-title">Still have questions?</h2>
+        <p class="cr7-faq__cta-sub">Our client concierge team is happy to assist you within 24 business hours.</p>
+      </div>
+      <a href="{{ pages['contact'].url | default: '/pages/contact' }}" class="cr7-faq__cta-btn">
+        <span>Contact Concierge</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <line x1="4" y1="12" x2="20" y2="12"/>
+          <polyline points="14 6 20 12 14 18"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "CR7 FAQ",
+  "tag": "section",
+  "class": "section-cr7-faq",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "CLIENT CONCIERGE"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Frequently Asked Questions"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Everything you need to know about CR7 Fragrances, shipping, returns, and product authenticity."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ Item",
+      "settings": [
+        {
+          "type": "select",
+          "id": "category",
+          "label": "Category",
+          "options": [
+            { "value": "orders", "label": "Orders & Shipping" },
+            { "value": "fragrances", "label": "Fragrances" },
+            { "value": "returns", "label": "Returns & Authenticity" }
+          ],
+          "default": "orders"
+        },
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question",
+          "default": "How long does shipping take?"
+        },
+        {
+          "type": "textarea",
+          "id": "answer",
+          "label": "Answer",
+          "default": "Orders are processed within 24–48 business hours and typically arrive within 2–5 business days."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "CR7 FAQ"
+    }
+  ]
+}
+{% endschema %}
+

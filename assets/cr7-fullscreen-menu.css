@@ -1,0 +1,634 @@
+/* ==========================================================================
+   CR7 LUXURY FULL-SCREEN HAMBURGER MENU
+   Matte Black (#030503) × Emerald Green (#00C853) × Editorial Serif & Sans
+   ========================================================================== */
+
+/* 0. Hide legacy left-side header-drawer hamburger so only the right-side CR7 menu is active */
+header-drawer.header-drawer {
+  display: none !important;
+}
+
+/* 1. Header Hamburger Trigger (Top-Right Corner) */
+.cr7-menu-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  margin-inline-start: 4px;
+  background: transparent;
+  border: none;
+  color: currentColor;
+  cursor: pointer;
+  transition: color 200ms ease;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.cr7-menu-trigger:hover,
+.cr7-menu-trigger:focus-visible {
+  color: #00C853;
+}
+
+.cr7-menu-trigger:focus-visible {
+  outline: 2px solid #00C853;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.cr7-menu-trigger__lines {
+  position: relative;
+  display: block;
+  width: 22px;
+  height: 14px;
+}
+
+.cr7-menu-trigger__line {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background-color: currentColor;
+  border-radius: 2px;
+  transform-origin: center;
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 220ms ease,
+              width 220ms ease,
+              background-color 200ms ease;
+}
+
+.cr7-menu-trigger__line--1 {
+  top: 0;
+}
+
+.cr7-menu-trigger__line--2 {
+  top: 6px;
+  width: 72%;
+  right: 0;
+  left: auto;
+}
+
+.cr7-menu-trigger__line--3 {
+  bottom: 0;
+}
+
+.cr7-menu-trigger:hover .cr7-menu-trigger__line--2 {
+  width: 100%;
+}
+
+.cr7-menu-trigger[aria-expanded="true"] .cr7-menu-trigger__line--1 {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.cr7-menu-trigger[aria-expanded="true"] .cr7-menu-trigger__line--2 {
+  opacity: 0;
+  width: 0;
+}
+
+.cr7-menu-trigger[aria-expanded="true"] .cr7-menu-trigger__line--3 {
+  transform: translateY(-6.5px) rotate(-45deg);
+}
+
+/* 2. Full-Screen Overlay Shell */
+.cr7-fs-menu {
+  --cr7-bg: #030503;
+  --cr7-surface: #0A0D0A;
+  --cr7-emerald: #00C853;
+  --cr7-emerald-deep: #008A38;
+  --cr7-white: #FFFFFF;
+  --cr7-muted: #A5A5A5;
+  --cr7-border: rgba(255, 255, 255, 0.1);
+  --cr7-serif: var(--font-heading--family, Georgia, serif);
+  --cr7-sans: var(--font-subheading--family, -apple-system, BlinkMacSystemFont, sans-serif);
+
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  z-index: 10000;
+  background-color: var(--cr7-bg);
+  color: var(--cr7-white);
+  font-family: var(--cr7-sans);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1),
+              visibility 420ms step-end;
+  box-sizing: border-box;
+}
+
+.cr7-fs-menu.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1),
+              visibility 0s step-start;
+}
+
+/* Ambient Emerald Glow & Restrained Smoke Gradient */
+.cr7-fs-menu__ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 700ms ease 120ms;
+  background:
+    radial-gradient(ellipse 55% 50% at 78% 45%, rgba(0, 200, 83, 0.14) 0%, rgba(0, 138, 56, 0.05) 45%, transparent 75%),
+    radial-gradient(circle 40% at 15% 85%, rgba(0, 138, 56, 0.08) 0%, transparent 70%);
+}
+
+.cr7-fs-menu.is-open .cr7-fs-menu__ambient {
+  opacity: 1;
+}
+
+.cr7-fs-menu__inner {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+  width: 100%;
+  max-width: var(--page-width, 1440px);
+  margin-inline: auto;
+  padding: clamp(20px, 3vw, 36px) var(--page-margin, clamp(20px, 4vw, 56px));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(24px, 3vw, 40px);
+  box-sizing: border-box;
+}
+
+/* 3. Top Bar (Logo Left + Close X Right) */
+.cr7-fs-menu__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--cr7-border);
+  flex-shrink: 0;
+}
+
+.cr7-fs-menu__logo {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--cr7-white);
+}
+
+.cr7-fs-menu__logo-img {
+  height: clamp(32px, 4vw, 48px);
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.cr7-fs-menu__logo-text {
+  font-family: var(--cr7-serif);
+  font-size: 26px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cr7-white);
+}
+
+.cr7-fs-menu__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--cr7-white);
+  cursor: pointer;
+  transition: border-color 220ms ease, color 220ms ease, transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cr7-fs-menu__close:hover,
+.cr7-fs-menu__close:focus-visible {
+  border-color: var(--cr7-emerald);
+  color: var(--cr7-emerald);
+  transform: rotate(90deg);
+}
+
+.cr7-fs-menu__close:focus-visible {
+  outline: 2px solid var(--cr7-emerald);
+  outline-offset: 2px;
+}
+
+/* 4. Main Split Composition */
+.cr7-fs-menu__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: clamp(32px, 5vw, 80px);
+  align-items: center;
+  flex: 1 0 auto;
+  padding-block: clamp(12px, 2vw, 24px);
+}
+
+/* Left: Large Vertically Stacked Navigation */
+.cr7-fs-menu__nav {
+  position: relative;
+  min-width: 0;
+}
+
+.cr7-fs-menu__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(6px, 1.1vh, 14px);
+}
+
+.cr7-fs-menu__item {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--item-idx, 0) * 45ms);
+}
+
+.cr7-fs-menu.is-open .cr7-fs-menu__item {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: calc(120ms + var(--item-idx, 0) * 55ms);
+}
+
+.cr7-fs-menu__link-row {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(12px, 1.8vw, 24px);
+}
+
+.cr7-fs-menu__num {
+  font-family: var(--cr7-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  color: var(--cr7-muted);
+  min-width: 34px;
+  transition: color 220ms ease;
+}
+
+.cr7-fs-menu__link,
+.cr7-fs-menu__toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 44px;
+  padding: 4px 0;
+  background: transparent;
+  border: none;
+  font-family: var(--cr7-serif);
+  font-size: clamp(26px, 3.2vw, 48px);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--cr7-white);
+  text-decoration: none;
+  text-align: start;
+  cursor: pointer;
+  transition: color 240ms ease, transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cr7-fs-menu__link::after,
+.cr7-fs-menu__toggle::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 2px;
+  width: 100%;
+  height: 1px;
+  background-color: var(--cr7-emerald);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cr7-fs-menu__item:hover .cr7-fs-menu__num,
+.cr7-fs-menu__item.is-sub-open .cr7-fs-menu__num {
+  color: var(--cr7-emerald);
+}
+
+.cr7-fs-menu__link:hover,
+.cr7-fs-menu__link:focus-visible,
+.cr7-fs-menu__toggle:hover,
+.cr7-fs-menu__toggle:focus-visible,
+.cr7-fs-menu__item.is-sub-open > .cr7-fs-menu__link-row .cr7-fs-menu__toggle {
+  color: var(--cr7-emerald);
+  transform: translateX(8px);
+}
+
+.cr7-fs-menu__link:hover::after,
+.cr7-fs-menu__link:focus-visible::after,
+.cr7-fs-menu__toggle:hover::after,
+.cr7-fs-menu__toggle:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.cr7-fs-menu__link:focus-visible,
+.cr7-fs-menu__toggle:focus-visible {
+  outline: 2px solid var(--cr7-emerald);
+  outline-offset: 4px;
+}
+
+.cr7-fs-menu__chevron {
+  width: 18px;
+  height: 18px;
+  transition: transform 260ms ease;
+  opacity: 0.7;
+}
+
+.cr7-fs-menu__item.is-sub-open .cr7-fs-menu__chevron {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+
+/* Submenu (Staggered Text Reveal) */
+.cr7-fs-menu__sub {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 340ms cubic-bezier(0.22, 1, 0.36, 1);
+  padding-inline-start: clamp(46px, 3.6vw, 58px);
+}
+
+.cr7-fs-menu__item.is-sub-open .cr7-fs-menu__sub {
+  grid-template-rows: 1fr;
+}
+
+.cr7-fs-menu__sub-inner {
+  overflow: hidden;
+}
+
+.cr7-fs-menu__sub-list {
+  list-style: none;
+  margin: 8px 0 12px;
+  padding: 10px 0 10px 18px;
+  border-left: 1px solid rgba(0, 200, 83, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cr7-fs-menu__sub-item {
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 280ms ease, transform 280ms ease;
+}
+
+.cr7-fs-menu__item.is-sub-open .cr7-fs-menu__sub-item {
+  opacity: 1;
+  transform: translateX(0);
+  transition-delay: calc(60ms + var(--sub-idx, 0) * 45ms);
+}
+
+.cr7-fs-menu__sub-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  font-family: var(--cr7-sans);
+  font-size: clamp(14px, 1.1vw, 16px);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cr7-muted);
+  text-decoration: none;
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.cr7-fs-menu__sub-link:hover,
+.cr7-fs-menu__sub-link:focus-visible {
+  color: var(--cr7-emerald);
+  transform: translateX(6px);
+}
+
+.cr7-fs-menu__sub-link:focus-visible {
+  outline: 2px solid var(--cr7-emerald);
+  outline-offset: 2px;
+}
+
+/* 5. Right: Brand Experience Panel */
+.cr7-fs-menu__panel {
+  position: relative;
+  background-color: var(--cr7-surface);
+  border: 1px solid var(--cr7-border);
+  padding: clamp(24px, 3vw, 40px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow: hidden;
+  opacity: 0;
+  transform: scale(0.96) translateY(14px);
+  transition: opacity 520ms cubic-bezier(0.22, 1, 0.36, 1) 180ms,
+              transform 520ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
+}
+
+.cr7-fs-menu.is-open .cr7-fs-menu__panel {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.cr7-fs-menu__visual {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(circle at center, rgba(0, 200, 83, 0.22) 0%, rgba(0, 138, 56, 0.06) 50%, transparent 76%);
+}
+
+.cr7-fs-menu__campaign-img {
+  max-width: 82%;
+  max-height: 92%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
+  will-change: transform;
+}
+
+.cr7-fs-menu__campaign-eyebrow {
+  font-family: var(--cr7-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cr7-emerald);
+  margin: 0;
+}
+
+.cr7-fs-menu__campaign-title {
+  font-family: var(--cr7-serif);
+  font-size: clamp(24px, 2.2vw, 34px);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--cr7-white);
+  margin: 0;
+}
+
+.cr7-fs-menu__campaign-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  width: fit-content;
+  font-family: var(--cr7-sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cr7-white);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  transition: color 200ms ease, border-color 200ms ease;
+}
+
+.cr7-fs-menu__campaign-cta:hover,
+.cr7-fs-menu__campaign-cta:focus-visible {
+  color: var(--cr7-emerald);
+  border-color: var(--cr7-emerald);
+}
+
+.cr7-fs-menu__campaign-cta svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 200ms ease;
+}
+
+.cr7-fs-menu__campaign-cta:hover svg {
+  transform: translateX(4px);
+}
+
+/* 6. Bottom Information Area */
+.cr7-fs-menu__bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--cr7-border);
+  flex-shrink: 0;
+}
+
+.cr7-fs-menu__support {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.cr7-fs-menu__support-link {
+  font-family: var(--cr7-sans);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--cr7-muted);
+  text-decoration: none;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  transition: color 180ms ease;
+}
+
+.cr7-fs-menu__support-link:hover,
+.cr7-fs-menu__support-link:focus-visible {
+  color: var(--cr7-white);
+}
+
+.cr7-fs-menu__bottom-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+}
+
+.cr7-fs-menu__socials {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cr7-fs-menu__social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--cr7-border);
+  color: var(--cr7-muted);
+  text-decoration: none;
+  transition: color 180ms ease, border-color 180ms ease;
+}
+
+.cr7-fs-menu__social:hover,
+.cr7-fs-menu__social:focus-visible {
+  color: var(--cr7-emerald);
+  border-color: var(--cr7-emerald);
+}
+
+.cr7-fs-menu__social svg {
+  width: 15px;
+  height: 15px;
+}
+
+.cr7-fs-menu__copy {
+  font-family: var(--cr7-sans);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  color: var(--cr7-muted);
+}
+
+/* 7. Responsive Mobile Layout (< 990px) */
+@media screen and (max-width: 989px) {
+  .cr7-fs-menu__grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  .cr7-fs-menu__panel {
+    padding: 20px;
+  }
+
+  .cr7-fs-menu__visual {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .cr7-fs-menu__link,
+  .cr7-fs-menu__toggle {
+    font-size: 24px;
+  }
+
+  .cr7-fs-menu__bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* 8. Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .cr7-menu-trigger__line,
+  .cr7-fs-menu,
+  .cr7-fs-menu__ambient,
+  .cr7-fs-menu__item,
+  .cr7-fs-menu__sub,
+  .cr7-fs-menu__sub-item,
+  .cr7-fs-menu__panel,
+  .cr7-fs-menu__campaign-img,
+  .cr7-fs-menu__close {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+

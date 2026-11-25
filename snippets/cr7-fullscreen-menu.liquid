@@ -1,0 +1,310 @@
+{%- doc -%}
+  CR7 Luxury Full-Screen Hamburger Menu Overlay
+  Inspired by editorial fullscreen navigation, styled for CR7 Fragrances
+  (#030503 matte black, #00C853 emerald green, editorial serif + sans).
+{%- enddoc -%}
+
+{{ 'cr7-fullscreen-menu.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'cr7-fullscreen-menu.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign energy_product = all_products['cr7-energy-1'] | default: collections['energy'].products.first | default: collections.all.products.first
+  assign campaign_img = energy_product.featured_media.preview_image | default: energy_product.featured_image
+  assign campaign_alt = energy_product.title | default: 'CR7 Energy' | escape
+  assign campaign_url = energy_product.url | default: collections['energy'].url | default: routes.all_products_collection_url
+
+  assign frag_energy = collections['energy']
+  assign frag_legacy = collections['energy-copy']
+  assign frag_game_on = collections['game-on']
+  assign frag_play_cool = collections['play-it-cool']
+  assign frag_discover = collections['discover']
+
+  assign prod_cr7 = collections['cr7']
+  assign prod_origins = collections['origins']
+  assign prod_fearless = collections['legacy-copy']
+
+  assign about_url = pages['about'].url | default: '/pages/about'
+  if pages['about'].template_suffix != 'about'
+    assign about_url = about_url | append: '?view=about'
+  endif
+  assign contact_url = pages['contact'].url | default: '/pages/contact'
+  assign gifts_url = collections['gifts-for-him'].url | default: collections['gifts'].url | default: prod_cr7.url | default: routes.all_products_collection_url
+  assign beyond_url = pages['beyond-the-legend'].url | default: prod_origins.url | default: routes.all_products_collection_url
+  if pages['faq'] != blank
+    assign faq_url = pages['faq'].url
+    if pages['faq'].template_suffix != 'faq'
+      assign faq_url = faq_url | append: '?view=faq'
+    endif
+  elsif pages['faqs'] != blank
+    assign faq_url = pages['faqs'].url
+    if pages['faqs'].template_suffix != 'faq'
+      assign faq_url = faq_url | append: '?view=faq'
+    endif
+  else
+    assign faq_url = contact_url | append: '?view=faq'
+  endif
+  assign shipping_url = shop.shipping_policy.url | default: pages['delivery-returns'].url | default: contact_url
+  assign privacy_url = shop.privacy_policy.url | default: contact_url
+  assign terms_url = shop.terms_of_service.url | default: contact_url
+-%}
+
+<div
+  id="cr7-fullscreen-menu"
+  class="cr7-fs-menu"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Site navigation"
+  aria-hidden="true"
+  inert
+>
+  <div class="cr7-fs-menu__ambient" aria-hidden="true"></div>
+
+  <div class="cr7-fs-menu__inner">
+    {%- comment -%} Top Bar: CR7 Logo + Close X {%- endcomment -%}
+    <div class="cr7-fs-menu__top">
+      <a href="{{ routes.root_url }}" class="cr7-fs-menu__logo" aria-label="{{ shop.name | escape }}">
+        {%- if settings.logo != blank -%}
+          {%- assign logo_alt = shop.name | escape -%}
+          {{ settings.logo | image_url: width: 280 | image_tag:
+            class: 'cr7-fs-menu__logo-img',
+            alt: logo_alt,
+            loading: 'lazy'
+          }}
+        {%- else -%}
+          <span class="cr7-fs-menu__logo-text">CR7</span>
+        {%- endif -%}
+      </a>
+
+      <button
+        type="button"
+        class="cr7-fs-menu__close"
+        data-cr7-menu-close
+        aria-label="Close menu"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    {%- comment -%} Split Composition: Navigation Left | Campaign Panel Right {%- endcomment -%}
+    <div class="cr7-fs-menu__grid">
+      <nav class="cr7-fs-menu__nav" aria-label="Main menu">
+        <ul class="cr7-fs-menu__list">
+          <li class="cr7-fs-menu__item" style="--item-idx: 0;">
+            <div class="cr7-fs-menu__link-row">
+              <span class="cr7-fs-menu__num" aria-hidden="true">01 —</span>
+              <a href="{{ routes.root_url }}" class="cr7-fs-menu__link">HOME</a>
+            </div>
+          </li>
+
+          <li class="cr7-fs-menu__item" style="--item-idx: 1;" data-cr7-sub-item>
+            <div class="cr7-fs-menu__link-row">
+              <span class="cr7-fs-menu__num" aria-hidden="true">02 —</span>
+              <button
+                type="button"
+                class="cr7-fs-menu__toggle"
+                data-cr7-sub-toggle
+                aria-expanded="false"
+                aria-controls="cr7-sub-fragrance"
+              >
+                <span>SHOP BY FRAGRANCE</span>
+                <svg class="cr7-fs-menu__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+            </div>
+            <div class="cr7-fs-menu__sub" id="cr7-sub-fragrance">
+              <div class="cr7-fs-menu__sub-inner">
+                <ul class="cr7-fs-menu__sub-list">
+                  <li class="cr7-fs-menu__sub-item" style="--sub-idx: 0;">
+                    <a
+                      href="{{ frag_energy.url | default: '/collections/energy' }}"
+                      class="cr7-fs-menu__sub-link"
+                      {% if frag_energy.image %}
+                        data-cr7-preview-src="{{ frag_energy.image | image_url: width: 900 }}"
+                        data-cr7-preview-alt="CR7 Energy"
+                      {% endif %}
+                    >CR7 Energy</a>
+                  </li>
+                  <li class="cr7-fs-menu__sub-item" style="--sub-idx: 1;">
+                    <a
+                      href="{{ frag_legacy.url | default: '/collections/energy-copy' }}"
+                      class="cr7-fs-menu__sub-link"
+                      {% if frag_legacy.image %}
+                        data-cr7-preview-src="{{ frag_legacy.image | image_url: width: 900 }}"
+                        data-cr7-preview-alt="Cristiano Ronaldo Legacy"
+                      {% endif %}
+                    >Cristiano Ronaldo Legacy</a>
+                  </li>
+                  <li class="cr7-fs-menu__sub-item" style="--sub-idx: 2;">
+                    <a
+                      href="{{ frag_game_on.url | default: '/collections/game-on' }}"
+                      class="cr7-fs-menu__sub-link"
+                      {% if frag_game_on.image %}
+                        data-cr7-preview-src="{{ frag_game_on.image | image_url: width: 900 }}"
+                        data-cr7-preview-alt="CR7 Game On"
+                      {% endif %}
+                    >CR7 Game On</a>
+                  </li>
+                  <li class="cr7-fs-menu__sub-item" style="--sub-idx: 3;">
+                    <a
+                      href="{{ frag_play_cool.url | default: '/collections/play-it-cool' }}"
+                      class="cr7-fs-menu__sub-link"
+                      {% if frag_play_cool.image %}
+                        data-cr7-preview-src="{{ frag_play_cool.image | image_url: width: 900 }}"
+                        data-cr7-preview-alt="CR7 Play It Cool"
+                      {% endif %}
+                    >CR7 Play It Cool</a>
+                  </li>
+                  <li class="cr7-fs-menu__sub-item" style="--sub-idx: 4;">
+                    <a
+                      href="{{ frag_discover.url | default: '/collections/discover' }}"
+                      class="cr7-fs-menu__sub-link"
+                      {% if frag_discover.image %}
+                        data-cr7-preview-src="{{ frag_discover.image | image_url: width: 900 }}"
+                        data-cr7-preview-alt="Cristiano Ronaldo Discover"
+                      {% endif %}
+                    >Cristiano Ronaldo Discover</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+
+          <li class="cr7-fs-menu__item" style="--item-idx: 2;" data-cr7-sub-item>
+            <div class="cr7-fs-menu__link-row">
+              <span class="cr7-fs-menu__num" aria-hidden="true">03 —</span>
+              <button
+                type="button"
+                class="cr7-fs-menu__toggle"
+                data-cr7-sub-toggle
+                aria-expanded="false"
+                aria-controls="cr7-sub-product"
+              >
+                <span>SHOP BY PRODUCT</span>
+                <svg class="cr7-fs-menu__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+            </div>
+            <div class="cr7-fs-menu__sub" id="cr7-sub-product">
+              <div class="cr7-fs-menu__sub-inner">
+                <ul class="cr7-fs-menu__sub-list">
+                  <li class="cr7-fs-menu__sub-item" style="--sub-idx: 0;">
+                    <a href="{{ routes.all_products_collection_url }}" class="cr7-fs-menu__sub-link">All Fragrances</a>
+                  </li>
+                  <li class="cr7-fs-menu__sub-item" style="--sub-idx: 1;">
+                    <a href="{{ prod_cr7.url | default: '/collections/cr7' }}" class="cr7-fs-menu__sub-link">CR7 Signature</a>
+                  </li>
+                  <li class="cr7-fs-menu__sub-item" style="--sub-idx: 2;">
+                    <a href="{{ prod_origins.url | default: '/collections/origins' }}" class="cr7-fs-menu__sub-link">Origins</a>
+                  </li>
+                  <li class="cr7-fs-menu__sub-item" style="--sub-idx: 3;">
+                    <a href="{{ prod_fearless.url | default: '/collections/legacy-copy' }}" class="cr7-fs-menu__sub-link">Fearless</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+
+          <li class="cr7-fs-menu__item" style="--item-idx: 3;">
+            <div class="cr7-fs-menu__link-row">
+              <span class="cr7-fs-menu__num" aria-hidden="true">04 —</span>
+              <a href="{{ gifts_url }}" class="cr7-fs-menu__link">GIFTS FOR HIM</a>
+            </div>
+          </li>
+
+          <li class="cr7-fs-menu__item" style="--item-idx: 4;">
+            <div class="cr7-fs-menu__link-row">
+              <span class="cr7-fs-menu__num" aria-hidden="true">05 —</span>
+              <a href="{{ about_url }}" class="cr7-fs-menu__link">ABOUT CR7</a>
+            </div>
+          </li>
+
+          <li class="cr7-fs-menu__item" style="--item-idx: 5;">
+            <div class="cr7-fs-menu__link-row">
+              <span class="cr7-fs-menu__num" aria-hidden="true">06 —</span>
+              <a href="{{ beyond_url }}" class="cr7-fs-menu__link">BEYOND THE LEGEND</a>
+            </div>
+          </li>
+
+          <li class="cr7-fs-menu__item" style="--item-idx: 6;">
+            <div class="cr7-fs-menu__link-row">
+              <span class="cr7-fs-menu__num" aria-hidden="true">07 —</span>
+              <a href="{{ contact_url }}" class="cr7-fs-menu__link">CONTACT</a>
+            </div>
+          </li>
+        </ul>
+      </nav>
+
+      {%- comment -%} Right: Brand Experience Campaign Panel {%- endcomment -%}
+      <aside class="cr7-fs-menu__panel" data-cr7-menu-panel aria-label="Featured collection">
+        {%- if campaign_img != blank -%}
+          {%- assign default_src = campaign_img | image_url: width: 900 -%}
+          <div class="cr7-fs-menu__visual">
+            {{ campaign_img | image_url: width: 900 | image_tag:
+              class: 'cr7-fs-menu__campaign-img',
+              data-cr7-campaign-img: '',
+              data-default-src: default_src,
+              data-default-alt: campaign_alt,
+              alt: campaign_alt,
+              loading: 'lazy',
+              widths: '400, 700, 900',
+              sizes: '(min-width: 990px) 34vw, 80vw'
+            }}
+          </div>
+        {%- endif -%}
+
+        <p class="cr7-fs-menu__campaign-eyebrow">THE SIGNATURE COLLECTION</p>
+        <h2 class="cr7-fs-menu__campaign-title">OWN YOUR ENERGY.<br>LIVE THE LEGEND.</h2>
+
+        <a href="{{ campaign_url }}" class="cr7-fs-menu__campaign-cta">
+          <span>EXPLORE THE COLLECTION</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="4" y1="12" x2="20" y2="12"/>
+            <polyline points="14 6 20 12 14 18"/>
+          </svg>
+        </a>
+      </aside>
+    </div>
+
+    {%- comment -%} Bottom Information Area {%- endcomment -%}
+    <div class="cr7-fs-menu__bottom">
+      <div class="cr7-fs-menu__support">
+        <a href="{{ contact_url }}" class="cr7-fs-menu__support-link">Customer Support</a>
+        <a href="{{ faq_url }}" class="cr7-fs-menu__support-link">FAQs</a>
+        <a href="{{ shipping_url }}" class="cr7-fs-menu__support-link">Delivery &amp; Returns</a>
+        <a href="{{ privacy_url }}" class="cr7-fs-menu__support-link">Privacy Policy</a>
+        <a href="{{ terms_url }}" class="cr7-fs-menu__support-link">Terms &amp; Conditions</a>
+      </div>
+
+      <div class="cr7-fs-menu__bottom-right">
+        <div class="cr7-fs-menu__socials" aria-label="Social media">
+          <a href="{{ settings.social_instagram_link | default: 'https://www.instagram.com/cristiano/' }}" target="_blank" rel="noopener" class="cr7-fs-menu__social" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <rect x="2" y="2" width="20" height="20" rx="5"/>
+              <circle cx="12" cy="12" r="4"/>
+              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+            </svg>
+          </a>
+          <a href="{{ settings.social_facebook_link | default: 'https://www.facebook.com/Cristiano/' }}" target="_blank" rel="noopener" class="cr7-fs-menu__social" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+            </svg>
+          </a>
+          <a href="{{ settings.social_youtube_link | default: 'https://www.youtube.com/@cristiano' }}" target="_blank" rel="noopener" class="cr7-fs-menu__social" aria-label="YouTube">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <rect x="2" y="5" width="20" height="14" rx="4"/>
+              <polygon points="10 9 16 12 10 15 10 9" fill="currentColor" stroke="none"/>
+            </svg>
+          </a>
+        </div>
+
+        <span class="cr7-fs-menu__copy">&copy; {{ 'now' | date: '%Y' }} CR7 Fragrances</span>
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,113 @@
+{%- doc -%}
+  Renders partial star ratings with accessible screen reader markup.
+  @param {number} rating - Decimal rating value (e.g. 4.8)
+  @param {number} [rating_count] - Total review count (e.g. 2500)
+  @param {string} [star_size='15px'] - Size of individual stars
+  @param {string} [star_color='#f2b01e'] - Color for filled stars
+  @param {string} [empty_star_color='rgba(255, 255, 255, 0.2)'] - Color for background stars
+  @param {boolean} [show_text=true] - Whether to show the numerical rating & count text
+  @param {string} [class] - Extra class names
+{%- enddoc -%}
+
+{%- liquid
+  assign rating_val = rating | default: 0 | plus: 0
+  assign count_val = rating_count | default: 0 | plus: 0
+  assign star_size = star_size | default: '15px'
+  assign star_color = star_color | default: '#f2b01e'
+  assign empty_star_color = empty_star_color | default: 'rgba(255, 255, 255, 0.2)'
+  if show_text == nil
+    assign show_text = true
+  endif
+
+  if rating_val > 0
+    assign rating_percent = rating_val | times: 100.0 | divided_by: 5.0 | round
+    if rating_percent > 100
+      assign rating_percent = 100
+    endif
+  endif
+-%}
+
+{%- if rating_val > 0 -%}
+  <div class="product-rating-stars {{ class }}" style="--prs-size: {{ star_size }}; --prs-color: {{ star_color }}; --prs-empty-color: {{ empty_star_color }};">
+    <span class="visually-hidden">
+      {{ 'accessibility.star_rating_info' | t: rating_value: rating_val, rating_max: 5, rating_count: count_val | default: 'Rated ' | append: rating_val | append: ' out of 5 stars' }}
+    </span>
+
+    <div class="product-rating-stars__wrap" aria-hidden="true">
+      <div class="product-rating-stars__bg">
+        {%- for i in (1..5) -%}
+          <svg class="product-rating-stars__star" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        {%- endfor -%}
+      </div>
+
+      <div class="product-rating-stars__fill" style="width: {{ rating_percent }}%;">
+        {%- for i in (1..5) -%}
+          <svg class="product-rating-stars__star" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        {%- endfor -%}
+      </div>
+    </div>
+
+    {%- if show_text -%}
+      <span class="product-rating-stars__text">
+        <strong class="product-rating-stars__score">{{ rating_val | round: 1 }}</strong>
+        {%- if count_val > 0 -%}
+          <span class="product-rating-stars__count">({{ count_val | weight_with_unit: '' | default: count_val }} reviews)</span>
+        {%- endif -%}
+      </span>
+    {%- endif -%}
+  </div>
+
+  {% style %}
+    .product-rating-stars {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      line-height: 1;
+    }
+    .product-rating-stars__wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      width: calc(var(--prs-size, 15px) * 5 + 8px);
+      height: var(--prs-size, 15px);
+    }
+    .product-rating-stars__bg {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      color: var(--prs-empty-color, rgba(255, 255, 255, 0.2));
+    }
+    .product-rating-stars__fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      color: var(--prs-color, #f2b01e);
+      white-space: nowrap;
+    }
+    .product-rating-stars__star {
+      width: var(--prs-size, 15px);
+      height: var(--prs-size, 15px);
+      flex-shrink: 0;
+    }
+    .product-rating-stars__text {
+      font-size: 13px;
+      color: var(--color-muted, #a3ada7);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .product-rating-stars__score {
+      color: #ffffff;
+      font-weight: 600;
+    }
+  {% endstyle %}
+{%- endif -%}

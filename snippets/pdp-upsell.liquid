@@ -1,0 +1,200 @@
+{%- doc -%}
+  PDP Dynamic Upsell ("Complete your set")
+  Renders complementary add-on products inside the buy box.
+  Priority:
+  1. Metafield `custom.upsell_products` (list of product references)
+  2. Shopify Product Recommendations API (`intent=complementary`)
+
+  @param {product} product - The main product
+  @param {object} section - The parent pdp-main section object
+  @param {object} [recommendations] - The Shopify recommendations object
+{%- enddoc -%}
+
+{%- liquid
+  assign max_items = section.settings.upsell_max_items | default: 3 | plus: 0
+  assign preselect = section.settings.upsell_preselect | default: false
+  assign heading = section.settings.upsell_heading | default: 'Complete your set'
+
+  assign metafield_products = product.metafields.custom.upsell_products.value
+  assign source_mode = 'none'
+  assign source_list = nil
+
+  if metafield_products != blank and metafield_products.size > 0
+    assign source_mode = 'metafield'
+    assign source_list = metafield_products
+  elsif recommendations.performed
+    if recommendations.products.size > 0
+      assign source_mode = 'recommendations'
+      assign source_list = recommendations.products
+    elsif product.collections.size > 0 and product.collections.first.products.size > 0
+      assign source_mode = 'collection_fallback'
+      assign source_list = product.collections.first.products
+    elsif collections.all.products.size > 0
+      assign source_mode = 'catalog_fallback'
+      assign source_list = collections.all.products
+    endif
+  else
+    assign source_mode = 'pending_recommendations'
+  endif
+
+  assign valid_count = 0
+  if source_list != nil
+    for item in source_list
+      if item.id != product.id and item.available and item.gift_card? == false and item.requires_selling_plan == false and item.selling_plan_groups.size == 0
+        assign valid_count = valid_count | plus: 1
+      endif
+    endfor
+  endif
+
+  # If primary collection only contained the current product, fall back to all catalog products
+  if source_mode == 'collection_fallback' and valid_count == 0 and collections.all.products.size > 0
+    assign source_mode = 'catalog_fallback'
+    assign source_list = collections.all.products
+    for item in source_list
+      if item.id != product.id and item.available and item.gift_card? == false and item.requires_selling_plan == false and item.selling_plan_groups.size == 0
+        assign valid_count = valid_count | plus: 1
+      endif
+    endfor
+  endif
+-%}
+
+{%- if source_mode == 'pending_recommendations' or valid_count > 0 -%}
+  <noscript>
+    <style>.pdp-upsell { display: none !important; }</style>
+  </noscript>
+  <div
+    class="pdp-upsell"
+    data-pdp-upsell
+    data-source-mode="{{ source_mode }}"
+    {% if source_mode == 'pending_recommendations' %}
+      data-recommendations-url="{{ routes.product_recommendations_url }}?product_id={{ product.id }}&limit=4&intent=complementary&section_id={{ section.id }}"
+    {% endif %}
+  >
+    <div class="pdp-upsell__header">
+      <h2 class="pdp-upsell__heading">{{ heading | escape }}</h2>
+    </div>
+
+    <div class="pdp-upsell__items" data-pdp-upsell-items>
+      {%- if source_mode == 'pending_recommendations' -%}
+        <div class="pdp-upsell__skeleton" aria-hidden="true">
+          <div class="pdp-upsell__skeleton-row"></div>
+          <div class="pdp-upsell__skeleton-row"></div>
+        </div>
+      {%- else -%}
+        {%- assign rendered_count = 0 -%}
+        {%- for item in source_list -%}
+          {%- if rendered_count >= max_items -%}{%- break -%}{%- endif -%}
+          {%- if item.id == product.id or item.available == false or item.gift_card? or item.requires_selling_plan or item.selling_plan_groups.size > 0 -%}
+            {%- continue -%}
+          {%- endif -%}
+
+          {%- liquid
+            assign rendered_count = rendered_count | plus: 1
+            assign item_variant = item.selected_or_first_available_variant
+            assign item_img = item_variant.featured_media.preview_image | default: item.featured_media.preview_image | default: item.featured_image
+            assign available_variants_count = 0
+            for v in item.variants
+              if v.available
+                assign available_variants_count = available_variants_count | plus: 1
+              endif
+            endfor
+          -%}
+
+          <label
+            class="pdp-upsell__row"
+            data-pdp-upsell-row
+            data-product-id="{{ item.id }}"
+            data-product-title="{{ item.title | escape }}"
+          >
+            <input
+              type="checkbox"
+              class="pdp-upsell__checkbox"
+              data-pdp-upsell-check
+              value="{{ item_variant.id }}"
+              {% if preselect %}checked{% endif %}
+            >
+            <span class="pdp-upsell__check-box" aria-hidden="true">
+              {% render 'pdp-icon', icon: 'check' %}
+            </span>
+
+            <span class="pdp-upsell__thumb">
+              {%- if item_img != blank -%}
+                {%- assign item_alt = item.title | escape -%}
+                {{ item_img | image_url: width: 120 | image_tag:
+                  loading: 'lazy',
+                  class: 'pdp-upsell__thumb-img',
+                  alt: item_alt,
+                  width: 56,
+                  height: 56
+                }}
+              {%- endif -%}
+            </span>
+
+            <span class="pdp-upsell__info">
+              <span class="pdp-upsell__title">{{ item.title }}</span>
+              {%- if available_variants_count > 1 -%}
+                <select
+                  class="pdp-upsell__select"
+                  data-pdp-upsell-select
+                  aria-label="Select option for {{ item.title | escape }}"
+                >
+                  {%- for v in item.variants -%}
+                    <option
+                      value="{{ v.id }}"
+                      data-price="{{ v.price }}"
+                      data-compare-at="{{ v.compare_at_price | default: 0 }}"
+                      data-available="{{ v.available }}"
+                      {% if v.id == item_variant.id %}selected{% endif %}
+                      {% unless v.available %}disabled{% endunless %}
+                    >
+                      {{ v.title }}
+                    </option>
+                  {%- endfor -%}
+                </select>
+              {%- endif -%}
+            </span>
+
+            <span class="pdp-upsell__price-wrap" data-pdp-upsell-price>
+              <span class="pdp-upsell__price" data-pdp-upsell-price-current>{{ item_variant.price | money }}</span>
+              {%- if item_variant.compare_at_price > item_variant.price -%}
+                <s class="pdp-upsell__compare" data-pdp-upsell-price-compare>{{ item_variant.compare_at_price | money }}</s>
+              {%- else -%}
+                <s class="pdp-upsell__compare" data-pdp-upsell-price-compare hidden></s>
+              {%- endif -%}
+            </span>
+
+            <script type="application/json" data-pdp-upsell-variant-json>
+              {
+                "selectedVariantId": {{ item_variant.id | json }},
+                "variants": [
+                  {%- for v in item.variants -%}
+                    {
+                      "id": {{ v.id | json }},
+                      "title": {{ v.title | json }},
+                      "price": {{ v.price | json }},
+                      "compare_at_price": {{ v.compare_at_price | default: 0 | json }},
+                      "available": {{ v.available | json }}
+                    }{% unless forloop.last %},{% endunless %}
+                  {%- endfor -%}
+                ]
+              }
+            </script>
+          </label>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+    <div class="pdp-upsell__footer" data-pdp-upsell-footer aria-hidden="true">
+      <div class="pdp-upsell__footer-inner" hidden data-pdp-upsell-footer-inner>
+        <span class="pdp-upsell__total-label">Total</span>
+        <span class="pdp-upsell__total-right">
+          <span class="pdp-upsell__total-price" data-pdp-upsell-total></span>
+          <span class="pdp-upsell__total-count" data-pdp-upsell-count></span>
+        </span>
+      </div>
+    </div>
+
+    <span class="visually-hidden" aria-live="polite" data-pdp-upsell-live></span>
+  </div>
+{%- endif -%}
+

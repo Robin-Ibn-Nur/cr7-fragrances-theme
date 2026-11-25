@@ -1,0 +1,232 @@
+{%- comment -%}
+  Product Fragrance Notes Section (3 Columns)
+  Target ID: pp-notes
+{%- endcomment -%}
+
+{{ 'product-notes.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  # Pre-calculate if any note content exists
+  assign has_any_notes = false
+  for block in section.blocks
+    assign note_text = ''
+    if block.settings.tier_type == 'top'
+      assign note_text = product.metafields.custom.notes_top.value | default: product.metafields.custom.notes_top
+    elsif block.settings.tier_type == 'heart'
+      assign note_text = product.metafields.custom.notes_heart.value | default: product.metafields.custom.notes_heart
+    elsif block.settings.tier_type == 'base'
+      assign note_text = product.metafields.custom.notes_base.value | default: product.metafields.custom.notes_base
+    endif
+    if note_text == blank
+      assign note_text = block.settings.default_notes
+    endif
+
+    if note_text != blank
+      assign has_any_notes = true
+      break
+    endif
+  endfor
+-%}
+
+{%- if has_any_notes -%}
+  <section
+    id="pp-notes"
+    class="pn-block"
+    data-section-id="{{ section.id }}"
+    data-section-type="product-notes"
+    data-pp-target="notes"
+    style="
+      --pn-bg: {{ section.settings.background_color }};
+      --pn-accent: {{ section.settings.accent_color }};
+      --pn-text: {{ section.settings.text_color }};
+      --pn-muted: {{ section.settings.muted_color }};
+      --pn-border: {{ section.settings.border_color }};
+    "
+  >
+    <div class="pn-block__container">
+      {%- if section.settings.title != blank or section.settings.subtitle != blank -%}
+        <div class="pn-block__header">
+          {%- if section.settings.title != blank -%}
+            <h2 class="pn-block__title">{{ section.settings.title }}</h2>
+          {%- endif -%}
+          {%- if section.settings.subtitle != blank -%}
+            <p class="pn-block__subtitle">{{ section.settings.subtitle }}</p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      <div class="pn-grid">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign col_text = ''
+            assign col_img = nil
+
+            if block.settings.tier_type == 'top'
+              assign col_text = product.metafields.custom.notes_top.value | default: product.metafields.custom.notes_top
+              assign col_img = product.metafields.custom.notes_top_image.value | default: product.metafields.custom.notes_top_image
+            elsif block.settings.tier_type == 'heart'
+              assign col_text = product.metafields.custom.notes_heart.value | default: product.metafields.custom.notes_heart
+              assign col_img = product.metafields.custom.notes_heart_image.value | default: product.metafields.custom.notes_heart_image
+            elsif block.settings.tier_type == 'base'
+              assign col_text = product.metafields.custom.notes_base.value | default: product.metafields.custom.notes_base
+              assign col_img = product.metafields.custom.notes_base_image.value | default: product.metafields.custom.notes_base_image
+            endif
+
+            if col_text == blank
+              assign col_text = block.settings.default_notes
+            endif
+
+            if col_img == blank
+              assign col_img = block.settings.default_image
+            endif
+          -%}
+
+          {%- if col_text != blank -%}
+            <div class="pn-col" {{ block.shopify_attributes }}>
+              <div class="pn-col__image-wrap">
+                {%- if col_img != blank -%}
+                  {%- assign tier_alt = block.settings.tier_label | escape -%}
+                  {{ col_img | image_url: width: 200 | image_tag:
+                    loading: 'lazy',
+                    class: 'pn-col__img',
+                    alt: tier_alt
+                  }}
+                {%- else -%}
+                  <div class="pn-col__img" style="background: radial-gradient(circle, #253828 0%, #0a140d 100%);"></div>
+                {%- endif -%}
+              </div>
+
+              <div class="pn-col__text-wrap">
+                <h3 class="pn-col__tier">{{ block.settings.tier_label }}</h3>
+                <p class="pn-col__notes">{{ col_text }}</p>
+              </div>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Product Fragrance Notes",
+  "tag": "section",
+  "class": "section-product-notes",
+  "settings": [
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#030504"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#19e65a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Title Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Muted Text",
+      "default": "#a3ada7"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Divider Border",
+      "default": "rgba(255, 255, 255, 0.12)"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "FRAGRANCE NOTES"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Section Subtitle",
+      "default": "A perfect balance of freshness and masculinity."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "note",
+      "name": "Note Tier Column",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "text",
+          "id": "tier_label",
+          "label": "Tier Label",
+          "default": "Top Notes"
+        },
+        {
+          "type": "select",
+          "id": "tier_type",
+          "label": "Tier Metafield Type",
+          "options": [
+            { "value": "top", "label": "Top Notes (custom.notes_top)" },
+            { "value": "heart", "label": "Heart Notes (custom.notes_heart)" },
+            { "value": "base", "label": "Base Notes (custom.notes_base)" },
+            { "value": "custom", "label": "Custom (Use Fallback Text)" }
+          ],
+          "default": "top"
+        },
+        {
+          "type": "text",
+          "id": "default_notes",
+          "label": "Default Notes List",
+          "default": "Citrus, Bergamot, Green Apple",
+          "info": "Used when product metafield is blank"
+        },
+        {
+          "type": "image_picker",
+          "id": "default_image",
+          "label": "Default Round Image",
+          "info": "Used when product metafield image is blank"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Fragrance Notes",
+      "blocks": [
+        {
+          "type": "note",
+          "settings": {
+            "tier_label": "Top Notes",
+            "tier_type": "top",
+            "default_notes": "Citrus, Bergamot, Green Apple"
+          }
+        },
+        {
+          "type": "note",
+          "settings": {
+            "tier_label": "Heart Notes",
+            "tier_type": "heart",
+            "default_notes": "Lavender, Geranium, Cedarwood"
+          }
+        },
+        {
+          "type": "note",
+          "settings": {
+            "tier_label": "Base Notes",
+            "tier_type": "base",
+            "default_notes": "Amber, Musk, Tonka Bean"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

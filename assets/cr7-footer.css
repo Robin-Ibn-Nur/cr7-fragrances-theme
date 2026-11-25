@@ -1,0 +1,384 @@
+/* ==========================================================================
+   CR7 FOOTER (Luxury Emerald-Smoke Newsletter + Refined 5-Column White Footer)
+   ========================================================================== */
+
+.cr7-footer {
+  --cf-dark: #030503;
+  --cf-emerald: #00c853;
+  --cf-emerald-deep: #008a38;
+  --cf-white: #ffffff;
+  --cf-text: #0a0a0a;
+  --cf-muted: #55595e;
+  --cf-divider: #e5e7eb;
+  --cf-serif: var(--font-heading--family, Georgia, serif);
+  --cf-sans: var(--font-subheading--family, -apple-system, BlinkMacSystemFont, sans-serif);
+
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--cf-sans);
+}
+
+.cr7-footer__container {
+  width: min(100% - 2 * var(--page-margin, clamp(16px, 4vw, 40px)), var(--normal-page-width, 95rem));
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+/* 1. Top Dark Emerald-Smoke Newsletter Banner */
+.cr7-footer__banner {
+  position: relative;
+  background-color: var(--cf-dark);
+  color: #ffffff;
+  padding-block: clamp(40px, 5vw, 64px);
+  border-top: 1px solid rgba(0, 200, 83, 0.25);
+  overflow: hidden;
+}
+
+.cr7-footer__smoke {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 42% 130% at 8% 55%, rgba(0, 200, 83, 0.24) 0%, rgba(0, 138, 56, 0.09) 45%, transparent 76%),
+    radial-gradient(ellipse 44% 130% at 88% 45%, rgba(0, 200, 83, 0.22) 0%, rgba(0, 138, 56, 0.08) 48%, transparent 78%);
+}
+
+.cr7-footer__banner-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 480px);
+  align-items: center;
+  gap: 28px 48px;
+}
+
+.cr7-footer__banner-eyebrow {
+  font-family: var(--cf-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cf-emerald);
+  margin: 0 0 10px;
+}
+
+.cr7-footer__banner-title {
+  font-family: var(--cf-serif);
+  font-size: clamp(26px, 2.6vw, 36px);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  color: #ffffff;
+  margin: 0 0 8px;
+}
+
+.cr7-footer__banner-sub {
+  font-family: var(--cf-sans);
+  font-size: 14px;
+  color: #b4bab6;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.cr7-footer__form {
+  width: 100%;
+}
+
+.cr7-footer__input-group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.04);
+  transition: border-color 200ms ease;
+}
+
+.cr7-footer__input-group:focus-within {
+  border-color: rgba(0, 200, 83, 0.65);
+}
+
+.cr7-footer__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 50px;
+  padding: 0 18px;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-family: var(--cf-sans);
+  font-size: 13.5px;
+  outline: none;
+}
+
+.cr7-footer__input::placeholder {
+  color: #9ca3af;
+}
+
+.cr7-footer__submit {
+  flex: 0 0 auto;
+  height: 50px;
+  padding: 0 28px;
+  background-color: #10b948;
+  color: #ffffff;
+  border: none;
+  font-family: var(--cf-sans);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 180ms ease;
+  white-space: nowrap;
+}
+
+.cr7-footer__submit:hover,
+.cr7-footer__submit:focus-visible {
+  background-color: #0ea33e;
+}
+
+.cr7-footer__submit:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: -2px;
+}
+
+.cr7-footer__form-msg {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  color: #86efac;
+}
+
+.cr7-footer__form-msg--error {
+  color: #fca5a5;
+}
+
+/* 2. Bottom White 5-Column Footer */
+.cr7-footer__main {
+  background-color: var(--cf-white);
+  color: var(--cf-text);
+  color-scheme: light;
+  padding-block: clamp(48px, 6vw, 76px);
+}
+
+.cr7-footer__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) repeat(3, minmax(0, 1fr)) minmax(0, 1.35fr);
+  align-items: start;
+}
+
+.cr7-footer__col {
+  position: relative;
+  padding-inline: clamp(16px, 2.2vw, 32px);
+  min-width: 0;
+}
+
+.cr7-footer__col:first-child {
+  padding-inline-start: 0;
+  display: flex;
+  align-items: center;
+  min-height: 92px;
+}
+
+.cr7-footer__col:last-child {
+  padding-inline-end: 0;
+  text-align: end;
+}
+
+.cr7-footer__col + .cr7-footer__col::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 1px;
+  background-color: var(--cf-divider);
+}
+
+/* Premium CR7 Typographic Wordmark */
+.cr7-footer__brand {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  text-decoration: none;
+  color: var(--cf-text);
+  transition: opacity 180ms ease;
+}
+
+.cr7-footer__brand:hover {
+  opacity: 0.78;
+}
+
+.cr7-footer__brand-mark {
+  font-family: var(--cf-serif);
+  font-size: clamp(32px, 3vw, 40px);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 0.95;
+  color: var(--cf-text);
+}
+
+.cr7-footer__brand-dot {
+  color: var(--cf-emerald-deep);
+}
+
+.cr7-footer__brand-sub {
+  font-family: var(--cf-sans);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--cf-muted);
+  padding-inline-start: 2px;
+}
+
+.cr7-footer__col-title {
+  font-family: var(--cf-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cf-text);
+  margin: 0 0 16px;
+  line-height: 1.2;
+}
+
+.cr7-footer__links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cr7-footer__link {
+  font-family: var(--cf-sans);
+  font-size: 13.5px;
+  color: var(--cf-muted);
+  text-decoration: none;
+  line-height: 1.4;
+  transition: color 150ms ease;
+}
+
+.cr7-footer__link:hover,
+.cr7-footer__link:focus-visible {
+  color: var(--cf-text);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.cr7-footer__socials {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cr7-footer__social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--cf-divider);
+  color: var(--cf-text);
+  text-decoration: none;
+  transition: border-color 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.cr7-footer__social:hover,
+.cr7-footer__social:focus-visible {
+  border-color: var(--cf-emerald-deep);
+  color: var(--cf-emerald-deep);
+  transform: translateY(-1px);
+}
+
+.cr7-footer__social svg {
+  width: 16px;
+  height: 16px;
+}
+
+.cr7-footer__legal {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--cf-muted);
+  margin-bottom: 14px;
+}
+
+.cr7-footer__legal-sep {
+  color: #d4d4d8;
+}
+
+.cr7-footer__copyright {
+  font-size: 12px;
+  color: var(--cf-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* 3. Responsive Breakpoints */
+@media screen and (max-width: 989px) {
+  .cr7-footer__banner-inner {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .cr7-footer__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px 24px;
+  }
+
+  .cr7-footer__col {
+    padding-inline: 0;
+  }
+
+  .cr7-footer__col + .cr7-footer__col::before {
+    display: none;
+  }
+
+  .cr7-footer__col:first-child {
+    grid-column: 1 / -1;
+    min-height: 0;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--cf-divider);
+  }
+
+  .cr7-footer__col:last-child {
+    grid-column: 1 / -1;
+    text-align: start;
+    padding-top: 20px;
+    border-top: 1px solid var(--cf-divider);
+  }
+
+  .cr7-footer__legal {
+    justify-content: flex-start;
+  }
+}
+
+@media screen and (max-width: 549px) {
+  .cr7-footer__input-group {
+    flex-direction: column;
+    border: none;
+    background: transparent;
+    gap: 10px;
+    border-radius: 0;
+  }
+
+  .cr7-footer__input {
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.04);
+  }
+
+  .cr7-footer__submit {
+    width: 100%;
+    border-radius: 8px;
+  }
+}

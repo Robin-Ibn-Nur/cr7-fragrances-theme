@@ -1,0 +1,264 @@
+{%- comment -%}
+  CR7 Floating Ambient Audio Player (Bottom-Left)
+  Beating/blinking luxury play button with animated emerald equalizer bars.
+{%- endcomment -%}
+
+<div class="cr7-audio-wrap">
+  <audio
+    id="cr7-ambient-audio"
+    src="{{ 'cr7-ambient-audio.m4a' | asset_url }}"
+    loop
+    preload="none"
+  ></audio>
+
+  <button
+    type="button"
+    id="cr7-audio-btn"
+    class="cr7-audio-btn"
+    aria-label="Play background soundtrack"
+    aria-pressed="false"
+  >
+    <span class="cr7-audio-btn__pulse" aria-hidden="true"></span>
+    <span class="cr7-audio-btn__pulse cr7-audio-btn__pulse--delay" aria-hidden="true"></span>
+
+    <span class="cr7-audio-btn__icon cr7-audio-btn__icon--play" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <polygon points="8 5 19 12 8 19 8 5"></polygon>
+      </svg>
+    </span>
+
+    <span class="cr7-audio-btn__eq" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </span>
+
+    <span class="cr7-audio-btn__dot" aria-hidden="true"></span>
+  </button>
+</div>
+
+<style>
+  .cr7-audio-wrap {
+    position: fixed;
+    left: clamp(16px, 3vw, 28px);
+    bottom: clamp(16px, 3vw, 28px);
+    z-index: 9990;
+  }
+
+  .cr7-audio-btn {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    border: 1.5px solid rgba(0, 200, 83, 0.72);
+    border-radius: 50%;
+    background: linear-gradient(145deg, #141414, #070707);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28),
+                0 0 18px rgba(0, 200, 83, 0.22);
+    animation: cr7AudioHeartbeat 1.8s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  }
+
+  .cr7-audio-btn:hover,
+  .cr7-audio-btn:focus-visible {
+    transform: scale(1.07);
+    border-color: #00e676;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.36),
+                0 0 24px rgba(0, 200, 83, 0.45);
+  }
+
+  .cr7-audio-btn:focus-visible {
+    outline: 2px solid #00c853;
+    outline-offset: 4px;
+  }
+
+  /* Concentric blinking/beating sonar rings */
+  .cr7-audio-btn__pulse {
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0, 200, 83, 0.7);
+    pointer-events: none;
+    animation: cr7AudioRing 2.1s cubic-bezier(0.165, 0.84, 0.44, 1) infinite;
+  }
+
+  .cr7-audio-btn__pulse--delay {
+    animation-delay: 1.05s;
+  }
+
+  /* Live blinking status dot */
+  .cr7-audio-btn__dot {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background-color: #00e676;
+    border: 1.5px solid #0a0a0a;
+    animation: cr7AudioBlink 1.1s ease-in-out infinite;
+  }
+
+  /* Play triangle */
+  .cr7-audio-btn__icon--play {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 2px;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .cr7-audio-btn__icon--play svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Equalizer bars (visible while playing) */
+  .cr7-audio-btn__eq {
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 3px;
+    height: 18px;
+  }
+
+  .cr7-audio-btn__eq span {
+    width: 3px;
+    height: 6px;
+    border-radius: 2px;
+    background-color: #00e676;
+    animation: cr7AudioEq 0.75s ease-in-out infinite alternate;
+  }
+
+  .cr7-audio-btn__eq span:nth-child(2) {
+    animation-delay: 0.18s;
+  }
+
+  .cr7-audio-btn__eq span:nth-child(3) {
+    animation-delay: 0.36s;
+  }
+
+  .cr7-audio-btn__eq span:nth-child(4) {
+    animation-delay: 0.12s;
+  }
+
+  /* Playing state */
+  .cr7-audio-btn.is-playing {
+    background: linear-gradient(145deg, #008a38, #005c25);
+    border-color: #00e676;
+    animation: cr7AudioHeartbeat 1.1s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  }
+
+  .cr7-audio-btn.is-playing .cr7-audio-btn__icon--play {
+    display: none;
+  }
+
+  .cr7-audio-btn.is-playing .cr7-audio-btn__eq {
+    display: inline-flex;
+  }
+
+  .cr7-audio-btn.is-playing .cr7-audio-btn__eq span {
+    background-color: #ffffff;
+  }
+
+  @keyframes cr7AudioHeartbeat {
+    0%, 100% {
+      transform: scale(1);
+    }
+    18% {
+      transform: scale(1.06);
+    }
+    36% {
+      transform: scale(1);
+    }
+    54% {
+      transform: scale(1.03);
+    }
+  }
+
+  @keyframes cr7AudioRing {
+    0% {
+      transform: scale(1);
+      opacity: 0.85;
+    }
+    100% {
+      transform: scale(1.62);
+      opacity: 0;
+    }
+  }
+
+  @keyframes cr7AudioBlink {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.3;
+      transform: scale(0.8);
+    }
+  }
+
+  @keyframes cr7AudioEq {
+    0% {
+      height: 5px;
+    }
+    100% {
+      height: 18px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cr7-audio-btn,
+    .cr7-audio-btn__pulse,
+    .cr7-audio-btn__dot,
+    .cr7-audio-btn__eq span {
+      animation: none !important;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    var audio = document.getElementById('cr7-ambient-audio');
+    var btn = document.getElementById('cr7-audio-btn');
+    if (!audio || !btn || btn.__cr7AudioBound) return;
+    btn.__cr7AudioBound = true;
+
+    audio.volume = 0.55;
+
+    function setPlayingState(playing) {
+      btn.classList.toggle('is-playing', playing);
+      btn.setAttribute('aria-pressed', String(playing));
+      btn.setAttribute('aria-label', playing ? 'Pause background soundtrack' : 'Play background soundtrack');
+    }
+
+    btn.addEventListener('click', function () {
+      if (audio.paused) {
+        var playPromise = audio.play();
+        if (playPromise && typeof playPromise.then === 'function') {
+          playPromise.then(function () {
+            setPlayingState(true);
+          }).catch(function (err) {
+            console.warn('[cr7-audio] Playback failed:', err);
+          });
+        } else {
+          setPlayingState(true);
+        }
+      } else {
+        audio.pause();
+        setPlayingState(false);
+      }
+    });
+
+    audio.addEventListener('ended', function () {
+      setPlayingState(false);
+    });
+  })();
+</script>
+

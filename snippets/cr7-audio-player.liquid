@@ -352,10 +352,11 @@
     var navController = null;
 
     function isSoftNavEligible(link) {
-      if (!link || !link.href) return false;
+      if (!link) return false;
+      var rawHref = link.getAttribute('href');
+      if (!rawHref || rawHref.charAt(0) === '#') return false;
       if (link.target && link.target !== '_self') return false;
       if (link.hasAttribute('download')) return false;
-      if (link.getAttribute('href').startsWith('#')) return false;
 
       var url;
       try {
@@ -377,26 +378,53 @@
           return l.getAttribute('href');
         })
       );
+      var stylePromises = [];
+
       newDoc.head.querySelectorAll('link[rel="stylesheet"]').forEach(function (link) {
         var href = link.getAttribute('href');
         if (href && !existingHrefs.has(href)) {
           var clone = document.createElement('link');
           clone.rel = 'stylesheet';
           clone.href = href;
+          stylePromises.push(new Promise(function (resolve) {
+            clone.onload = resolve;
+            clone.onerror = resolve;
+            window.setTimeout(resolve, 1500);
+          }));
           document.head.appendChild(clone);
         }
       });
+
+      // Sync Shopify subsetted <style> blocks from the target page <head>
+      var existingStyleTexts = new Set(
+        Array.from(document.head.querySelectorAll('style')).map(function (s) {
+          return s.textContent.trim();
+        })
+      );
+      newDoc.head.querySelectorAll('style').forEach(function (styleEl) {
+        var text = styleEl.textContent.trim();
+        if (text && !existingStyleTexts.has(text)) {
+          var cloneStyle = document.createElement('style');
+          if (styleEl.hasAttribute('data-shopify')) cloneStyle.setAttribute('data-shopify', '');
+          cloneStyle.textContent = styleEl.textContent;
+          document.head.appendChild(cloneStyle);
+          existingStyleTexts.add(text);
+        }
+      });
+
+      return Promise.all(stylePromises);
     }
 
     async function softNavigate(url, pushHistory) {
       if (navController) navController.abort();
       navController = new AbortController();
 
+      document.documentElement.classList.add('cr7-soft-nav-loading');
+
       try {
         var res = await fetch(url, {
           credentials: 'same-origin',
-          signal: navController.signal,
-          headers: { 'X-Requested-With': 'cr7-soft-nav' }
+          signal: navController.signal
         });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         var contentType = res.headers.get('content-type') || '';
@@ -417,7 +445,7 @@
           document.body.style.overflow = '';
         }
 
-        syncHeadStyles(newDoc);
+        await syncHeadStyles(newDoc);
 
         // Sync transparent header attribute if changed
         var curHeader = document.getElementById('header-component');
@@ -434,18 +462,29 @@
         curMain.setAttribute('data-template', newMain.getAttribute('data-template') || '');
         curMain.innerHTML = newMain.innerHTML;
 
-        // Execute any inline/external scripts inside the swapped MainContent
+        // Execute only executable JS scripts inside swapped MainContent (skip application/json, ld+json, etc.)
         var loadedSrcs = new Set(
           Array.from(document.querySelectorAll('script[src]')).map(function (s) { return s.getAttribute('src'); })
         );
+        var scriptPromises = [];
         curMain.querySelectorAll('script').forEach(function (oldScript) {
+          var type = (oldScript.getAttribute('type') || '').trim().toLowerCase();
+          if (type && type !== 'text/javascript' && type !== 'application/javascript' && type !== 'module') {
+            return;
+          }
           var src = oldScript.getAttribute('src');
           if (src && loadedSrcs.has(src)) return;
+
           var s = document.createElement('script');
+          if (type) s.type = type;
           if (src) {
             s.src = src;
-            if (oldScript.type) s.type = oldScript.type;
-            s.defer = true;
+            loadedSrcs.add(src);
+            scriptPromises.push(new Promise(function (resolve) {
+              s.onload = resolve;
+              s.onerror = resolve;
+              window.setTimeout(resolve, 1500);
+            }));
           } else {
             s.textContent = oldScript.textContent;
           }
@@ -457,11 +496,16 @@
         }
 
         window.scrollTo(0, 0);
+        if (scriptPromises.length) {
+          await Promise.all(scriptPromises);
+        }
         document.dispatchEvent(new CustomEvent('shopify:section:load', { detail: { softNav: true } }));
       } catch (err) {
         if (err && err.name === 'AbortError') return;
         saveState();
         window.location.href = url;
+      } finally {
+        document.documentElement.classList.remove('cr7-soft-nav-loading');
       }
     }
 
@@ -471,8 +515,9 @@
       var link = e.target.closest('a');
       if (!isSoftNavEligible(link)) return;
       e.preventDefault();
+      e.stopPropagation();
       softNavigate(link.href, true);
-    });
+    }, true);
 
     window.addEventListener('popstate', function () {
       if (audio.paused) return;

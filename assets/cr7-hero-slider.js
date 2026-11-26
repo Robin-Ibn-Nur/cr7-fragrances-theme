@@ -119,6 +119,8 @@
     initAll();
   }
 
+  document.addEventListener('shopify:section:load', initAll);
+
   document.addEventListener('shopify:section:load', (e) => {
     const target = e.target.matches('[data-cr7-hero-slider]')
       ? e.target

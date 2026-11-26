@@ -1,0 +1,158 @@
+{%- comment -%}
+  CR7 Scroll-to-Top Button with Scroll-Dependent Progress Border Ring
+{%- endcomment -%}
+
+<button
+  type="button"
+  id="cr7-scroll-top"
+  class="cr7-scroll-top"
+  aria-label="Scroll to top"
+  hidden
+>
+  <svg class="cr7-scroll-top__ring" viewBox="0 0 48 48" aria-hidden="true">
+    <circle class="cr7-scroll-top__track" cx="24" cy="24" r="21.5" />
+    <circle class="cr7-scroll-top__progress" cx="24" cy="24" r="21.5" />
+  </svg>
+  <svg class="cr7-scroll-top__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <line x1="12" y1="19" x2="12" y2="5" />
+    <polyline points="6 11 12 5 18 11" />
+  </svg>
+</button>
+
+<style>
+  .cr7-scroll-top {
+    position: fixed;
+    right: clamp(16px, 3vw, 28px);
+    bottom: clamp(16px, 3vw, 28px);
+    z-index: 9990;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background-color: #0a0a0a;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    transform: translateY(14px) scale(0.92);
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
+                transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
+                background-color 0.25s ease,
+                box-shadow 0.25s ease;
+  }
+
+  .cr7-scroll-top.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  .cr7-scroll-top:hover,
+  .cr7-scroll-top:focus-visible {
+    background-color: #008a38;
+    box-shadow: 0 12px 32px rgba(0, 138, 56, 0.32);
+    transform: translateY(-2px) scale(1.03);
+  }
+
+  .cr7-scroll-top:focus-visible {
+    outline: 2px solid #00c853;
+    outline-offset: 3px;
+  }
+
+  .cr7-scroll-top__ring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+    pointer-events: none;
+  }
+
+  .cr7-scroll-top__track,
+  .cr7-scroll-top__progress {
+    fill: none;
+    stroke-width: 2.5;
+  }
+
+  .cr7-scroll-top__track {
+    stroke: rgba(255, 255, 255, 0.16);
+  }
+
+  .cr7-scroll-top__progress {
+    stroke: #00c853;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.08s linear;
+  }
+
+  .cr7-scroll-top__arrow {
+    position: relative;
+    z-index: 1;
+    width: 18px;
+    height: 18px;
+    transition: transform 0.25s ease;
+  }
+
+  .cr7-scroll-top:hover .cr7-scroll-top__arrow {
+    transform: translateY(-2px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cr7-scroll-top,
+    .cr7-scroll-top__progress,
+    .cr7-scroll-top__arrow {
+      transition: none !important;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    var btn = document.getElementById('cr7-scroll-top');
+    if (!btn || btn.__cr7Bound) return;
+    btn.__cr7Bound = true;
+
+    var progressCircle = btn.querySelector('.cr7-scroll-top__progress');
+    var radius = 21.5;
+    var circumference = 2 * Math.PI * radius;
+
+    if (progressCircle) {
+      progressCircle.style.strokeDasharray = circumference + ' ' + circumference;
+      progressCircle.style.strokeDashoffset = String(circumference);
+    }
+
+    function updateScrollButton() {
+      var scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+      var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      var progress = docHeight > 0 ? Math.min(Math.max(scrollTop / docHeight, 0), 1) : 0;
+
+      if (progressCircle) {
+        progressCircle.style.strokeDashoffset = String(circumference * (1 - progress));
+      }
+
+      if (scrollTop > 220) {
+        btn.hidden = false;
+        btn.classList.add('is-visible');
+      } else {
+        btn.classList.remove('is-visible');
+      }
+    }
+
+    btn.addEventListener('click', function () {
+      var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({
+        top: 0,
+        behavior: reduced ? 'auto' : 'smooth'
+      });
+    });
+
+    window.addEventListener('scroll', updateScrollButton, { passive: true });
+    window.addEventListener('resize', updateScrollButton, { passive: true });
+    updateScrollButton();
+  })();
+</script>
+

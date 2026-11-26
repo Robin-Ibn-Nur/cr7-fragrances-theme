@@ -89,7 +89,7 @@
       const scope = el.closest('.shopify-section') || el.parentElement || document.body;
       const count = containerCounters.get(scope) || 0;
       containerCounters.set(scope, count + 1);
-      registerTarget(el, 'scroll-reveal--text', Math.min(count, 5) * 0.07);
+      registerTarget(el, 'scroll-reveal--text', 0.1 + Math.min(count, 5) * 0.1);
     });
 
     // 3. Fade-up sections, cards, FAQ items, and footer blocks
@@ -112,11 +112,11 @@
     );
 
     upTargets.forEach((el) => {
-      let delay = 0;
+      let delay = 0.15;
       const parent = el.parentElement;
       if (parent && parent.children.length > 1) {
         const index = Array.from(parent.children).indexOf(el);
-        if (index > 0) delay = Math.min(index, 5) * 0.08;
+        if (index >= 0) delay = 0.15 + Math.min(index, 5) * 0.1;
       }
       registerTarget(el, 'scroll-reveal', delay);
     });

@@ -2029,7 +2029,7 @@ main > .shopify-section:first-child .section:not(.disable-section-top-offset) {
   background: #555555;
 }
 
-/* Scroll Reveal Animations (Site-wide Fade-Up, Side Slide & Text Reveal) */
+/* Scroll Reveal Animations (Contextser-style 1s easeOutQuart Rise & Stagger) */
 #MainContent,
 #MainContent > .shopify-section,
 footer {
@@ -2042,30 +2042,24 @@ footer {
 .scroll-reveal--text {
   opacity: 0;
   will-change: opacity, transform;
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-stagger, 0s),
-              transform 0.85s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-stagger, 0s),
-              filter 0.75s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-stagger, 0s);
+  transition: opacity 1s cubic-bezier(0.165, 0.84, 0.44, 1) var(--reveal-stagger, 0.1s),
+              transform 1s cubic-bezier(0.165, 0.84, 0.44, 1) var(--reveal-stagger, 0.1s);
 }
 
 .scroll-reveal {
-  transform: translate3d(0, 28px, 0);
-  filter: blur(3px);
+  transform: translate3d(0, 100px, 0);
 }
 
 .scroll-reveal--left {
-  transform: translate3d(-28px, 10px, 0);
-  filter: blur(2px);
+  transform: translate3d(-64px, 36px, 0);
 }
 
 .scroll-reveal--right {
-  transform: translate3d(28px, 10px, 0);
-  filter: blur(2px);
+  transform: translate3d(64px, 36px, 0);
 }
 
 .scroll-reveal--text {
-  transform: translate3d(0, 20px, 0);
-  filter: blur(2px);
-  transition-duration: 0.72s, 0.78s, 0.68s;
+  transform: translate3d(0, 56px, 0);
 }
 
 .scroll-reveal.is-revealed,
@@ -2074,7 +2068,6 @@ footer {
 .scroll-reveal--text.is-revealed {
   opacity: 1;
   transform: translate3d(0, 0, 0);
-  filter: blur(0);
 }
 
 /* Accessibility: Reduced Motion */
@@ -2085,7 +2078,6 @@ footer {
   .scroll-reveal--text {
     opacity: 1 !important;
     transform: none !important;
-    filter: none !important;
     transition: none !important;
     will-change: auto !important;
   }

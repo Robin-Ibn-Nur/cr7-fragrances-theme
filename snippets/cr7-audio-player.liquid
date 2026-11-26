@@ -230,6 +230,9 @@
     if (!audio || !btn || btn.__cr7AudioBound) return;
     btn.__cr7AudioBound = true;
 
+    var KEY_PLAYING = 'cr7_audio_playing';
+    var KEY_TIME = 'cr7_audio_time';
+
     audio.volume = 0.55;
 
     function setPlayingState(playing) {
@@ -238,26 +241,242 @@
       btn.setAttribute('aria-label', playing ? 'Pause background soundtrack' : 'Play background soundtrack');
     }
 
+    function saveState() {
+      try {
+        sessionStorage.setItem(KEY_PLAYING, audio.paused ? '0' : '1');
+        if (!isNaN(audio.currentTime) && audio.currentTime > 0) {
+          sessionStorage.setItem(KEY_TIME, String(audio.currentTime));
+        }
+      } catch (e) {}
+    }
+
+    function resumeFromSavedTime() {
+      var savedTime = 0;
+      try {
+        savedTime = parseFloat(sessionStorage.getItem(KEY_TIME) || '0') || 0;
+      } catch (e) {}
+
+      function seekAndPlay() {
+        if (savedTime > 0 && isFinite(audio.duration) && savedTime < audio.duration) {
+          try {
+            audio.currentTime = savedTime;
+          } catch (e) {}
+        } else if (savedTime > 0 && !isFinite(audio.duration)) {
+          try {
+            audio.currentTime = savedTime;
+          } catch (e) {}
+        }
+
+        var p = audio.play();
+        if (p && typeof p.then === 'function') {
+          p.then(function () {
+            setPlayingState(true);
+          }).catch(function () {
+            // Browser blocked autoplay on navigation; resume on first interaction
+            setPlayingState(false);
+            var onFirstGesture = function () {
+              if (sessionStorage.getItem(KEY_PLAYING) !== '1') return;
+              var t = parseFloat(sessionStorage.getItem(KEY_TIME) || '0') || 0;
+              if (t > 0) {
+                try { audio.currentTime = t; } catch (e) {}
+              }
+              audio.play().then(function () {
+                setPlayingState(true);
+              }).catch(function () {});
+            };
+            document.addEventListener('pointerdown', onFirstGesture, { once: true, capture: true });
+            document.addEventListener('keydown', onFirstGesture, { once: true, capture: true });
+          });
+        } else {
+          setPlayingState(true);
+        }
+      }
+
+      if (audio.readyState >= 1) {
+        seekAndPlay();
+      } else {
+        audio.preload = 'auto';
+        audio.addEventListener('loadedmetadata', seekAndPlay, { once: true });
+        audio.load();
+      }
+    }
+
+    // Auto-resume if user had audio playing before navigating
+    try {
+      if (sessionStorage.getItem(KEY_PLAYING) === '1') {
+        resumeFromSavedTime();
+      }
+    } catch (e) {}
+
     btn.addEventListener('click', function () {
       if (audio.paused) {
+        audio.preload = 'auto';
         var playPromise = audio.play();
         if (playPromise && typeof playPromise.then === 'function') {
           playPromise.then(function () {
             setPlayingState(true);
+            saveState();
           }).catch(function (err) {
             console.warn('[cr7-audio] Playback failed:', err);
           });
         } else {
           setPlayingState(true);
+          saveState();
         }
       } else {
         audio.pause();
         setPlayingState(false);
+        try {
+          sessionStorage.setItem(KEY_PLAYING, '0');
+          sessionStorage.setItem(KEY_TIME, String(audio.currentTime || 0));
+        } catch (e) {}
       }
     });
 
+    audio.addEventListener('timeupdate', function () {
+      if (!audio.paused) {
+        try {
+          sessionStorage.setItem(KEY_TIME, String(audio.currentTime || 0));
+        } catch (e) {}
+      }
+    });
+
+    window.addEventListener('pagehide', saveState);
+    window.addEventListener('beforeunload', saveState);
+
     audio.addEventListener('ended', function () {
       setPlayingState(false);
+    });
+
+    // Zero-interruption soft navigation while background audio is playing
+    var navController = null;
+
+    function isSoftNavEligible(link) {
+      if (!link || !link.href) return false;
+      if (link.target && link.target !== '_self') return false;
+      if (link.hasAttribute('download')) return false;
+      if (link.getAttribute('href').startsWith('#')) return false;
+
+      var url;
+      try {
+        url = new URL(link.href, window.location.href);
+      } catch (e) {
+        return false;
+      }
+      if (url.origin !== window.location.origin) return false;
+      if (url.pathname === window.location.pathname && url.search === window.location.search && url.hash) return false;
+
+      // Keep checkout, account, cart, and admin on native full navigation
+      if (/^\/(admin|cart|checkout|account|challenge)/.test(url.pathname)) return false;
+      return true;
+    }
+
+    function syncHeadStyles(newDoc) {
+      var existingHrefs = new Set(
+        Array.from(document.head.querySelectorAll('link[rel="stylesheet"]')).map(function (l) {
+          return l.getAttribute('href');
+        })
+      );
+      newDoc.head.querySelectorAll('link[rel="stylesheet"]').forEach(function (link) {
+        var href = link.getAttribute('href');
+        if (href && !existingHrefs.has(href)) {
+          var clone = document.createElement('link');
+          clone.rel = 'stylesheet';
+          clone.href = href;
+          document.head.appendChild(clone);
+        }
+      });
+    }
+
+    async function softNavigate(url, pushHistory) {
+      if (navController) navController.abort();
+      navController = new AbortController();
+
+      try {
+        var res = await fetch(url, {
+          credentials: 'same-origin',
+          signal: navController.signal,
+          headers: { 'X-Requested-With': 'cr7-soft-nav' }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var contentType = res.headers.get('content-type') || '';
+        if (!contentType.includes('text/html')) throw new Error('Non-HTML');
+
+        var html = await res.text();
+        var parser = new DOMParser();
+        var newDoc = parser.parseFromString(html, 'text/html');
+        var newMain = newDoc.getElementById('MainContent');
+        var curMain = document.getElementById('MainContent');
+        if (!newMain || !curMain) throw new Error('Missing MainContent');
+
+        // Close fullscreen menu if open
+        var fsMenu = document.getElementById('cr7-fs-menu');
+        if (fsMenu && fsMenu.classList.contains('is-open')) {
+          fsMenu.classList.remove('is-open');
+          fsMenu.setAttribute('aria-hidden', 'true');
+          document.body.style.overflow = '';
+        }
+
+        syncHeadStyles(newDoc);
+
+        // Sync transparent header attribute if changed
+        var curHeader = document.getElementById('header-component');
+        var newHeader = newDoc.getElementById('header-component');
+        if (curHeader && newHeader) {
+          if (newHeader.hasAttribute('transparent')) {
+            curHeader.setAttribute('transparent', newHeader.getAttribute('transparent') || '');
+          } else {
+            curHeader.removeAttribute('transparent');
+          }
+        }
+
+        document.title = newDoc.title || document.title;
+        curMain.setAttribute('data-template', newMain.getAttribute('data-template') || '');
+        curMain.innerHTML = newMain.innerHTML;
+
+        // Execute any inline/external scripts inside the swapped MainContent
+        var loadedSrcs = new Set(
+          Array.from(document.querySelectorAll('script[src]')).map(function (s) { return s.getAttribute('src'); })
+        );
+        curMain.querySelectorAll('script').forEach(function (oldScript) {
+          var src = oldScript.getAttribute('src');
+          if (src && loadedSrcs.has(src)) return;
+          var s = document.createElement('script');
+          if (src) {
+            s.src = src;
+            if (oldScript.type) s.type = oldScript.type;
+            s.defer = true;
+          } else {
+            s.textContent = oldScript.textContent;
+          }
+          oldScript.replaceWith(s);
+        });
+
+        if (pushHistory) {
+          window.history.pushState({ cr7SoftNav: true }, '', url);
+        }
+
+        window.scrollTo(0, 0);
+        document.dispatchEvent(new CustomEvent('shopify:section:load', { detail: { softNav: true } }));
+      } catch (err) {
+        if (err && err.name === 'AbortError') return;
+        saveState();
+        window.location.href = url;
+      }
+    }
+
+    document.addEventListener('click', function (e) {
+      if (audio.paused) return;
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      var link = e.target.closest('a');
+      if (!isSoftNavEligible(link)) return;
+      e.preventDefault();
+      softNavigate(link.href, true);
+    });
+
+    window.addEventListener('popstate', function () {
+      if (audio.paused) return;
+      softNavigate(window.location.href, false);
     });
   })();
 </script>

@@ -153,20 +153,40 @@
   });
 
   // ---------------------------------------------------------------------------
-  // 2. Quick View Modal Handler
+  // 2. Quick View Modal Handler (Portaled to document.body for true full-viewport popup)
   // ---------------------------------------------------------------------------
+  function openQuickViewModal(modal) {
+    if (!modal) return;
+    if (modal.parentElement !== document.body) {
+      document.body.appendChild(modal);
+    }
+    // Force reflow before adding .is-open so CSS transition always plays smoothly
+    void modal.offsetWidth;
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeQuickViewModal(modal) {
+    if (!modal) return;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
   document.addEventListener('click', function (e) {
     const qvOpen = e.target.closest('.js-quickview-open');
     if (qvOpen) {
       e.preventDefault();
       e.stopPropagation();
       const card = qvOpen.closest('.lilac-product-card');
-      const modal = card ? card.querySelector('.js-quickview-modal') : null;
-      if (modal) {
-        modal.classList.add('is-open');
-        modal.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
+      const modal =
+        (card && (card.__qvModal || card.querySelector('.js-quickview-modal'))) ||
+        document.getElementById(qvOpen.getAttribute('aria-controls') || '');
+      if (card && modal) {
+        card.__qvModal = modal;
       }
+      openQuickViewModal(modal);
       return;
     }
 
@@ -174,22 +194,14 @@
     if (qvClose) {
       e.preventDefault();
       const modal = qvClose.closest('.js-quickview-modal');
-      if (modal) {
-        modal.classList.remove('is-open');
-        modal.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
-      }
+      closeQuickViewModal(modal);
     }
   });
 
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       const openModal = document.querySelector('.lilac-quickview-modal.is-open');
-      if (openModal) {
-        openModal.classList.remove('is-open');
-        openModal.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
-      }
+      closeQuickViewModal(openModal);
     }
   });
 })();
